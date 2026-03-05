@@ -575,10 +575,9 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
         });
 
         const charityName = charitySelect.options[charitySelect.selectedIndex].text;
-        showStatus(
-          `Donated ${amount} USDC to ${charityName}! Tx: ${txHash.slice(0, 10)}...`,
-          'success'
-        );
+        const explorerUrl = 'https://sepolia.basescan.org/tx/' + txHash;
+        statusDiv.innerHTML = `Donated ${amount} USDC to ${charityName}!<br><a href="${explorerUrl}" target="_blank" style="color: var(--green); text-decoration: underline;">View on BaseScan →</a>`;
+        statusDiv.className = 'status success';
       } catch (err) {
         showStatus('Transaction failed: ' + err.message, 'error');
       } finally {
