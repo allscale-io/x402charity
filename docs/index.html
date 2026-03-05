@@ -447,7 +447,49 @@
       text-align: center;
       color: var(--text-muted);
       font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .network-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 0;
       margin-bottom: 24px;
+    }
+
+    .network-btn {
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .network-btn:first-child {
+      border-radius: 8px 0 0 8px;
+    }
+
+    .network-btn:last-child {
+      border-radius: 0 8px 8px 0;
+      border-left: none;
+    }
+
+    .network-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .network-btn:not(.active):hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+    }
+
+    .network-btn:last-child:not(.active) {
+      border-left: none;
     }
 
     .history-stats {
@@ -863,7 +905,12 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
     <!-- Donation History -->
     <section class="history-section" id="history">
       <h3>Donation History</h3>
-      <p class="subtitle">Live USDC donations to registered charities on Base Sepolia</p>
+      <p class="subtitle">Live USDC donations to registered charities</p>
+
+      <div class="network-toggle">
+        <button class="network-btn active" data-network="base-sepolia">Base Sepolia</button>
+        <button class="network-btn" data-network="base">Base Mainnet</button>
+      </div>
 
       <div class="history-stats">
         <div class="history-stat">
@@ -1087,10 +1134,38 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
     });
 
     // --- Donation History ---
-    const CHARITY_WALLETS = [
-      { address: '0x8DC1521132381aAB648e067c2Db3677D5BF70c6d', name: 'Testing Charity' },
-    ];
-    const BASESCAN_API = 'https://api-sepolia.basescan.org/api';
+    const NETWORKS = {
+      'base-sepolia': {
+        api: 'https://api-sepolia.basescan.org/api',
+        explorer: 'https://sepolia.basescan.org',
+        usdc: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
+        charities: [
+          { address: '0x8DC1521132381aAB648e067c2Db3677D5BF70c6d', name: 'Testing Charity' },
+        ],
+      },
+      'base': {
+        api: 'https://api.basescan.org/api',
+        explorer: 'https://basescan.org',
+        usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+        charities: [
+          { address: '0x8DC1521132381aAB648e067c2Db3677D5BF70c6d', name: 'Testing Charity' },
+        ],
+      },
+    };
+
+    let currentNetwork = 'base-sepolia';
+
+    // Network toggle
+    document.querySelectorAll('.network-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const network = btn.dataset.network;
+        if (network === currentNetwork) return;
+        currentNetwork = network;
+        document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadHistory();
+      });
+    });
 
     function shortAddr(addr) {
       return addr.slice(0, 6) + '...' + addr.slice(-4);
@@ -1117,27 +1192,26 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
     }
 
     async function loadHistory() {
+      const net = NETWORKS[currentNetwork];
       const content = document.getElementById('history-content');
       const refreshBtn = document.getElementById('refresh-history');
       refreshBtn.textContent = 'Loading...';
       refreshBtn.disabled = true;
 
       try {
-        // Fetch token transfers for all charity wallets
         const allTxs = [];
 
-        for (const charity of CHARITY_WALLETS) {
-          const url = BASESCAN_API +
+        for (const charity of net.charities) {
+          const url = net.api +
             '?module=account&action=tokentx' +
             '&address=' + charity.address +
-            '&contractaddress=' + USDC_ADDRESS +
+            '&contractaddress=' + net.usdc +
             '&sort=desc&page=1&offset=50';
 
           const resp = await fetch(url);
           const data = await resp.json();
 
           if (data.status === '1' && data.result) {
-            // Only include incoming transfers (to = charity wallet)
             const incoming = data.result.filter(
               tx => tx.to.toLowerCase() === charity.address.toLowerCase()
             );
@@ -1146,10 +1220,8 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
           }
         }
 
-        // Sort by timestamp descending
         allTxs.sort((a, b) => Number(b.timeStamp) - Number(a.timeStamp));
 
-        // Update stats
         const totalUsdc = allTxs.reduce((sum, tx) => sum + Number(tx.value), 0);
         const uniqueDonors = new Set(allTxs.map(tx => tx.from.toLowerCase()));
 
@@ -1158,11 +1230,10 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
         document.getElementById('total-donors').textContent = uniqueDonors.size.toString();
 
         if (allTxs.length === 0) {
-          content.innerHTML = '<div class="history-empty">No donations yet. Be the first!</div>';
+          content.innerHTML = '<div class="history-empty">No donations yet on ' + (currentNetwork === 'base' ? 'Base Mainnet' : 'Base Sepolia') + '. Be the first!</div>';
           return;
         }
 
-        // Render table
         let html = '<table class="history-table">';
         html += '<thead><tr><th>Date</th><th>From</th><th>To</th><th>Amount</th><th>Tx</th></tr></thead>';
         html += '<tbody>';
@@ -1172,7 +1243,7 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
           const from = shortAddr(tx.from);
           const charityName = tx._charityName;
           const amount = formatUsdc(tx.value);
-          const txLink = 'https://sepolia.basescan.org/tx/' + tx.hash;
+          const txLink = net.explorer + '/tx/' + tx.hash;
 
           html += '<tr>';
           html += '<td>' + date + '</td>';
