@@ -39,6 +39,31 @@ User action → Your app → x402 Charity middleware → Donation sent via x402
 2. When a qualifying event fires, the middleware sends a stablecoin payment to the charity's x402 endpoint
 3. The user's primary transaction is unaffected — the donation is a side-effect
 
+## Repository Structure
+
+This is a pnpm monorepo with four packages:
+
+```
+x402charity/
+├── packages/
+│   ├── core/            # @x402charity/core — ERC-20 USDC transfer client (viem)
+│   ├── express/         # @x402charity/express — Express middleware
+│   ├── next/            # @x402charity/next — Next.js middleware
+│   └── cli/             # x402charity — CLI tool
+├── registry/
+│   └── charities.json   # Verified charity directory
+└── docs/                # Landing page (x402charity.com)
+```
+
+| Package | Description |
+|---------|-------------|
+| `@x402charity/core` | Low-level client that performs USDC transfers on Base via `viem`. Handles balance checks, transaction simulation, and receipt verification. |
+| `@x402charity/express` | Express middleware — fires a background USDC donation on every matched request. |
+| `@x402charity/next` | Next.js middleware — same concept, with path-based matching for the Next.js middleware API. |
+| `x402charity` | CLI for listing charities and sending donations from the terminal. |
+
+All packages are ESM-only and written in TypeScript. The express and next packages depend on `@x402charity/core` via `workspace:*`.
+
 ## Quick Start
 
 ```bash

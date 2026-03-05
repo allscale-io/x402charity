@@ -18,4 +18,6 @@ export interface DonationReceipt {
   chain: string;
   charity: Charity;
   timestamp: number;
+  blockNumber: number;
+  gasUsed: string;
 }

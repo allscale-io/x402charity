@@ -3,7 +3,6 @@
 ## TODO Checklist
 
 ### Urgent (This Week)
-- [ ] Apply to Base Batches 2026 -- startup track deadline **March 9** (https://www.basebatches.xyz/)
 - [ ] Submit PR to awesome-x402 (xpaysh): https://github.com/xpaysh/awesome-x402
 - [ ] Submit PR to awesome-x402 (Merit-Systems): https://github.com/Merit-Systems/awesome-x402
 - [ ] Submit to x402.org/ecosystem directory
@@ -70,19 +69,7 @@ This document lays out a concrete, prioritized plan to get x402charity in front 
 
 ## Part 1: Urgent Actions (This Week)
 
-### 1.1 Base Batches 2026 -- Apply NOW
-
-**Deadline: March 9, 2026 (days away).**
-
-- Website: https://www.basebatches.xyz/
-- Startup Track: for pre-product/pre-launch/pre-seed teams that have raised less than ~$250K
-- Top 15 teams get: $10K grant, 8-week virtual program, Demo Day in SF (May 2026)
-- Minimum 3 teams get $50K investment from Base Ecosystem Fund
-- All teams considered for Coinbase Ventures investment
-
-x402charity is a strong fit: it's built on x402 (a core Coinbase technology), uses USDC on Base, and addresses the growing crypto philanthropy market. Apply immediately.
-
-### 1.2 Submit to awesome-x402 Lists
+### 1.1 Submit to awesome-x402 Lists
 
 Open PRs to get listed on these curated directories:
 
@@ -276,7 +263,6 @@ Submit x402charity for listing on:
 | Event | Date | Prize Pool | Notes |
 |-------|------|-----------|-------|
 | ETHGlobal Cannes | Apr 3-5, 2026 | TBD | Base typically sponsors bounties |
-| Base Batches Demo Day | May 2026 (SF) | $10K-$50K | If accepted via Batches |
 | ETHGlobal New York | Jun 12-14, 2026 | TBD | Major event |
 | ETHGlobal Lisbon | Jul 24-26, 2026 | TBD | |
 | ETHGlobal Tokyo | Sep 25-27, 2026 | TBD | |
