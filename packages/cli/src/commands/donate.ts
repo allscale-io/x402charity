@@ -5,9 +5,10 @@ import { getPrivateKey, getNetwork } from '../config.js';
 export const donateCommand = new Command('donate')
   .description('Donate USDC to a charity')
   .argument('<cause>', 'Charity ID or name')
-  .argument('<amount>', 'Amount in USDC')
+  .argument('[amount]', 'Amount in USDC (default: 0.0001)')
   .option('-n, --network <network>', 'Network: base or base-sepolia')
-  .action(async (cause: string, amount: string, options: { network?: string }) => {
+  .action(async (cause: string, amount: string | undefined, options: { network?: string }) => {
+    amount = amount || '0.0001';
     try {
       const privateKey = getPrivateKey();
       const network = (options.network || getNetwork()) as 'base' | 'base-sepolia';

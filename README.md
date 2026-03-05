@@ -16,7 +16,7 @@ The [x402 protocol](https://www.x402.org/) makes machine-to-machine stablecoin p
 
 ## Example Use Cases
 
-- **DEX or prediction market** — donate $0.01 USDC every time a user places an order
+- **DEX or prediction market** — donate $0.0001 USDC every time a user places an order
 - **AI SaaS** — donate on every new plan purchase or API call
 - **Any x402-enabled app** — attach a cause to any event you already track
 
@@ -43,7 +43,7 @@ const { x402Charity } = require('x402charity');
 
 const charity = x402Charity({
   cause: 'red-cross',
-  amount: '0.01',       // USDC per event
+  amount: '0.0001',     // USDC per event
   currency: 'USDC',
 });
 
@@ -58,7 +58,7 @@ app.post('/trade', charity.wrap(async (req, res) => {
 | Option     | Description                          | Default |
 |------------|--------------------------------------|---------|
 | `cause`    | Charity identifier or wallet address | —       |
-| `amount`   | Donation amount per event            | `0.01`  |
+| `amount`   | Donation amount per event            | `0.0001`|
 | `currency` | Stablecoin to use                    | `USDC`  |
 | `network`  | Chain to send on                     | `base`  |
 | `silent`   | Suppress donation errors             | `true`  |
