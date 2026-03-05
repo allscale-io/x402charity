@@ -500,6 +500,24 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
           }
         }
 
+        // Register USDC token so MetaMask shows the name instead of "Unknown"
+        try {
+          await window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: USDC_ADDRESS,
+                symbol: 'USDC',
+                decimals: USDC_DECIMALS,
+                image: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png',
+              },
+            },
+          });
+        } catch (e) {
+          // User declined — not critical, continue
+        }
+
         walletAddress.textContent = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
         connectSection.style.display = 'none';
         donateForm.style.display = 'block';
