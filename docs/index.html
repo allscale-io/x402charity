@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>x402 Charity — Micro-Donations Powered by x402</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --border: #262626;
+      --text: #fafafa;
+      --text-muted: #a1a1a1;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    header nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-left: 24px;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    header nav a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+
+    .hero h2 {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero h2 span { color: var(--accent); }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 560px;
+      margin: 0 auto 32px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { border-color: var(--text-muted); }
+
+    /* Features */
+    .features {
+      padding: 60px 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .feature h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .feature p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Code block */
+    .code-section {
+      padding: 40px 0;
+    }
+
+    .code-section h3 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      overflow-x: auto;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    code { font-family: 'SF Mono', 'Fira Code', monospace; }
+
+    .code-comment { color: #6b7280; }
+    .code-keyword { color: #c084fc; }
+    .code-string { color: #34d399; }
+    .code-func { color: #60a5fa; }
+
+    /* Donate section */
+    .donate-section {
+      padding: 60px 0;
+    }
+
+    .donate-section h3 {
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .donate-section .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .donate-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .form-group select,
+    .form-group input {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group select:focus,
+    .form-group input:focus {
+      border-color: var(--accent);
+    }
+
+    .network-badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #1e3a5f;
+      color: var(--accent);
+      margin-left: 8px;
+    }
+
+    #connect-btn, #donate-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+    }
+
+    #donate-btn {
+      background: var(--green);
+      color: white;
+    }
+
+    #donate-btn:hover { background: #16a34a; }
+    #donate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .status {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .status.success {
+      display: block;
+      background: #052e16;
+      border: 1px solid #166534;
+      color: var(--green);
+    }
+
+    .status.error {
+      display: block;
+      background: #2a0a0a;
+      border: 1px solid #7f1d1d;
+      color: var(--red);
+    }
+
+    .status.pending {
+      display: block;
+      background: #1e1b4b;
+      border: 1px solid #3730a3;
+      color: #818cf8;
+    }
+
+    .wallet-info {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      word-break: break-all;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 640px) {
+      .hero h2 { font-size: 32px; }
+      .features { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>x402 Charity</h1>
+      <nav>
+        <a href="#try-it">Try It</a>
+        <a href="https://github.com/allscale-io/x402charity">GitHub</a>
+        <a href="https://www.npmjs.com/package/x402charity">npm</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h2>Micro-donations,<br><span>built into every payment.</span></h2>
+      <p>Embed automatic charitable giving into any payment flow. No extra steps. No separate UI. Just part of the transaction.</p>
+      <div class="hero-buttons">
+        <a href="#try-it" class="btn btn-primary">Try a Donation</a>
+        <a href="https://github.com/allscale-io/x402charity" class="btn btn-secondary">View Source</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="features">
+      <div class="feature">
+        <h3>Programmable Giving</h3>
+        <p>Attach a cause to any event — a trade, an API call, a subscription. Donations happen in the background.</p>
+      </div>
+      <div class="feature">
+        <h3>Powered by x402</h3>
+        <p>Uses the x402 protocol for native HTTP stablecoin payments. If payments can be programmable, so can giving.</p>
+      </div>
+      <div class="feature">
+        <h3>Open Source</h3>
+        <p>MIT licensed. Add your charity to the registry. Integrate with any x402-enabled app.</p>
+      </div>
+    </div>
+
+    <div class="code-section">
+      <h3>Add donations in 4 lines</h3>
+      <pre><code><span class="code-keyword">const</span> charity = <span class="code-func">x402Charity</span>({
+  <span class="code-string">cause</span>: <span class="code-string">'red-cross'</span>,
+  <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,  <span class="code-comment">// USDC per event</span>
+});
+
+app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span>, charity.<span class="code-func">wrap</span>(<span class="code-keyword">async</span> (req, res) => {
+  <span class="code-comment">// your trade logic — donation happens automatically</span>
+}));</code></pre>
+    </div>
+
+    <section class="donate-section" id="try-it">
+      <h3>Try It Now</h3>
+      <p class="subtitle">Connect your wallet and make a test donation on Base Sepolia</p>
+
+      <div class="donate-card">
+        <div id="wallet-status"></div>
+
+        <div id="connect-section">
+          <button id="connect-btn" class="btn btn-primary">Connect Wallet</button>
+        </div>
+
+        <div id="donate-form" style="display: none;">
+          <div class="wallet-info">
+            Connected: <span id="wallet-address"></span>
+            <span class="network-badge">Base Sepolia</span>
+          </div>
+
+          <div class="form-group">
+            <label>Charity</label>
+            <select id="charity-select">
+              <option value="0x1111111111111111111111111111111111111111">American Red Cross</option>
+              <option value="0x2222222222222222222222222222222222222222">UNICEF</option>
+              <option value="0x3333333333333333333333333333333333333333">Doctors Without Borders</option>
+              <option value="0x4444444444444444444444444444444444444444">Water.org</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Amount (USDC)</label>
+            <input type="text" id="amount-input" value="0.0001" placeholder="0.0001">
+          </div>
+
+          <button id="donate-btn" class="btn">Donate</button>
+
+          <div id="status" class="status"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="container">
+      Built by <a href="https://allscale.io">AllScale Lab</a> &middot;
+      <a href="https://github.com/allscale-io/x402charity">GitHub</a> &middot;
+      <a href="https://www.npmjs.com/package/x402charity">npm</a>
+    </div>
+  </footer>
+
+  <script>
+    const BASE_SEPOLIA_CHAIN_ID = '0x14a34'; // 84532
+    const USDC_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
+    const USDC_DECIMALS = 6;
+
+    const TRANSFER_ABI = 'a9059cbb'; // transfer(address,uint256)
+
+    const connectBtn = document.getElementById('connect-btn');
+    const donateBtn = document.getElementById('donate-btn');
+    const connectSection = document.getElementById('connect-section');
+    const donateForm = document.getElementById('donate-form');
+    const walletAddress = document.getElementById('wallet-address');
+    const charitySelect = document.getElementById('charity-select');
+    const amountInput = document.getElementById('amount-input');
+    const statusDiv = document.getElementById('status');
+
+    function showStatus(message, type) {
+      statusDiv.textContent = message;
+      statusDiv.className = 'status ' + type;
+    }
+
+    function padHex(hex, length) {
+      return hex.replace('0x', '').padStart(length, '0');
+    }
+
+    function amountToHex(amount) {
+      const parts = amount.split('.');
+      const decimals = parts[1] ? parts[1].length : 0;
+      const missingDecimals = USDC_DECIMALS - decimals;
+      const intStr = parts.join('') + '0'.repeat(Math.max(0, missingDecimals));
+      return BigInt(intStr).toString(16);
+    }
+
+    connectBtn.addEventListener('click', async () => {
+      if (typeof window.ethereum === 'undefined') {
+        alert('MetaMask or a compatible wallet is required. Please install it first.');
+        return;
+      }
+
+      try {
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts',
+        });
+
+        // Switch to Base Sepolia
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: BASE_SEPOLIA_CHAIN_ID }],
+          });
+        } catch (switchError) {
+          if (switchError.code === 4902) {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: BASE_SEPOLIA_CHAIN_ID,
+                chainName: 'Base Sepolia',
+                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                rpcUrls: ['https://sepolia.base.org'],
+                blockExplorerUrls: ['https://sepolia.basescan.org'],
+              }],
+            });
+          } else {
+            throw switchError;
+          }
+        }
+
+        walletAddress.textContent = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
+        connectSection.style.display = 'none';
+        donateForm.style.display = 'block';
+      } catch (err) {
+        alert('Failed to connect: ' + err.message);
+      }
+    });
+
+    donateBtn.addEventListener('click', async () => {
+      const to = charitySelect.value;
+      const amount = amountInput.value;
+
+      if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+        showStatus('Please enter a valid amount.', 'error');
+        return;
+      }
+
+      donateBtn.disabled = true;
+      showStatus('Sending donation...', 'pending');
+
+      try {
+        const accounts = await window.ethereum.request({
+          method: 'eth_accounts',
+        });
+
+        const amountHex = padHex('0x' + amountToHex(amount), 64);
+        const toHex = padHex(to, 64);
+        const data = '0x' + TRANSFER_ABI + toHex + amountHex;
+
+        const txHash = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{
+            from: accounts[0],
+            to: USDC_ADDRESS,
+            data: data,
+          }],
+        });
+
+        const charityName = charitySelect.options[charitySelect.selectedIndex].text;
+        showStatus(
+          `Donated ${amount} USDC to ${charityName}! Tx: ${txHash.slice(0, 10)}...`,
+          'success'
+        );
+      } catch (err) {
+        showStatus('Transaction failed: ' + err.message, 'error');
+      } finally {
+        donateBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
