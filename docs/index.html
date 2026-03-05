@@ -1134,22 +1134,28 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
     });
 
     // --- Donation History ---
+    // Uses RPC eth_getLogs directly (BaseScan V1 API is deprecated)
+    const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+
     const NETWORKS = {
       'base-sepolia': {
-        api: 'https://api-sepolia.basescan.org/api',
+        rpc: 'https://sepolia.base.org',
         explorer: 'https://sepolia.basescan.org',
         usdc: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
         charities: [
           { address: '0x8DC1521132381aAB648e067c2Db3677D5BF70c6d', name: 'Testing Charity' },
         ],
+        // Scan more blocks on Sepolia (2s block time) — ~100k blocks ≈ 2.3 days
+        scanBlocks: 100000,
       },
       'base': {
-        api: 'https://api.basescan.org/api',
+        rpc: 'https://mainnet.base.org',
         explorer: 'https://basescan.org',
         usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
         charities: [
           { address: '0x8DC1521132381aAB648e067c2Db3677D5BF70c6d', name: 'Testing Charity' },
         ],
+        scanBlocks: 100000,
       },
     };
 
@@ -1191,6 +1197,21 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
       return num.toFixed(6);
     }
 
+    function padAddress(addr) {
+      return '0x' + addr.replace('0x', '').toLowerCase().padStart(64, '0');
+    }
+
+    async function rpcCall(rpcUrl, method, params) {
+      const resp = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', method, params, id: 1 }),
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message);
+      return data.result;
+    }
+
     async function loadHistory() {
       const net = NETWORKS[currentNetwork];
       const content = document.getElementById('history-content');
@@ -1199,29 +1220,49 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
       refreshBtn.disabled = true;
 
       try {
-        const allTxs = [];
+        // Get latest block
+        const latestHex = await rpcCall(net.rpc, 'eth_blockNumber', []);
+        const latestBlock = parseInt(latestHex, 16);
 
+        const allLogs = [];
+
+        // Query logs for each charity wallet (USDC Transfer events TO the charity)
+        // RPC limits to 10k block ranges, so we paginate
         for (const charity of net.charities) {
-          const url = net.api +
-            '?module=account&action=tokentx' +
-            '&address=' + charity.address +
-            '&contractaddress=' + net.usdc +
-            '&sort=desc&page=1&offset=50';
+          const toTopic = padAddress(charity.address);
+          let fromBlock = Math.max(0, latestBlock - net.scanBlocks);
+          const chunkSize = 9999;
 
-          const resp = await fetch(url);
-          const data = await resp.json();
+          while (fromBlock <= latestBlock) {
+            const toBlock = Math.min(fromBlock + chunkSize, latestBlock);
 
-          if (data.status === '1' && data.result) {
-            const incoming = data.result.filter(
-              tx => tx.to.toLowerCase() === charity.address.toLowerCase()
-            );
-            incoming.forEach(tx => { tx._charityName = charity.name; });
-            allTxs.push(...incoming);
+            const logs = await rpcCall(net.rpc, 'eth_getLogs', [{
+              address: net.usdc,
+              topics: [TRANSFER_TOPIC, null, toTopic],
+              fromBlock: '0x' + fromBlock.toString(16),
+              toBlock: '0x' + toBlock.toString(16),
+            }]);
+
+            logs.forEach(log => { log._charityName = charity.name; });
+            allLogs.push(...logs);
+            fromBlock = toBlock + 1;
           }
         }
 
-        allTxs.sort((a, b) => Number(b.timeStamp) - Number(a.timeStamp));
+        // Parse logs into tx objects
+        const allTxs = allLogs.map(log => ({
+          from: '0x' + log.topics[1].slice(26),
+          to: '0x' + log.topics[2].slice(26),
+          value: BigInt(log.data).toString(),
+          hash: log.transactionHash,
+          blockTimestamp: parseInt(log.blockTimestamp, 16),
+          charityName: log._charityName,
+        }));
 
+        // Sort by timestamp descending
+        allTxs.sort((a, b) => b.blockTimestamp - a.blockTimestamp);
+
+        // Update stats
         const totalUsdc = allTxs.reduce((sum, tx) => sum + Number(tx.value), 0);
         const uniqueDonors = new Set(allTxs.map(tx => tx.from.toLowerCase()));
 
@@ -1230,7 +1271,7 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
         document.getElementById('total-donors').textContent = uniqueDonors.size.toString();
 
         if (allTxs.length === 0) {
-          content.innerHTML = '<div class="history-empty">No donations yet on ' + (currentNetwork === 'base' ? 'Base Mainnet' : 'Base Sepolia') + '. Be the first!</div>';
+          content.innerHTML = '<div class="history-empty">No donations found in the last ~' + Math.round(net.scanBlocks * 2 / 86400) + ' days on ' + (currentNetwork === 'base' ? 'Base Mainnet' : 'Base Sepolia') + '.</div>';
           return;
         }
 
@@ -1239,9 +1280,9 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
         html += '<tbody>';
 
         for (const tx of allTxs.slice(0, 25)) {
-          const date = formatDate(Number(tx.timeStamp));
+          const date = formatDate(tx.blockTimestamp);
           const from = shortAddr(tx.from);
-          const charityName = tx._charityName;
+          const charityName = tx.charityName;
           const amount = formatUsdc(tx.value);
           const txLink = net.explorer + '/tx/' + tx.hash;
 
@@ -1263,7 +1304,7 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
         content.innerHTML = html;
 
       } catch (err) {
-        content.innerHTML = '<div class="history-error">Failed to load donation history. Try refreshing.</div>';
+        content.innerHTML = '<div class="history-error">Failed to load donation history: ' + err.message + '</div>';
       } finally {
         refreshBtn.textContent = 'Refresh';
         refreshBtn.disabled = false;
