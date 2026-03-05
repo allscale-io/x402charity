@@ -1134,28 +1134,23 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
     });
 
     // --- Donation History ---
-    // Uses RPC eth_getLogs directly (BaseScan V1 API is deprecated)
-    const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-
+    // Uses Blockscout API (free, no key, CORS enabled, single request)
     const NETWORKS = {
       'base-sepolia': {
-        rpc: 'https://sepolia.base.org',
+        blockscout: 'https://base-sepolia.blockscout.com',
         explorer: 'https://sepolia.basescan.org',
         usdc: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
         charities: [
           { address: '0x8DC1521132381aAB648e067c2Db3677D5BF70c6d', name: 'Testing Charity' },
         ],
-        // Scan more blocks on Sepolia (2s block time) — ~100k blocks ≈ 2.3 days
-        scanBlocks: 100000,
       },
       'base': {
-        rpc: 'https://mainnet.base.org',
+        blockscout: 'https://base.blockscout.com',
         explorer: 'https://basescan.org',
         usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
         charities: [
           { address: '0x8DC1521132381aAB648e067c2Db3677D5BF70c6d', name: 'Testing Charity' },
         ],
-        scanBlocks: 100000,
       },
     };
 
@@ -1177,8 +1172,8 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
       return addr.slice(0, 6) + '...' + addr.slice(-4);
     }
 
-    function formatDate(timestamp) {
-      const d = new Date(timestamp * 1000);
+    function formatDate(isoString) {
+      const d = new Date(isoString);
       const now = new Date();
       const diff = (now - d) / 1000;
 
@@ -1190,26 +1185,11 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
       return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
     }
 
-    function formatUsdc(rawValue) {
-      const num = Number(rawValue) / 1e6;
+    function formatUsdc(rawValue, decimals) {
+      const num = Number(rawValue) / Math.pow(10, decimals || 6);
       if (num >= 1) return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       if (num >= 0.01) return num.toFixed(4);
       return num.toFixed(6);
-    }
-
-    function padAddress(addr) {
-      return '0x' + addr.replace('0x', '').toLowerCase().padStart(64, '0');
-    }
-
-    async function rpcCall(rpcUrl, method, params) {
-      const resp = await fetch(rpcUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', method, params, id: 1 }),
-      });
-      const data = await resp.json();
-      if (data.error) throw new Error(data.error.message);
-      return data.result;
     }
 
     async function loadHistory() {
@@ -1220,58 +1200,51 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
       refreshBtn.disabled = true;
 
       try {
-        // Get latest block
-        const latestHex = await rpcCall(net.rpc, 'eth_blockNumber', []);
-        const latestBlock = parseInt(latestHex, 16);
+        const allTxs = [];
 
-        const allLogs = [];
-
-        // Query logs for each charity wallet (USDC Transfer events TO the charity)
-        // RPC limits to 10k block ranges, so we paginate
         for (const charity of net.charities) {
-          const toTopic = padAddress(charity.address);
-          let fromBlock = Math.max(0, latestBlock - net.scanBlocks);
-          const chunkSize = 9999;
+          const url = net.blockscout + '/api/v2/addresses/' + charity.address +
+            '/token-transfers?type=ERC-20&token=' + net.usdc;
 
-          while (fromBlock <= latestBlock) {
-            const toBlock = Math.min(fromBlock + chunkSize, latestBlock);
+          const resp = await fetch(url);
+          if (!resp.ok) throw new Error('Blockscout returned ' + resp.status);
+          const data = await resp.json();
 
-            const logs = await rpcCall(net.rpc, 'eth_getLogs', [{
-              address: net.usdc,
-              topics: [TRANSFER_TOPIC, null, toTopic],
-              fromBlock: '0x' + fromBlock.toString(16),
-              toBlock: '0x' + toBlock.toString(16),
-            }]);
+          const items = data.items || [];
+          // Only include incoming transfers (to = charity wallet)
+          const incoming = items.filter(
+            item => item.to && item.to.hash && item.to.hash.toLowerCase() === charity.address.toLowerCase()
+          );
 
-            logs.forEach(log => { log._charityName = charity.name; });
-            allLogs.push(...logs);
-            fromBlock = toBlock + 1;
-          }
+          incoming.forEach(item => {
+            allTxs.push({
+              from: item.from.hash,
+              to: item.to.hash,
+              value: item.total.value,
+              decimals: Number(item.total.decimals) || 6,
+              hash: item.transaction_hash,
+              timestamp: item.timestamp,
+              charityName: charity.name,
+            });
+          });
         }
 
-        // Parse logs into tx objects
-        const allTxs = allLogs.map(log => ({
-          from: '0x' + log.topics[1].slice(26),
-          to: '0x' + log.topics[2].slice(26),
-          value: BigInt(log.data).toString(),
-          hash: log.transactionHash,
-          blockTimestamp: parseInt(log.blockTimestamp, 16),
-          charityName: log._charityName,
-        }));
-
         // Sort by timestamp descending
-        allTxs.sort((a, b) => b.blockTimestamp - a.blockTimestamp);
+        allTxs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
         // Update stats
-        const totalUsdc = allTxs.reduce((sum, tx) => sum + Number(tx.value), 0);
+        const totalUsdc = allTxs.reduce((sum, tx) => sum + Number(tx.value) / Math.pow(10, tx.decimals), 0);
         const uniqueDonors = new Set(allTxs.map(tx => tx.from.toLowerCase()));
 
-        document.getElementById('total-donated').textContent = formatUsdc(totalUsdc.toString()) + ' USDC';
+        const totalStr = totalUsdc >= 1
+          ? totalUsdc.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : totalUsdc.toFixed(6);
+        document.getElementById('total-donated').textContent = totalStr + ' USDC';
         document.getElementById('total-txs').textContent = allTxs.length.toString();
         document.getElementById('total-donors').textContent = uniqueDonors.size.toString();
 
         if (allTxs.length === 0) {
-          content.innerHTML = '<div class="history-empty">No donations found in the last ~' + Math.round(net.scanBlocks * 2 / 86400) + ' days on ' + (currentNetwork === 'base' ? 'Base Mainnet' : 'Base Sepolia') + '.</div>';
+          content.innerHTML = '<div class="history-empty">No donations yet on ' + (currentNetwork === 'base' ? 'Base Mainnet' : 'Base Sepolia') + '. Be the first!</div>';
           return;
         }
 
@@ -1280,10 +1253,10 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
         html += '<tbody>';
 
         for (const tx of allTxs.slice(0, 25)) {
-          const date = formatDate(tx.blockTimestamp);
+          const date = formatDate(tx.timestamp);
           const from = shortAddr(tx.from);
           const charityName = tx.charityName;
-          const amount = formatUsdc(tx.value);
+          const amount = formatUsdc(tx.value, tx.decimals);
           const txLink = net.explorer + '/tx/' + tx.hash;
 
           html += '<tr>';
