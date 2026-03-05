@@ -374,9 +374,12 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
         </div>
 
         <div id="donate-form" style="display: none;">
-          <div class="wallet-info">
-            Connected: <span id="wallet-address"></span>
-            <span class="network-badge">Base Sepolia</span>
+          <div class="wallet-info" style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              Connected: <span id="wallet-address"></span>
+              <span class="network-badge">Base Sepolia</span>
+            </div>
+            <button id="disconnect-btn" style="background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;">Disconnect</button>
           </div>
 
           <div class="form-group">
@@ -531,6 +534,14 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
         connectBtn.textContent = 'Connect Wallet';
         connectBtn.disabled = false;
       }
+    });
+
+    document.getElementById('disconnect-btn').addEventListener('click', () => {
+      connectSection.style.display = 'block';
+      donateForm.style.display = 'none';
+      statusDiv.className = 'status';
+      connectError.style.display = 'none';
+      connectError.className = 'status';
     });
 
     donateBtn.addEventListener('click', async () => {
