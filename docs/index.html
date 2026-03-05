@@ -4,37 +4,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>x402 Charity — Micro-Donations Powered by x402</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0a;
-      --surface: #141414;
-      --border: #262626;
-      --text: #fafafa;
-      --text-muted: #a1a1a1;
-      --accent: #3b82f6;
-      --accent-hover: #2563eb;
-      --green: #22c55e;
-      --red: #ef4444;
+      --bg: #000000;
+      --surface: #111111;
+      --surface-hover: #1a1a1a;
+      --border: #222222;
+      --text: #ffffff;
+      --text-muted: #888888;
+      --accent: #20F58E;
+      --accent-hover: #1ad97d;
+      --accent-dim: rgba(32, 245, 142, 0.12);
+      --red: #ff4d4d;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     .container {
-      max-width: 800px;
+      max-width: 840px;
       margin: 0 auto;
       padding: 0 24px;
     }
 
     /* Header */
     header {
-      padding: 24px 0;
+      padding: 20px 0;
       border-bottom: 1px solid var(--border);
     }
 
@@ -44,16 +53,37 @@
       align-items: center;
     }
 
-    header h1 {
-      font-size: 20px;
-      font-weight: 600;
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .header-brand img {
+      height: 22px;
+      width: auto;
+    }
+
+    .header-brand span {
+      font-family: 'Manrope', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    header nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
     }
 
     header nav a {
       color: var(--text-muted);
       text-decoration: none;
-      margin-left: 24px;
       font-size: 14px;
+      font-weight: 500;
       transition: color 0.2s;
     }
 
@@ -61,15 +91,16 @@
 
     /* Hero */
     .hero {
-      padding: 80px 0 60px;
+      padding: 100px 0 72px;
       text-align: center;
     }
 
     .hero h2 {
-      font-size: 48px;
-      font-weight: 700;
-      line-height: 1.1;
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1.08;
       margin-bottom: 20px;
+      letter-spacing: -1.5px;
     }
 
     .hero h2 span { color: var(--accent); }
@@ -77,23 +108,25 @@
     .hero p {
       font-size: 18px;
       color: var(--text-muted);
-      max-width: 560px;
-      margin: 0 auto 32px;
+      max-width: 520px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
     }
 
     .hero-buttons {
       display: flex;
-      gap: 12px;
+      gap: 14px;
       justify-content: center;
       flex-wrap: wrap;
     }
 
     .btn {
       display: inline-block;
-      padding: 12px 24px;
-      border-radius: 8px;
+      padding: 12px 28px;
+      border-radius: 24px;
+      font-family: 'Manrope', sans-serif;
       font-size: 15px;
-      font-weight: 500;
+      font-weight: 700;
       text-decoration: none;
       cursor: pointer;
       border: none;
@@ -102,7 +135,7 @@
 
     .btn-primary {
       background: var(--accent);
-      color: white;
+      color: #000000;
     }
 
     .btn-primary:hover { background: var(--accent-hover); }
@@ -113,31 +146,36 @@
       border: 1px solid var(--border);
     }
 
-    .btn-secondary:hover { border-color: var(--text-muted); }
+    .btn-secondary:hover { border-color: #444; color: var(--text); }
 
     /* Features */
     .features {
       padding: 60px 0;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      gap: 20px;
     }
 
     .feature {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
+      border-radius: 16px;
+      padding: 28px;
+      transition: border-color 0.2s;
     }
+
+    .feature:hover { border-color: #333; }
 
     .feature h3 {
       font-size: 16px;
+      font-weight: 700;
       margin-bottom: 8px;
     }
 
     .feature p {
       font-size: 14px;
       color: var(--text-muted);
+      line-height: 1.6;
     }
 
     /* Getting started */
@@ -146,10 +184,11 @@
     }
 
     .getting-started > h3 {
-      font-size: 28px;
-      font-weight: 700;
+      font-size: 30px;
+      font-weight: 800;
       text-align: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
     }
 
     .getting-started > p {
@@ -169,8 +208,9 @@
 
     .tab {
       padding: 12px 24px;
+      font-family: 'Manrope', sans-serif;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--text-muted);
       background: none;
       border: none;
@@ -200,10 +240,10 @@
     }
 
     .code-section h4 {
-      font-size: 15px;
+      font-size: 14px;
       color: var(--text-muted);
       margin: 24px 0 10px;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .code-section h4:first-child {
@@ -219,10 +259,10 @@
     pre {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 20px 24px;
       overflow-x: auto;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.7;
       margin-bottom: 0;
       position: relative;
@@ -232,19 +272,19 @@
       margin-top: 24px;
     }
 
-    code { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; }
+    code { font-family: 'Inconsolata', 'SF Mono', monospace; }
 
-    .code-comment { color: #6b7280; }
-    .code-keyword { color: #c084fc; }
-    .code-string { color: #34d399; }
-    .code-func { color: #60a5fa; }
+    .code-comment { color: #555; }
+    .code-keyword { color: #b48ead; }
+    .code-string { color: var(--accent); }
+    .code-func { color: #88c0d0; }
 
     .install-cmd {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 16px 24px;
-      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-family: 'Inconsolata', monospace;
       font-size: 15px;
       display: flex;
       align-items: center;
@@ -254,7 +294,7 @@
     }
 
     .install-cmd .prompt {
-      color: var(--green);
+      color: var(--accent);
       user-select: none;
     }
 
@@ -265,11 +305,14 @@
       background: var(--border);
       border: none;
       color: var(--text-muted);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 24px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'Manrope', sans-serif;
       cursor: pointer;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
       transition: all 0.2s;
     }
 
@@ -288,12 +331,12 @@
       height: 28px;
       border-radius: 50%;
       background: var(--accent);
-      color: white;
+      color: #000;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       margin-top: 2px;
     }
 
@@ -304,7 +347,7 @@
 
     .step-content h4 {
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text);
       margin: 0 0 8px;
     }
@@ -321,9 +364,11 @@
     }
 
     .donate-section h3 {
-      font-size: 24px;
+      font-size: 26px;
+      font-weight: 800;
       text-align: center;
       margin-bottom: 8px;
+      letter-spacing: -0.3px;
     }
 
     .donate-section .subtitle {
@@ -348,10 +393,13 @@
 
     .form-group label {
       display: block;
-      font-size: 13px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 12px;
       color: var(--text-muted);
       margin-bottom: 6px;
-      font-weight: 500;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
     .form-group select,
@@ -362,6 +410,7 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       color: var(--text);
+      font-family: 'Lato', sans-serif;
       font-size: 15px;
       outline: none;
       transition: border-color 0.2s;
@@ -374,55 +423,61 @@
 
     .network-badge {
       display: inline-block;
-      font-size: 11px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
       padding: 2px 8px;
-      border-radius: 4px;
-      background: #1e3a5f;
+      border-radius: 24px;
+      background: var(--accent-dim);
       color: var(--accent);
       margin-left: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
     #connect-btn, #donate-btn {
       width: 100%;
       padding: 14px;
       font-size: 16px;
+      border-radius: 24px;
     }
 
     #donate-btn {
-      background: var(--green);
-      color: white;
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
     }
 
-    #donate-btn:hover { background: #16a34a; }
+    #donate-btn:hover { background: var(--accent-hover); }
     #donate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .status {
       margin-top: 16px;
       padding: 12px 16px;
-      border-radius: 8px;
+      border-radius: 12px;
       font-size: 14px;
       display: none;
     }
 
     .status.success {
       display: block;
-      background: #052e16;
-      border: 1px solid #166534;
-      color: var(--green);
+      background: rgba(32, 245, 142, 0.08);
+      border: 1px solid rgba(32, 245, 142, 0.25);
+      color: var(--accent);
     }
 
     .status.error {
       display: block;
-      background: #2a0a0a;
-      border: 1px solid #7f1d1d;
+      background: rgba(255, 77, 77, 0.08);
+      border: 1px solid rgba(255, 77, 77, 0.25);
       color: var(--red);
     }
 
     .status.pending {
       display: block;
-      background: #1e1b4b;
-      border: 1px solid #3730a3;
-      color: #818cf8;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
     }
 
     .wallet-info {
@@ -438,9 +493,11 @@
     }
 
     .history-section h3 {
-      font-size: 24px;
+      font-size: 26px;
+      font-weight: 800;
       text-align: center;
       margin-bottom: 8px;
+      letter-spacing: -0.3px;
     }
 
     .history-section .subtitle {
@@ -459,8 +516,9 @@
 
     .network-btn {
       padding: 8px 20px;
+      font-family: 'Manrope', sans-serif;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--text-muted);
       background: var(--surface);
       border: 1px solid var(--border);
@@ -469,23 +527,24 @@
     }
 
     .network-btn:first-child {
-      border-radius: 8px 0 0 8px;
+      border-radius: 24px 0 0 24px;
     }
 
     .network-btn:last-child {
-      border-radius: 0 8px 8px 0;
+      border-radius: 0 24px 24px 0;
       border-left: none;
     }
 
     .network-btn.active {
       background: var(--accent);
-      color: white;
+      color: #000;
       border-color: var(--accent);
+      font-weight: 700;
     }
 
     .network-btn:not(.active):hover {
       color: var(--text);
-      border-color: var(--text-muted);
+      border-color: #444;
     }
 
     .network-btn:last-child:not(.active) {
@@ -503,25 +562,28 @@
     .history-stat {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 16px;
       padding: 16px 28px;
       text-align: center;
     }
 
     .history-stat .label {
-      font-size: 12px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 11px;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-weight: 600;
       margin-bottom: 4px;
     }
 
     .history-stat .value {
+      font-family: 'Manrope', sans-serif;
       font-size: 22px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
-    .history-stat .value.green { color: var(--green); }
+    .history-stat .value.green { color: var(--accent); }
 
     .history-header {
       display: flex;
@@ -535,14 +597,14 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--green);
+      background: var(--accent);
       margin-right: 6px;
       animation: pulse-dot 2s infinite;
     }
 
     @keyframes pulse-dot {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+      50% { opacity: 0.3; }
     }
 
     .history-header .live-label {
@@ -554,19 +616,21 @@
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text-muted);
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 13px;
+      padding: 6px 16px;
+      border-radius: 24px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .refresh-btn:hover { border-color: var(--text-muted); color: var(--text); }
+    .refresh-btn:hover { border-color: #444; color: var(--text); }
 
     .history-table-wrap {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 16px;
       overflow: hidden;
     }
 
@@ -579,13 +643,14 @@
     .history-table th {
       text-align: left;
       padding: 12px 16px;
-      font-size: 12px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 11px;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      font-weight: 500;
+      font-weight: 600;
       border-bottom: 1px solid var(--border);
-      background: var(--bg);
+      background: rgba(255, 255, 255, 0.02);
     }
 
     .history-table td {
@@ -598,14 +663,18 @@
       border-bottom: none;
     }
 
+    .history-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
     .history-table .mono {
-      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-family: 'Inconsolata', monospace;
       font-size: 13px;
     }
 
     .history-table .amount-cell {
-      color: var(--green);
-      font-weight: 600;
+      color: var(--accent);
+      font-weight: 700;
     }
 
     .history-table a {
@@ -641,32 +710,65 @@
 
     /* Footer */
     footer {
-      padding: 40px 0;
+      padding: 48px 0;
       border-top: 1px solid var(--border);
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 14px;
     }
 
-    footer a {
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer-brand img {
+      height: 18px;
+      width: auto;
+      opacity: 0.5;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      font-size: 13px;
+    }
+
+    .footer-links a {
       color: var(--text-muted);
       text-decoration: none;
+      transition: color 0.2s;
     }
 
-    footer a:hover { color: var(--text); }
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy {
+      font-size: 12px;
+      color: #444;
+    }
 
     @media (max-width: 640px) {
-      .hero h2 { font-size: 32px; }
+      .hero h2 { font-size: 36px; letter-spacing: -1px; }
       .features { grid-template-columns: 1fr; }
       .tabs { overflow-x: auto; }
       .tab { white-space: nowrap; padding: 12px 16px; }
+      header nav { gap: 16px; }
+      header nav a { font-size: 13px; }
     }
   </style>
 </head>
 <body>
   <header>
     <div class="container">
-      <h1>x402 Charity</h1>
+      <a href="/" class="header-brand">
+        <img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale">
+        <span>x402 Charity</span>
+      </a>
       <nav>
         <a href="#get-started">Get Started</a>
         <a href="#try-it">Try It</a>
@@ -877,7 +979,7 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
               Connected: <span id="wallet-address"></span>
               <span class="network-badge">Base Sepolia</span>
             </div>
-            <button id="disconnect-btn" style="background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;">Disconnect</button>
+            <button id="disconnect-btn" style="background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 10px; border-radius: 24px; font-size: 11px; cursor: pointer; font-family: 'Manrope', sans-serif; font-weight: 600;">Disconnect</button>
           </div>
 
           <div class="form-group">
@@ -885,7 +987,7 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
             <select id="charity-select">
               <option value="0x8DC1521132381aAB648e067c2Db3677D5BF70c6d">Testing Charity</option>
             </select>
-            <div id="charity-address" style="margin-top: 6px; font-size: 12px; color: var(--text-muted); font-family: 'SF Mono', 'Fira Code', monospace; word-break: break-all;">0x8DC1521132381aAB648e067c2Db3677D5BF70c6d</div>
+            <div id="charity-address" style="margin-top: 6px; font-size: 12px; color: var(--text-muted); font-family: 'Inconsolata', monospace; word-break: break-all;">0x8DC1521132381aAB648e067c2Db3677D5BF70c6d</div>
           </div>
 
           <div class="form-group">
@@ -915,22 +1017,22 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
       <div class="history-stats">
         <div class="history-stat">
           <div class="label">Total Donated</div>
-          <div class="value green" id="total-donated">—</div>
+          <div class="value green" id="total-donated">&mdash;</div>
         </div>
         <div class="history-stat">
           <div class="label">Transactions</div>
-          <div class="value" id="total-txs">—</div>
+          <div class="value" id="total-txs">&mdash;</div>
         </div>
         <div class="history-stat">
           <div class="label">Unique Donors</div>
-          <div class="value" id="total-donors">—</div>
+          <div class="value" id="total-donors">&mdash;</div>
         </div>
       </div>
 
       <div class="history-header">
         <div>
           <span class="live-dot"></span>
-          <span class="live-label">Live from BaseScan</span>
+          <span class="live-label">Live from Blockscout</span>
         </div>
         <button class="refresh-btn" id="refresh-history" onclick="loadHistory()">Refresh</button>
       </div>
@@ -945,9 +1047,20 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
 
   <footer>
     <div class="container">
-      Built by <a href="https://allscale.io">AllScale Lab</a> &middot;
-      <a href="https://github.com/allscale-io/x402charity">GitHub</a> &middot;
-      <a href="https://www.npmjs.com/package/x402charity">npm</a>
+      <div class="footer-content">
+        <div class="footer-brand">
+          <span style="font-size: 13px; color: var(--text-muted);">Built by</span>
+          <a href="https://allscale.io" target="_blank" rel="noopener">
+            <img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale" style="height: 16px; opacity: 0.6;">
+          </a>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/allscale-io/x402charity">GitHub</a>
+          <a href="https://www.npmjs.com/package/x402charity">npm</a>
+          <a href="https://allscale.io">AllScale</a>
+        </div>
+        <div class="footer-copy">MIT License</div>
+      </div>
     </div>
   </footer>
 
@@ -1121,7 +1234,7 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
 
         const charityName = charitySelect.options[charitySelect.selectedIndex].text;
         const explorerUrl = 'https://sepolia.basescan.org/tx/' + txHash;
-        statusDiv.innerHTML = 'Donated ' + amount + ' USDC to ' + charityName + '!<br><a href="' + explorerUrl + '" target="_blank" style="color: var(--green); text-decoration: underline;">View on BaseScan &rarr;</a>';
+        statusDiv.innerHTML = 'Donated ' + amount + ' USDC to ' + charityName + '!<br><a href="' + explorerUrl + '" target="_blank" style="color: var(--accent); text-decoration: underline;">View on BaseScan &rarr;</a>';
         statusDiv.className = 'status success';
 
         // Refresh history after successful donation
