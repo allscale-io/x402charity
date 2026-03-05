@@ -1,9 +1,13 @@
 # x402 Charity
 
 [![npm](https://img.shields.io/npm/v/x402charity)](https://www.npmjs.com/package/x402charity)
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://allscale-io.github.io/x402charity/)
+[![npm downloads](https://img.shields.io/npm/dw/x402charity)](https://www.npmjs.com/package/x402charity)
+[![GitHub stars](https://img.shields.io/github/stars/allscale-io/x402charity)](https://github.com/allscale-io/x402charity)
+[![TypeScript](https://img.shields.io/badge/TypeScript-ready-blue)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://x402charity.com)
 
-Embed automatic micro-donations into any payment flow, powered by x402.
+Drop-in Express and Next.js middleware that sends USDC micro-donations to charities on every user action, powered by the [x402 protocol](https://www.x402.org/) on Base.
 
 Built and maintained by [AllScale Lab](https://allscale.io).
 
