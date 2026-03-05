@@ -1,0 +1,11 @@
+{
+  "name": "x402charity-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

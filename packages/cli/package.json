@@ -1,0 +1,21 @@
+{
+  "name": "x402charity",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "x402charity": "./bin/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@x402charity/core": "workspace:*",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "typescript": "^5.4.0"
+  },
+  "license": "MIT"
+}
