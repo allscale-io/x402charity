@@ -140,33 +140,180 @@
       color: var(--text-muted);
     }
 
-    /* Code block */
-    .code-section {
-      padding: 40px 0;
+    /* Getting started */
+    .getting-started {
+      padding: 60px 0;
     }
 
-    .code-section h3 {
-      font-size: 20px;
-      margin-bottom: 16px;
+    .getting-started > h3 {
+      font-size: 28px;
+      font-weight: 700;
       text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .getting-started > p {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 16px;
+      margin-bottom: 40px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab:hover { color: var(--text); }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Code block */
+    .code-section {
+      padding: 0;
+    }
+
+    .code-section h4 {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin: 24px 0 10px;
+      font-weight: 500;
+    }
+
+    .code-section h4:first-child {
+      margin-top: 24px;
+    }
+
+    .code-section p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
     }
 
     pre {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 24px;
+      padding: 20px 24px;
       overflow-x: auto;
       font-size: 14px;
       line-height: 1.7;
+      margin-bottom: 0;
+      position: relative;
     }
 
-    code { font-family: 'SF Mono', 'Fira Code', monospace; }
+    pre + h4 {
+      margin-top: 24px;
+    }
+
+    code { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; }
 
     .code-comment { color: #6b7280; }
     .code-keyword { color: #c084fc; }
     .code-string { color: #34d399; }
     .code-func { color: #60a5fa; }
+
+    .install-cmd {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0;
+      position: relative;
+    }
+
+    .install-cmd .prompt {
+      color: var(--green);
+      user-select: none;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--border);
+      border: none;
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover { background: #333; color: var(--text); }
+
+    /* Steps */
+    .step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .step-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .step-content h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 8px;
+    }
+
+    .step-content p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
 
     /* Donate section */
     .donate-section {
@@ -285,6 +432,13 @@
       word-break: break-all;
     }
 
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
     /* Footer */
     footer {
       padding: 40px 0;
@@ -304,6 +458,8 @@
     @media (max-width: 640px) {
       .hero h2 { font-size: 32px; }
       .features { grid-template-columns: 1fr; }
+      .tabs { overflow-x: auto; }
+      .tab { white-space: nowrap; padding: 12px 16px; }
     }
   </style>
 </head>
@@ -312,9 +468,9 @@
     <div class="container">
       <h1>x402 Charity</h1>
       <nav>
+        <a href="#get-started">Get Started</a>
         <a href="#try-it">Try It</a>
         <a href="https://github.com/allscale-io/x402charity">GitHub</a>
-        <a href="https://www.npmjs.com/package/x402charity">npm</a>
       </nav>
     </div>
   </header>
@@ -324,7 +480,7 @@
       <h2>Micro-donations,<br><span>built into every payment.</span></h2>
       <p>Embed automatic charitable giving into any payment flow. No extra steps. No separate UI. Just part of the transaction.</p>
       <div class="hero-buttons">
-        <a href="#try-it" class="btn btn-primary">Try a Donation</a>
+        <a href="#get-started" class="btn btn-primary">Get Started</a>
         <a href="https://github.com/allscale-io/x402charity" class="btn btn-secondary">View Source</a>
       </div>
     </div>
@@ -338,26 +494,167 @@
       </div>
       <div class="feature">
         <h3>Powered by x402</h3>
-        <p>Uses the x402 protocol for native HTTP stablecoin payments. If payments can be programmable, so can giving.</p>
+        <p>Uses the x402 protocol for native HTTP stablecoin payments. USDC on Base — fast, cheap, and gas-efficient.</p>
       </div>
       <div class="feature">
         <h3>Open Source</h3>
-        <p>MIT licensed. Add your charity to the registry. Integrate with any x402-enabled app.</p>
+        <p>MIT licensed. Add your charity to the registry. Integrate with Express, Next.js, or the CLI.</p>
       </div>
     </div>
 
-    <div class="code-section">
-      <h3>Add donations in 4 lines</h3>
-      <pre><code><span class="code-keyword">const</span> charity = <span class="code-func">x402Charity</span>({
-  <span class="code-string">cause</span>: <span class="code-string">'red-cross'</span>,
-  <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,  <span class="code-comment">// USDC per event</span>
+    <hr class="divider">
+
+    <!-- Getting Started -->
+    <section class="getting-started" id="get-started">
+      <h3>Get Started</h3>
+      <p>Pick how you want to integrate — CLI, Express middleware, or Next.js middleware.</p>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="cli">CLI</button>
+        <button class="tab" data-tab="express">Express</button>
+        <button class="tab" data-tab="next">Next.js</button>
+        <button class="tab" data-tab="core">Core Library</button>
+      </div>
+
+      <!-- CLI Tab -->
+      <div class="tab-panel active" id="tab-cli">
+        <div class="code-section">
+          <h4>1. Install globally</h4>
+          <div class="install-cmd">
+            <span class="prompt">$</span> npm install -g charitypay
+            <button class="copy-btn" onclick="copyText('npm install -g charitypay')">Copy</button>
+          </div>
+
+          <h4>2. Set your private key</h4>
+          <div class="install-cmd">
+            <span class="prompt">$</span> x402charity config set-key YOUR_PRIVATE_KEY
+            <button class="copy-btn" onclick="copyText('x402charity config set-key YOUR_PRIVATE_KEY')">Copy</button>
+          </div>
+
+          <h4>3. Pick a network</h4>
+          <div class="install-cmd">
+            <span class="prompt">$</span> x402charity config set-network base-sepolia
+            <button class="copy-btn" onclick="copyText('x402charity config set-network base-sepolia')">Copy</button>
+          </div>
+
+          <h4>4. Donate</h4>
+          <div class="install-cmd">
+            <span class="prompt">$</span> x402charity donate testing-charity 0.01
+            <button class="copy-btn" onclick="copyText('x402charity donate testing-charity 0.01')">Copy</button>
+          </div>
+
+          <h4>List available charities</h4>
+          <div class="install-cmd">
+            <span class="prompt">$</span> x402charity list
+            <button class="copy-btn" onclick="copyText('x402charity list')">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Express Tab -->
+      <div class="tab-panel" id="tab-express">
+        <div class="code-section">
+          <h4>1. Install</h4>
+          <div class="install-cmd">
+            <span class="prompt">$</span> npm install @x402charity/express
+            <button class="copy-btn" onclick="copyText('npm install @x402charity/express')">Copy</button>
+          </div>
+
+          <h4>2. Add middleware to your app</h4>
+          <pre><code><span class="code-keyword">import</span> express <span class="code-keyword">from</span> <span class="code-string">'express'</span>;
+<span class="code-keyword">import</span> { <span class="code-func">x402charity</span> } <span class="code-keyword">from</span> <span class="code-string">'@x402charity/express'</span>;
+
+<span class="code-keyword">const</span> app = <span class="code-func">express</span>();
+
+<span class="code-comment">// Auto-donate 0.0001 USDC on every request to /api/trade</span>
+app.<span class="code-func">use</span>(<span class="code-string">'/api/trade'</span>, <span class="code-func">x402charity</span>({
+  <span class="code-string">privateKey</span>: process.env.X402_PRIVATE_KEY,
+  <span class="code-string">cause</span>: <span class="code-string">'testing-charity'</span>,
+  <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,
+  <span class="code-string">network</span>: <span class="code-string">'base-sepolia'</span>,
+}));
+
+app.<span class="code-func">post</span>(<span class="code-string">'/api/trade'</span>, (req, res) => {
+  <span class="code-comment">// your trade logic — donation happens automatically</span>
+  res.<span class="code-func">json</span>({ <span class="code-string">ok</span>: <span class="code-keyword">true</span> });
 });
 
-app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span>, charity.<span class="code-func">wrap</span>(<span class="code-keyword">async</span> (req, res) => {
-  <span class="code-comment">// your trade logic — donation happens automatically</span>
-}));</code></pre>
-    </div>
+app.<span class="code-func">listen</span>(<span class="code-string">3000</span>);</code></pre>
 
+          <h4>Options</h4>
+          <pre><code><span class="code-func">x402charity</span>({
+  <span class="code-string">privateKey</span>: <span class="code-string">'0x...'</span>,        <span class="code-comment">// Wallet private key (required)</span>
+  <span class="code-string">cause</span>: <span class="code-string">'testing-charity'</span>,  <span class="code-comment">// Charity ID (required)</span>
+  <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,          <span class="code-comment">// USDC per event (default: 0.0001)</span>
+  <span class="code-string">network</span>: <span class="code-string">'base-sepolia'</span>,   <span class="code-comment">// base or base-sepolia (default)</span>
+  <span class="code-string">silent</span>: <span class="code-keyword">true</span>,              <span class="code-comment">// Suppress errors (default: true)</span>
+  <span class="code-string">shouldDonate</span>: (req) => {   <span class="code-comment">// Optional filter function</span>
+    <span class="code-keyword">return</span> req.method === <span class="code-string">'POST'</span>;
+  },
+});</code></pre>
+        </div>
+      </div>
+
+      <!-- Next.js Tab -->
+      <div class="tab-panel" id="tab-next">
+        <div class="code-section">
+          <h4>1. Install</h4>
+          <div class="install-cmd">
+            <span class="prompt">$</span> npm install @x402charity/next
+            <button class="copy-btn" onclick="copyText('npm install @x402charity/next')">Copy</button>
+          </div>
+
+          <h4>2. Add to your middleware.ts</h4>
+          <pre><code><span class="code-comment">// middleware.ts</span>
+<span class="code-keyword">import</span> { <span class="code-func">x402charity</span> } <span class="code-keyword">from</span> <span class="code-string">'@x402charity/next'</span>;
+
+<span class="code-keyword">export default</span> <span class="code-func">x402charity</span>({
+  <span class="code-string">privateKey</span>: process.env.X402_PRIVATE_KEY,
+  <span class="code-string">cause</span>: <span class="code-string">'testing-charity'</span>,
+  <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,
+  <span class="code-string">network</span>: <span class="code-string">'base-sepolia'</span>,
+  <span class="code-string">matcher</span>: <span class="code-string">'/api/*'</span>,       <span class="code-comment">// Only donate on API routes</span>
+});
+
+<span class="code-comment">// Or match multiple paths:</span>
+<span class="code-comment">// matcher: ['/api/trade', '/api/subscribe']</span></code></pre>
+        </div>
+      </div>
+
+      <!-- Core Library Tab -->
+      <div class="tab-panel" id="tab-core">
+        <div class="code-section">
+          <h4>1. Install</h4>
+          <div class="install-cmd">
+            <span class="prompt">$</span> npm install @x402charity/core
+            <button class="copy-btn" onclick="copyText('npm install @x402charity/core')">Copy</button>
+          </div>
+
+          <h4>2. Use the client directly</h4>
+          <pre><code><span class="code-keyword">import</span> { <span class="code-func">X402CharityClient</span>, <span class="code-func">listCharities</span> } <span class="code-keyword">from</span> <span class="code-string">'@x402charity/core'</span>;
+
+<span class="code-comment">// List available charities</span>
+<span class="code-keyword">const</span> charities = <span class="code-func">listCharities</span>();
+console.<span class="code-func">log</span>(charities);
+
+<span class="code-comment">// Create a client and donate</span>
+<span class="code-keyword">const</span> client = <span class="code-keyword">new</span> <span class="code-func">X402CharityClient</span>({
+  <span class="code-string">privateKey</span>: process.env.X402_PRIVATE_KEY,
+  <span class="code-string">network</span>: <span class="code-string">'base-sepolia'</span>,
+});
+
+<span class="code-keyword">const</span> receipt = <span class="code-keyword">await</span> client.<span class="code-func">donate</span>(<span class="code-string">'testing-charity'</span>, <span class="code-string">'0.01'</span>);
+console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'</span>, receipt.txHash);</code></pre>
+
+          <h4>Build your own integration</h4>
+          <p>The core library gives you <code>X402CharityClient</code>, <code>listCharities()</code>, <code>findCharity()</code>, and <code>setCharities()</code>. Use them to build donations into any workflow — cron jobs, webhooks, AI agents, or custom middleware.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- Try it -->
     <section class="donate-section" id="try-it">
       <h3>Try It Now</h3>
       <p class="subtitle">Connect your wallet and make a test donation on Base Sepolia</p>
@@ -412,11 +709,30 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
   </footer>
 
   <script>
-    const BASE_SEPOLIA_CHAIN_ID = '0x14a34'; // 84532
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Copy button
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+      });
+    }
+
+    // Wallet + Donate
+    const BASE_SEPOLIA_CHAIN_ID = '0x14a34';
     const USDC_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
     const USDC_DECIMALS = 6;
-
-    const TRANSFER_ABI = 'a9059cbb'; // transfer(address,uint256)
+    const TRANSFER_ABI = 'a9059cbb';
 
     const connectBtn = document.getElementById('connect-btn');
     const donateBtn = document.getElementById('donate-btn');
@@ -445,13 +761,11 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
     }
 
     const charityAddress = document.getElementById('charity-address');
-
     charitySelect.addEventListener('change', () => {
       charityAddress.textContent = charitySelect.value;
     });
 
     const connectError = document.getElementById('connect-error');
-
     function showConnectError(message) {
       connectError.textContent = message;
       connectError.className = 'status error';
@@ -470,16 +784,13 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
       connectBtn.disabled = true;
 
       try {
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts',
-        });
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
 
         if (!accounts || accounts.length === 0) {
           showConnectError('No accounts found. Please unlock your wallet and try again.');
           return;
         }
 
-        // Switch to Base Sepolia
         try {
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
@@ -503,7 +814,6 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
           }
         }
 
-        // Register USDC token so MetaMask shows the name instead of "Unknown"
         try {
           await window.ethereum.request({
             method: 'wallet_watchAsset',
@@ -517,9 +827,7 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
               },
             },
           });
-        } catch (e) {
-          // User declined — not critical, continue
-        }
+        } catch (e) {}
 
         walletAddress.textContent = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
         connectSection.style.display = 'none';
@@ -557,9 +865,7 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
       showStatus('Sending donation...', 'pending');
 
       try {
-        const accounts = await window.ethereum.request({
-          method: 'eth_accounts',
-        });
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
 
         const amountHex = padHex('0x' + amountToHex(amount), 64);
         const toHex = padHex(to, 64);
@@ -567,16 +873,12 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
 
         const txHash = await window.ethereum.request({
           method: 'eth_sendTransaction',
-          params: [{
-            from: accounts[0],
-            to: USDC_ADDRESS,
-            data: data,
-          }],
+          params: [{ from: accounts[0], to: USDC_ADDRESS, data: data }],
         });
 
         const charityName = charitySelect.options[charitySelect.selectedIndex].text;
         const explorerUrl = 'https://sepolia.basescan.org/tx/' + txHash;
-        statusDiv.innerHTML = `Donated ${amount} USDC to ${charityName}!<br><a href="${explorerUrl}" target="_blank" style="color: var(--green); text-decoration: underline;">View on BaseScan →</a>`;
+        statusDiv.innerHTML = 'Donated ' + amount + ' USDC to ' + charityName + '!<br><a href="' + explorerUrl + '" target="_blank" style="color: var(--green); text-decoration: underline;">View on BaseScan &rarr;</a>';
         statusDiv.className = 'status success';
       } catch (err) {
         showStatus('Transaction failed: ' + err.message, 'error');

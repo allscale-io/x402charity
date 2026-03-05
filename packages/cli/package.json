@@ -1,6 +1,6 @@
 {
-  "name": "x402charity",
-  "version": "0.1.1",
+  "name": "charitypay",
+  "version": "0.1.0",
   "type": "module",
   "bin": {
     "x402charity": "./bin/cli.js"
