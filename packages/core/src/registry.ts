@@ -1,6 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Charity } from './types.js';
 
-const DEFAULT_CHARITIES: Charity[] = [
+const FALLBACK_CHARITIES: Charity[] = [
   {
     id: 'testing-charity',
     name: 'Testing Charity',
@@ -12,6 +15,22 @@ const DEFAULT_CHARITIES: Charity[] = [
   },
 ];
 
+function loadCharitiesFromFile(): Charity[] | null {
+  try {
+    const __dirname = dirname(fileURLToPath(import.meta.url));
+    const filePath = resolve(__dirname, '../../../registry/charities.json');
+    const data = JSON.parse(readFileSync(filePath, 'utf-8'));
+    if (Array.isArray(data.charities) && data.charities.length > 0) {
+      return data.charities;
+    }
+  } catch {
+    // File not found (e.g. installed as npm package outside the monorepo)
+  }
+  return null;
+}
+
+const registryCharities = loadCharitiesFromFile();
+
 let customCharities: Charity[] | null = null;
 
 export function setCharities(charities: Charity[]): void {
@@ -19,7 +38,7 @@ export function setCharities(charities: Charity[]): void {
 }
 
 export function listCharities(): Charity[] {
-  return customCharities || DEFAULT_CHARITIES;
+  return customCharities || registryCharities || FALLBACK_CHARITIES;
 }
 
 export function findCharity(idOrName: string): Charity | undefined {

@@ -4,6 +4,7 @@ import {
   http,
   parseUnits,
   type Address,
+  type Chain,
 } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -24,10 +25,10 @@ const TRANSFER_ABI = [
   },
 ] as const;
 
-const CHAINS = {
+const CHAINS: Record<string, Chain> = {
   base,
   'base-sepolia': baseSepolia,
-} as const;
+};
 
 export interface ClientOptions {
   privateKey: string;
@@ -35,16 +36,32 @@ export interface ClientOptions {
 }
 
 export class X402CharityClient {
-  private privateKey: `0x${string}`;
   private network: 'base' | 'base-sepolia';
+  private chain: Chain;
+  private account;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private walletClient: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private publicClient: any;
 
   constructor(options: ClientOptions) {
-    this.privateKey = (
+    const privateKey = (
       options.privateKey.startsWith('0x')
         ? options.privateKey
         : `0x${options.privateKey}`
     ) as `0x${string}`;
     this.network = options.network || 'base-sepolia';
+    this.chain = CHAINS[this.network];
+
+    const transport = http(RPC_URLS[this.network]);
+
+    this.account = privateKeyToAccount(privateKey);
+    this.walletClient = createWalletClient({
+      account: this.account,
+      chain: this.chain,
+      transport,
+    });
+    this.publicClient = createPublicClient({ chain: this.chain, transport });
   }
 
   async donate(causeId: string, amount: string): Promise<DonationReceipt> {
@@ -55,35 +72,22 @@ export class X402CharityClient {
       );
     }
 
-    const chain = CHAINS[this.network];
-    const account = privateKeyToAccount(this.privateKey);
-
-    const walletClient = createWalletClient({
-      account,
-      chain,
-      transport: http(RPC_URLS[this.network]),
-    });
-
-    const publicClient = createPublicClient({
-      chain,
-      transport: http(RPC_URLS[this.network]),
-    });
-
     const usdcAddress = USDC_ADDRESSES[this.network];
     const parsedAmount = parseUnits(amount, USDC_DECIMALS);
 
-    const txHash = await walletClient.writeContract({
+    const txHash = await this.walletClient.writeContract({
       address: usdcAddress,
       abi: TRANSFER_ABI,
       functionName: 'transfer',
       args: [charity.walletAddress as Address, parsedAmount],
+      chain: this.chain,
     });
 
-    await publicClient.waitForTransactionReceipt({ hash: txHash });
+    await this.publicClient.waitForTransactionReceipt({ hash: txHash });
 
     return {
       txHash,
-      from: account.address,
+      from: this.account.address,
       to: charity.walletAddress,
       amount,
       currency: 'USDC',
