@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Use Cases — x402 Charity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #111111;
+      --surface-hover: #1a1a1a;
+      --border: #222222;
+      --text: #ffffff;
+      --text-muted: #888888;
+      --accent: #20F58E;
+      --accent-hover: #1ad97d;
+      --accent-dim: rgba(32, 245, 142, 0.12);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .header-brand img {
+      height: 22px;
+      width: auto;
+    }
+
+    .header-brand span {
+      font-family: 'Manrope', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    header nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    header nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    header nav a:hover { color: var(--text); }
+
+    /* Hero */
+    .page-hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+
+    .page-hero h1 {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -1.5px;
+    }
+
+    .page-hero h1 span { color: var(--accent); }
+
+    .page-hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Value Props */
+    .value-props {
+      padding: 0 0 60px;
+    }
+
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .value-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .value-card:hover { border-color: #333; }
+
+    .value-icon {
+      font-size: 32px;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .value-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .value-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* Use Cases */
+    .use-cases {
+      padding: 60px 0;
+    }
+
+    .use-cases > h2 {
+      font-size: 30px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .use-cases > p {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 16px;
+      margin-bottom: 48px;
+    }
+
+    .case {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      margin-bottom: 64px;
+      padding-bottom: 64px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .case:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .case:nth-child(even) .case-visual { order: -1; }
+
+    .case-content h3 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .case-content .case-label {
+      font-family: 'Manrope', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .case-content p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .case-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 8px 16px;
+      font-family: 'Inconsolata', monospace;
+      font-size: 13px;
+      color: var(--accent);
+    }
+
+    .case-trigger .arrow { color: var(--text-muted); }
+
+    .case-visual {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .case-visual pre {
+      background: transparent;
+      border: none;
+      padding: 0;
+      font-size: 12px;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .case-visual code {
+      font-family: 'Inconsolata', monospace;
+    }
+
+    .code-comment { color: #555; }
+    .code-keyword { color: #b48ead; }
+    .code-string { color: var(--accent); }
+    .code-func { color: #88c0d0; }
+
+    .case-stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+    }
+
+    .case-stat {
+      text-align: center;
+    }
+
+    .case-stat .num {
+      font-family: 'Manrope', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent);
+      display: block;
+    }
+
+    .case-stat .desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Impact Math */
+    .impact-section {
+      padding: 60px 0;
+    }
+
+    .impact-section > h2 {
+      font-size: 30px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .impact-section > p {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 16px;
+      margin-bottom: 40px;
+    }
+
+    .impact-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .impact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      transition: border-color 0.2s;
+    }
+
+    .impact-card:hover { border-color: #333; }
+
+    .impact-card .company-type {
+      font-family: 'Manrope', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .impact-card h4 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .impact-math {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inconsolata', monospace;
+      font-size: 14px;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .impact-math .equals {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .impact-result {
+      font-family: 'Manrope', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .impact-result .unit {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .impact-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    /* CTA */
+    .cta-section {
+      padding: 80px 0;
+      text-align: center;
+    }
+
+    .cta-section h2 {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 14px;
+      letter-spacing: -0.5px;
+    }
+
+    .cta-section h2 span { color: var(--accent); }
+
+    .cta-section p {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border-radius: 24px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000000;
+    }
+
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { border-color: #444; color: var(--text); }
+
+    /* Footer */
+    footer {
+      padding: 48px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer-brand img {
+      height: 18px;
+      width: auto;
+      opacity: 0.5;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      font-size: 13px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy {
+      font-size: 12px;
+      color: #444;
+    }
+
+    @media (max-width: 768px) {
+      .page-hero h1 { font-size: 34px; letter-spacing: -1px; }
+      .value-grid { grid-template-columns: 1fr; }
+      .case { grid-template-columns: 1fr; gap: 24px; }
+      .case:nth-child(even) .case-visual { order: 0; }
+      .impact-grid { grid-template-columns: 1fr; }
+      header nav { gap: 16px; }
+      header nav a { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="header-brand">
+        <img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale">
+        <span>x402 Charity</span>
+      </a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/use-cases">Use Cases</a>
+        <a href="https://github.com/allscale-io/x402charity">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>Every action <span>gives back.</span></h1>
+      <p>x402 Charity turns ordinary product interactions into automatic micro-donations. Here's how companies across industries are embedding giving into their products.</p>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="value-props">
+      <div class="value-grid">
+        <div class="value-card">
+          <span class="value-icon">+</span>
+          <h3>Customer Loyalty</h3>
+          <p>Users stay when they know their activity creates real social impact. Turn every interaction into a reason to come back.</p>
+        </div>
+        <div class="value-card">
+          <span class="value-icon">&lt;/&gt;</span>
+          <h3>Zero Friction</h3>
+          <p>One middleware call. No checkout changes, no pop-ups, no extra steps. Donations happen in the background automatically.</p>
+        </div>
+        <div class="value-card">
+          <span class="value-icon">~</span>
+          <h3>Brand Differentiation</h3>
+          <p>In competitive markets, "we donate with every transaction" is a powerful, verifiable story your competitors can't match.</p>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Detailed Use Cases -->
+    <section class="use-cases">
+      <h2>Who Can Use x402 Charity?</h2>
+      <p>Any product with a backend can add automatic giving in under 10 lines of code.</p>
+
+      <!-- DEX / Trading -->
+      <div class="case">
+        <div class="case-content">
+          <span class="case-label">DeFi / Trading</span>
+          <h3>DEX & Trading Platforms</h3>
+          <p>Donate a fraction of a cent every time a user places a trade. With millions of swaps per day, even $0.0001 per trade adds up to thousands of dollars for charity — and your traders feel good about every order.</p>
+          <p>Market it as: <strong>"Every swap you make helps fund clean water."</strong></p>
+          <div class="case-trigger">
+            <span>user places trade</span>
+            <span class="arrow">&rarr;</span>
+            <span>$0.0001 donated</span>
+          </div>
+        </div>
+        <div class="case-visual">
+          <pre><code><span class="code-comment">// Express middleware on your trade endpoint</span>
+app.<span class="code-func">use</span>(<span class="code-string">'/api/swap'</span>, <span class="code-func">x402charity</span>({
+  <span class="code-string">privateKey</span>: process.env.KEY,
+  <span class="code-string">cause</span>: <span class="code-string">'clean-water'</span>,
+  <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,
+  <span class="code-string">shouldDonate</span>: (req) =>
+    req.method === <span class="code-string">'POST'</span>,
+}));</code></pre>
+          <div class="case-stats">
+            <div class="case-stat">
+              <span class="num">10K</span>
+              <span class="desc">trades / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$1</span>
+              <span class="desc">donated / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$365</span>
+              <span class="desc">/ year auto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prediction Markets -->
+      <div class="case">
+        <div class="case-content">
+          <span class="case-label">Prediction Markets</span>
+          <h3>Betting & Prediction Platforms</h3>
+          <p>Every bet placed triggers a micro-donation. Turn speculation into social impact. Users can see the total charitable impact of the platform's activity — transforming gambling into a net positive.</p>
+          <p>Market it as: <strong>"Win or lose, every bet makes a difference."</strong></p>
+          <div class="case-trigger">
+            <span>user places bet</span>
+            <span class="arrow">&rarr;</span>
+            <span>$0.001 donated</span>
+          </div>
+        </div>
+        <div class="case-visual">
+          <pre><code><span class="code-comment">// Next.js middleware for bet endpoints</span>
+<span class="code-keyword">export default</span> <span class="code-func">x402charity</span>({
+  <span class="code-string">privateKey</span>: process.env.KEY,
+  <span class="code-string">cause</span>: <span class="code-string">'education-fund'</span>,
+  <span class="code-string">amount</span>: <span class="code-string">'0.001'</span>,
+  <span class="code-string">matcher</span>: <span class="code-string">'/api/bet/*'</span>,
+});</code></pre>
+          <div class="case-stats">
+            <div class="case-stat">
+              <span class="num">50K</span>
+              <span class="desc">bets / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$50</span>
+              <span class="desc">donated / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$18K</span>
+              <span class="desc">/ year auto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Products -->
+      <div class="case">
+        <div class="case-content">
+          <span class="case-label">AI & SaaS</span>
+          <h3>AI Products & API Platforms</h3>
+          <p>Donate every time a user signs up, subscribes, or makes an API call. For AI products processing thousands of requests daily, this creates a compelling story: every query powers both intelligence and generosity.</p>
+          <p>Market it as: <strong>"Every AI response contributes to a better world."</strong></p>
+          <div class="case-trigger">
+            <span>API call processed</span>
+            <span class="arrow">&rarr;</span>
+            <span>$0.0001 donated</span>
+          </div>
+        </div>
+        <div class="case-visual">
+          <pre><code><span class="code-comment">// Donate on every API request</span>
+app.<span class="code-func">use</span>(<span class="code-string">'/v1/chat'</span>, <span class="code-func">x402charity</span>({
+  <span class="code-string">privateKey</span>: process.env.KEY,
+  <span class="code-string">cause</span>: <span class="code-string">'stem-education'</span>,
+  <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,
+}));
+
+<span class="code-comment">// Or donate only on new signups</span>
+app.<span class="code-func">post</span>(<span class="code-string">'/signup'</span>, <span class="code-func">x402charity</span>({
+  <span class="code-string">privateKey</span>: process.env.KEY,
+  <span class="code-string">cause</span>: <span class="code-string">'stem-education'</span>,
+  <span class="code-string">amount</span>: <span class="code-string">'0.01'</span>,
+}), handler);</code></pre>
+          <div class="case-stats">
+            <div class="case-stat">
+              <span class="num">100K</span>
+              <span class="desc">calls / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$10</span>
+              <span class="desc">donated / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$3.6K</span>
+              <span class="desc">/ year auto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- E-commerce -->
+      <div class="case">
+        <div class="case-content">
+          <span class="case-label">E-Commerce</span>
+          <h3>Online Stores & Marketplaces</h3>
+          <p>Donate with every checkout or product listing. Shoppers are more likely to buy from brands that give back — add "we donate with every purchase" to your checkout page, backed by on-chain proof.</p>
+          <p>Market it as: <strong>"Your purchase just helped feed a family."</strong></p>
+          <div class="case-trigger">
+            <span>order placed</span>
+            <span class="arrow">&rarr;</span>
+            <span>$0.01 donated</span>
+          </div>
+        </div>
+        <div class="case-visual">
+          <pre><code><span class="code-comment">// Donate on every successful checkout</span>
+app.<span class="code-func">post</span>(<span class="code-string">'/checkout'</span>, <span class="code-func">x402charity</span>({
+  <span class="code-string">privateKey</span>: process.env.KEY,
+  <span class="code-string">cause</span>: <span class="code-string">'hunger-relief'</span>,
+  <span class="code-string">amount</span>: <span class="code-string">'0.01'</span>,
+  <span class="code-string">shouldDonate</span>: (req) =>
+    req.body.paymentStatus === <span class="code-string">'success'</span>,
+}), processOrder);</code></pre>
+          <div class="case-stats">
+            <div class="case-stat">
+              <span class="num">5K</span>
+              <span class="desc">orders / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$50</span>
+              <span class="desc">donated / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$18K</span>
+              <span class="desc">/ year auto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gaming -->
+      <div class="case">
+        <div class="case-content">
+          <span class="case-label">Gaming</span>
+          <h3>Games & Virtual Worlds</h3>
+          <p>Donate per in-game purchase, match completion, or achievement unlock. Gamers love seeing tangible impact from their play time. Add a "community impact" leaderboard powered by real on-chain data.</p>
+          <p>Market it as: <strong>"Play games. Save lives. It's that simple."</strong></p>
+          <div class="case-trigger">
+            <span>in-app purchase</span>
+            <span class="arrow">&rarr;</span>
+            <span>$0.001 donated</span>
+          </div>
+        </div>
+        <div class="case-visual">
+          <pre><code><span class="code-comment">// Donate on in-game purchases</span>
+app.<span class="code-func">use</span>(<span class="code-string">'/api/purchase'</span>, <span class="code-func">x402charity</span>({
+  <span class="code-string">privateKey</span>: process.env.KEY,
+  <span class="code-string">cause</span>: <span class="code-string">'child-health'</span>,
+  <span class="code-string">amount</span>: <span class="code-string">'0.001'</span>,
+}));
+
+<span class="code-comment">// Or donate per match completed</span>
+app.<span class="code-func">post</span>(<span class="code-string">'/api/match/complete'</span>,
+  <span class="code-func">x402charity</span>({
+    <span class="code-string">privateKey</span>: process.env.KEY,
+    <span class="code-string">cause</span>: <span class="code-string">'child-health'</span>,
+    <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,
+  }), handler);</code></pre>
+          <div class="case-stats">
+            <div class="case-stat">
+              <span class="num">200K</span>
+              <span class="desc">events / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$20</span>
+              <span class="desc">donated / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$7.3K</span>
+              <span class="desc">/ year auto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fintech / Payments -->
+      <div class="case">
+        <div class="case-content">
+          <span class="case-label">Fintech</span>
+          <h3>Payment & Fintech Apps</h3>
+          <p>Like round-up donations, but built into the protocol layer. Every payment processed, every invoice paid, every transfer completed triggers an automatic donation. Fully transparent and verifiable on-chain.</p>
+          <p>Market it as: <strong>"Banking that gives back, automatically."</strong></p>
+          <div class="case-trigger">
+            <span>payment processed</span>
+            <span class="arrow">&rarr;</span>
+            <span>$0.001 donated</span>
+          </div>
+        </div>
+        <div class="case-visual">
+          <pre><code><span class="code-comment">// Next.js middleware for all payments</span>
+<span class="code-keyword">export default</span> <span class="code-func">x402charity</span>({
+  <span class="code-string">privateKey</span>: process.env.KEY,
+  <span class="code-string">cause</span>: <span class="code-string">'financial-literacy'</span>,
+  <span class="code-string">amount</span>: <span class="code-string">'0.001'</span>,
+  <span class="code-string">matcher</span>: [
+    <span class="code-string">'/api/pay/*'</span>,
+    <span class="code-string">'/api/transfer/*'</span>,
+    <span class="code-string">'/api/invoice/*'</span>,
+  ],
+});</code></pre>
+          <div class="case-stats">
+            <div class="case-stat">
+              <span class="num">500K</span>
+              <span class="desc">payments / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$500</span>
+              <span class="desc">donated / day</span>
+            </div>
+            <div class="case-stat">
+              <span class="num">$182K</span>
+              <span class="desc">/ year auto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- Impact Math -->
+    <section class="impact-section">
+      <h2>The Math Behind Micro-Giving</h2>
+      <p>Small amounts, massive impact at scale. Here's what $0.0001 per action looks like.</p>
+
+      <div class="impact-grid">
+        <div class="impact-card">
+          <span class="company-type">Small Startup</span>
+          <h4>1,000 daily users</h4>
+          <div class="impact-math">
+            <span>1,000 actions x $0.001</span>
+            <span class="equals">=</span>
+          </div>
+          <div class="impact-result">$365 <span class="unit">/ year</span></div>
+          <p>Enough to fund school supplies for 50 children. Zero additional cost to your users.</p>
+        </div>
+
+        <div class="impact-card">
+          <span class="company-type">Growing Product</span>
+          <h4>50,000 daily users</h4>
+          <div class="impact-math">
+            <span>50,000 actions x $0.001</span>
+            <span class="equals">=</span>
+          </div>
+          <div class="impact-result">$18,250 <span class="unit">/ year</span></div>
+          <p>Funds a full clean water well installation. Your users collectively built it — just by using your product.</p>
+        </div>
+
+        <div class="impact-card">
+          <span class="company-type">Scaled Platform</span>
+          <h4>500,000 daily actions</h4>
+          <div class="impact-math">
+            <span>500,000 actions x $0.001</span>
+            <span class="equals">=</span>
+          </div>
+          <div class="impact-result">$182,500 <span class="unit">/ year</span></div>
+          <p>That's a meaningful charitable program — created from fractions of a cent, without anyone noticing.</p>
+        </div>
+
+        <div class="impact-card">
+          <span class="company-type">Enterprise / DEX</span>
+          <h4>5M daily transactions</h4>
+          <div class="impact-math">
+            <span>5,000,000 actions x $0.0001</span>
+            <span class="equals">=</span>
+          </div>
+          <div class="impact-result">$182,500 <span class="unit">/ year</span></div>
+          <p>Even at a tenth of a cent per transaction, high-volume platforms generate six-figure annual donations.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <h2>Ready to make <span>every action count</span>?</h2>
+      <p>Add automatic charitable giving to your product in under 5 minutes. Open source, free, and verifiable on-chain.</p>
+      <div class="cta-buttons">
+        <a href="/#get-started" class="btn btn-primary">Get Started</a>
+        <a href="https://github.com/allscale-io/x402charity" class="btn btn-secondary">View on GitHub</a>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <span style="font-size: 13px; color: var(--text-muted);">Built by</span>
+          <a href="https://allscale.io" target="_blank" rel="noopener">
+            <img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale" style="height: 16px; opacity: 0.6;">
+          </a>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/allscale-io/x402charity">GitHub</a>
+          <a href="https://www.npmjs.com/package/x402charity">npm</a>
+          <a href="https://allscale.io">AllScale</a>
+        </div>
+        <div class="footer-copy">MIT License</div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
