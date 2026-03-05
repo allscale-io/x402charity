@@ -1,6 +1,7 @@
 # x402 Charity
 
 [![npm](https://img.shields.io/npm/v/x402charity)](https://www.npmjs.com/package/x402charity)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://allscale-io.github.io/x402charity/)
 
 Embed automatic micro-donations into any payment flow, powered by x402.
 
