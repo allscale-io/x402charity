@@ -366,7 +366,11 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
         <div id="wallet-status"></div>
 
         <div id="connect-section">
+          <div id="connect-error" class="status" style="margin-bottom: 12px;"></div>
           <button id="connect-btn" class="btn btn-primary">Connect Wallet</button>
+          <p style="margin-top: 10px; font-size: 12px; color: var(--text-muted); text-align: center;">
+            Requires <a href="https://metamask.io/download/" target="_blank" style="color: var(--accent);">MetaMask</a> or a compatible browser wallet
+          </p>
         </div>
 
         <div id="donate-form" style="display: none;">
@@ -443,16 +447,34 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
       charityAddress.textContent = charitySelect.value;
     });
 
+    const connectError = document.getElementById('connect-error');
+
+    function showConnectError(message) {
+      connectError.textContent = message;
+      connectError.className = 'status error';
+    }
+
     connectBtn.addEventListener('click', async () => {
+      connectError.style.display = 'none';
+      connectError.className = 'status';
+
       if (typeof window.ethereum === 'undefined') {
-        alert('MetaMask or a compatible wallet is required. Please install it first.');
+        showConnectError('No wallet detected. Please install MetaMask or open this page in a wallet browser.');
         return;
       }
+
+      connectBtn.textContent = 'Connecting...';
+      connectBtn.disabled = true;
 
       try {
         const accounts = await window.ethereum.request({
           method: 'eth_requestAccounts',
         });
+
+        if (!accounts || accounts.length === 0) {
+          showConnectError('No accounts found. Please unlock your wallet and try again.');
+          return;
+        }
 
         // Switch to Base Sepolia
         try {
@@ -473,7 +495,8 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
               }],
             });
           } else {
-            throw switchError;
+            showConnectError('Please switch to Base Sepolia network in your wallet.');
+            return;
           }
         }
 
@@ -481,7 +504,14 @@ app.<span class="code-func">post</span>(<span class="code-string">'/trade'</span
         connectSection.style.display = 'none';
         donateForm.style.display = 'block';
       } catch (err) {
-        alert('Failed to connect: ' + err.message);
+        if (err.code === 4001) {
+          showConnectError('Connection rejected. Please approve the connection in your wallet.');
+        } else {
+          showConnectError('Failed to connect: ' + err.message);
+        }
+      } finally {
+        connectBtn.textContent = 'Connect Wallet';
+        connectBtn.disabled = false;
       }
     });
 
