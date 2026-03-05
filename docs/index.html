@@ -432,6 +432,164 @@
       word-break: break-all;
     }
 
+    /* History section */
+    .history-section {
+      padding: 60px 0;
+    }
+
+    .history-section h3 {
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .history-section .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .history-stats {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .history-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 28px;
+      text-align: center;
+    }
+
+    .history-stat .label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .history-stat .value {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .history-stat .value.green { color: var(--green); }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .history-header .live-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 6px;
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .history-header .live-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .refresh-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .refresh-btn:hover { border-color: var(--text-muted); color: var(--text); }
+
+    .history-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .history-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .history-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .history-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .history-table .mono {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 13px;
+    }
+
+    .history-table .amount-cell {
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .history-table a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .history-table a:hover { text-decoration: underline; }
+
+    .history-empty, .history-loading, .history-error {
+      text-align: center;
+      padding: 40px 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .history-error { color: var(--red); }
+
+    @media (max-width: 640px) {
+      .history-table th:nth-child(2),
+      .history-table td:nth-child(2) { display: none; }
+      .history-stats { gap: 10px; }
+      .history-stat { padding: 12px 18px; }
+      .history-stat .value { font-size: 18px; }
+    }
+
     /* Divider */
     .divider {
       border: none;
@@ -470,6 +628,7 @@
       <nav>
         <a href="#get-started">Get Started</a>
         <a href="#try-it">Try It</a>
+        <a href="#history">History</a>
         <a href="https://github.com/allscale-io/x402charity">GitHub</a>
       </nav>
     </div>
@@ -698,6 +857,43 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
         </div>
       </div>
     </section>
+
+    <hr class="divider">
+
+    <!-- Donation History -->
+    <section class="history-section" id="history">
+      <h3>Donation History</h3>
+      <p class="subtitle">Live USDC donations to registered charities on Base Sepolia</p>
+
+      <div class="history-stats">
+        <div class="history-stat">
+          <div class="label">Total Donated</div>
+          <div class="value green" id="total-donated">—</div>
+        </div>
+        <div class="history-stat">
+          <div class="label">Transactions</div>
+          <div class="value" id="total-txs">—</div>
+        </div>
+        <div class="history-stat">
+          <div class="label">Unique Donors</div>
+          <div class="value" id="total-donors">—</div>
+        </div>
+      </div>
+
+      <div class="history-header">
+        <div>
+          <span class="live-dot"></span>
+          <span class="live-label">Live from BaseScan</span>
+        </div>
+        <button class="refresh-btn" id="refresh-history" onclick="loadHistory()">Refresh</button>
+      </div>
+
+      <div class="history-table-wrap">
+        <div id="history-content">
+          <div class="history-loading">Loading donation history...</div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <footer>
@@ -880,12 +1076,131 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
         const explorerUrl = 'https://sepolia.basescan.org/tx/' + txHash;
         statusDiv.innerHTML = 'Donated ' + amount + ' USDC to ' + charityName + '!<br><a href="' + explorerUrl + '" target="_blank" style="color: var(--green); text-decoration: underline;">View on BaseScan &rarr;</a>';
         statusDiv.className = 'status success';
+
+        // Refresh history after successful donation
+        setTimeout(loadHistory, 5000);
       } catch (err) {
         showStatus('Transaction failed: ' + err.message, 'error');
       } finally {
         donateBtn.disabled = false;
       }
     });
+
+    // --- Donation History ---
+    const CHARITY_WALLETS = [
+      { address: '0x8DC1521132381aAB648e067c2Db3677D5BF70c6d', name: 'Testing Charity' },
+    ];
+    const BASESCAN_API = 'https://api-sepolia.basescan.org/api';
+
+    function shortAddr(addr) {
+      return addr.slice(0, 6) + '...' + addr.slice(-4);
+    }
+
+    function formatDate(timestamp) {
+      const d = new Date(timestamp * 1000);
+      const now = new Date();
+      const diff = (now - d) / 1000;
+
+      if (diff < 60) return 'just now';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+    }
+
+    function formatUsdc(rawValue) {
+      const num = Number(rawValue) / 1e6;
+      if (num >= 1) return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (num >= 0.01) return num.toFixed(4);
+      return num.toFixed(6);
+    }
+
+    async function loadHistory() {
+      const content = document.getElementById('history-content');
+      const refreshBtn = document.getElementById('refresh-history');
+      refreshBtn.textContent = 'Loading...';
+      refreshBtn.disabled = true;
+
+      try {
+        // Fetch token transfers for all charity wallets
+        const allTxs = [];
+
+        for (const charity of CHARITY_WALLETS) {
+          const url = BASESCAN_API +
+            '?module=account&action=tokentx' +
+            '&address=' + charity.address +
+            '&contractaddress=' + USDC_ADDRESS +
+            '&sort=desc&page=1&offset=50';
+
+          const resp = await fetch(url);
+          const data = await resp.json();
+
+          if (data.status === '1' && data.result) {
+            // Only include incoming transfers (to = charity wallet)
+            const incoming = data.result.filter(
+              tx => tx.to.toLowerCase() === charity.address.toLowerCase()
+            );
+            incoming.forEach(tx => { tx._charityName = charity.name; });
+            allTxs.push(...incoming);
+          }
+        }
+
+        // Sort by timestamp descending
+        allTxs.sort((a, b) => Number(b.timeStamp) - Number(a.timeStamp));
+
+        // Update stats
+        const totalUsdc = allTxs.reduce((sum, tx) => sum + Number(tx.value), 0);
+        const uniqueDonors = new Set(allTxs.map(tx => tx.from.toLowerCase()));
+
+        document.getElementById('total-donated').textContent = formatUsdc(totalUsdc.toString()) + ' USDC';
+        document.getElementById('total-txs').textContent = allTxs.length.toString();
+        document.getElementById('total-donors').textContent = uniqueDonors.size.toString();
+
+        if (allTxs.length === 0) {
+          content.innerHTML = '<div class="history-empty">No donations yet. Be the first!</div>';
+          return;
+        }
+
+        // Render table
+        let html = '<table class="history-table">';
+        html += '<thead><tr><th>Date</th><th>From</th><th>To</th><th>Amount</th><th>Tx</th></tr></thead>';
+        html += '<tbody>';
+
+        for (const tx of allTxs.slice(0, 25)) {
+          const date = formatDate(Number(tx.timeStamp));
+          const from = shortAddr(tx.from);
+          const charityName = tx._charityName;
+          const amount = formatUsdc(tx.value);
+          const txLink = 'https://sepolia.basescan.org/tx/' + tx.hash;
+
+          html += '<tr>';
+          html += '<td>' + date + '</td>';
+          html += '<td class="mono">' + from + '</td>';
+          html += '<td>' + charityName + '</td>';
+          html += '<td class="amount-cell">' + amount + '</td>';
+          html += '<td><a href="' + txLink + '" target="_blank" rel="noopener">' + shortAddr(tx.hash) + '</a></td>';
+          html += '</tr>';
+        }
+
+        html += '</tbody></table>';
+
+        if (allTxs.length > 25) {
+          html += '<div style="text-align: center; padding: 12px; font-size: 13px; color: var(--text-muted);">Showing 25 of ' + allTxs.length + ' donations</div>';
+        }
+
+        content.innerHTML = html;
+
+      } catch (err) {
+        content.innerHTML = '<div class="history-error">Failed to load donation history. Try refreshing.</div>';
+      } finally {
+        refreshBtn.textContent = 'Refresh';
+        refreshBtn.disabled = false;
+      }
+    }
+
+    // Load history on page load
+    loadHistory();
   </script>
 </body>
 </html>
