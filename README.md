@@ -2,7 +2,7 @@
 
 Embed automatic micro-donations into any payment flow, powered by x402.
 
-Built and maintained by [AllScale Lab](https://github.com/allscale-io).
+Built and maintained by [AllScale Lab](https://allscale.io).
 
 ## What Is This?
 
