@@ -1214,23 +1214,45 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
           throw new Error('Unexpected response: ' + res.status + ' ' + res.statusText);
         }
 
-        // Step 2: Parse x402 payment requirements
-        const requirements = await res.json();
-        const accept = requirements.accepts && requirements.accepts[0];
+        // Step 2: Parse x402 v2 payment requirements from PAYMENT-REQUIRED header
+        const paymentRequiredHeader = res.headers.get('payment-required');
+        if (!paymentRequiredHeader) {
+          throw new Error('No payment-required header in 402 response');
+        }
+        const paymentRequired = JSON.parse(atob(paymentRequiredHeader));
+        const accept = paymentRequired.accepts && paymentRequired.accepts[0];
 
         if (!accept || accept.scheme !== 'exact') {
           throw new Error('Unsupported payment scheme');
         }
 
-        const amountRaw = accept.maxAmountRequired;
-        const amountUSDC = (Number(amountRaw) / 1e6).toFixed(accept.extra?.decimals === 18 ? 18 : 6);
+        const amountUSDC = (Number(accept.amount) / 1e6).toFixed(6);
         showStatus('Sign to pay ' + amountUSDC + ' USDC...', 'pending');
 
         // Step 3: Build EIP-712 typed data for USDC TransferWithAuthorization (EIP-3009)
-        const validBefore = String(Math.floor(Date.now() / 1000) + (accept.maxTimeoutSeconds || 86400));
+        const chainId = accept.network.split(':')[1];
+        const now = Math.floor(Date.now() / 1000);
+        const validAfter = String(now - 600);
+        const validBefore = String(now + (accept.maxTimeoutSeconds || 300));
         const randomBytes = new Uint8Array(32);
         crypto.getRandomValues(randomBytes);
         const nonce = '0x' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+        const domain = {
+          name: accept.extra.name,
+          version: accept.extra.version,
+          chainId: chainId,
+          verifyingContract: accept.asset,
+        };
+
+        const authorization = {
+          from: from,
+          to: accept.payTo,
+          value: accept.amount,
+          validAfter: validAfter,
+          validBefore: validBefore,
+          nonce: nonce,
+        };
 
         const typedData = {
           types: {
@@ -1249,16 +1271,9 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
               { name: 'nonce', type: 'bytes32' },
             ],
           },
-          domain: accept.extra,
+          domain: domain,
           primaryType: 'TransferWithAuthorization',
-          message: {
-            from: from,
-            to: accept.payTo,
-            value: amountRaw,
-            validAfter: '0',
-            validBefore: validBefore,
-            nonce: nonce,
-          },
+          message: authorization,
         };
 
         // Step 4: Sign with browser wallet
@@ -1269,21 +1284,19 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
 
         showStatus('Submitting payment to facilitator...', 'pending');
 
-        // Step 5: Build x402 payment token and retry
-        const payment = {
-          x402Version: requirements.x402Version || 1,
-          scheme: accept.scheme,
-          network: accept.network,
+        // Step 5: Build x402 v2 payment payload and send via PAYMENT-SIGNATURE header
+        const paymentPayload = {
+          x402Version: 2,
           payload: {
             signature: signature,
-            authorization: typedData.message,
+            authorization: authorization,
           },
+          resource: paymentRequired.resource,
+          accepted: accept,
         };
 
-        const paymentHeader = btoa(JSON.stringify(payment));
-
         const paidRes = await fetch(X402_SERVER + '/donate/' + charityId, {
-          headers: { 'X-Payment': paymentHeader },
+          headers: { 'PAYMENT-SIGNATURE': btoa(JSON.stringify(paymentPayload)) },
         });
 
         if (!paidRes.ok) {

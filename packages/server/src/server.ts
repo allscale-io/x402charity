@@ -94,8 +94,8 @@ export function createCharityServer(options: ServerOptions = {}): {
   // CORS — allow the GitHub Pages frontend to call the server
   app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Payment, Content-Type');
-    res.setHeader('Access-Control-Expose-Headers', 'X-Payment');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Payment, PAYMENT-SIGNATURE, Content-Type');
+    res.setHeader('Access-Control-Expose-Headers', 'X-Payment, PAYMENT-REQUIRED, PAYMENT-RESPONSE');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     if (req.method === 'OPTIONS') {
       res.status(204).end();

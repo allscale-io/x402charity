@@ -735,7 +735,7 @@
 
     // --- x402 Donation ---
     async function donateViaX402() {
-      // Step 1: Hit x402 endpoint, get 402 with payment requirements
+      // Step 1: Hit x402 endpoint, get 402 with payment requirements in header
       const res = await fetch(X402_SERVER + '/donate/' + CHARITY_ID);
 
       if (res.ok) {
@@ -747,20 +747,42 @@
         throw new Error('Server returned ' + res.status);
       }
 
-      // Step 2: Parse requirements
-      const requirements = await res.json();
-      const accept = requirements.accepts && requirements.accepts[0];
+      // Step 2: Parse x402 v2 requirements from PAYMENT-REQUIRED header
+      const paymentRequiredHeader = res.headers.get('payment-required');
+      if (!paymentRequiredHeader) {
+        throw new Error('No payment-required header in 402 response');
+      }
+      const paymentRequired = JSON.parse(atob(paymentRequiredHeader));
+      const accept = paymentRequired.accepts && paymentRequired.accepts[0];
       if (!accept || accept.scheme !== 'exact') {
         throw new Error('Unsupported payment scheme');
       }
 
-      const amountRaw = accept.maxAmountRequired;
-
-      // Step 3: Build EIP-712 typed data
-      const validBefore = String(Math.floor(Date.now() / 1000) + (accept.maxTimeoutSeconds || 86400));
+      // Step 3: Build EIP-712 typed data for TransferWithAuthorization (EIP-3009)
+      // The domain needs chainId (from network eip155:XXXXX) and verifyingContract (asset address)
+      const chainId = accept.network.split(':')[1];
+      const now = Math.floor(Date.now() / 1000);
+      const validAfter = String(now - 600);
+      const validBefore = String(now + (accept.maxTimeoutSeconds || 300));
       const randomBytes = new Uint8Array(32);
       crypto.getRandomValues(randomBytes);
       const nonce = '0x' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const domain = {
+        name: accept.extra.name,
+        version: accept.extra.version,
+        chainId: chainId,
+        verifyingContract: accept.asset,
+      };
+
+      const authorization = {
+        from: userAddress,
+        to: accept.payTo,
+        value: accept.amount,
+        validAfter: validAfter,
+        validBefore: validBefore,
+        nonce: nonce,
+      };
 
       const typedData = {
         types: {
@@ -779,39 +801,32 @@
             { name: 'nonce', type: 'bytes32' },
           ],
         },
-        domain: accept.extra,
+        domain: domain,
         primaryType: 'TransferWithAuthorization',
-        message: {
-          from: userAddress,
-          to: accept.payTo,
-          value: amountRaw,
-          validAfter: '0',
-          validBefore: validBefore,
-          nonce: nonce,
-        },
+        message: authorization,
       };
 
-      // Step 4: Sign
+      // Step 4: Sign with browser wallet
       const signature = await window.ethereum.request({
         method: 'eth_signTypedData_v4',
         params: [userAddress, JSON.stringify(typedData)],
       });
 
-      resultBanner.innerHTML = 'Submitting to facilitator...<div class="result-sub">Settling payment on-chain</div>';
+      resultBanner.innerHTML = 'Submitting to facilitator...<div class="result-sub">Settling payment on-chain via x402</div>';
 
-      // Step 5: Send payment
-      const payment = {
-        x402Version: requirements.x402Version || 1,
-        scheme: accept.scheme,
-        network: accept.network,
+      // Step 5: Build x402 v2 payment payload and send via PAYMENT-SIGNATURE header
+      const paymentPayload = {
+        x402Version: 2,
         payload: {
           signature: signature,
-          authorization: typedData.message,
+          authorization: authorization,
         },
+        resource: paymentRequired.resource,
+        accepted: accept,
       };
 
       const paidRes = await fetch(X402_SERVER + '/donate/' + CHARITY_ID, {
-        headers: { 'X-Payment': btoa(JSON.stringify(payment)) },
+        headers: { 'PAYMENT-SIGNATURE': btoa(JSON.stringify(paymentPayload)) },
       });
 
       if (!paidRes.ok) {
