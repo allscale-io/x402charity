@@ -587,6 +587,7 @@
   </footer>
 
   <script>
+    console.log('[x402 demo v3] loaded');
     const X402_SERVER = 'https://x402charity.vercel.app';
     const BASE_SEPOLIA_CHAIN_ID = '0x14a34';
     const CHARITY_ID = 'testing-charity';
@@ -748,23 +749,34 @@
       }
 
       // Step 2: Parse x402 v2 requirements from PAYMENT-REQUIRED header (or body fallback)
+      console.log('[x402] 402 response received');
+      console.log('[x402] Response headers:', [...res.headers.entries()]);
+
       let paymentRequired;
       const paymentRequiredHeader = res.headers.get('payment-required');
+      console.log('[x402] payment-required header:', paymentRequiredHeader ? paymentRequiredHeader.slice(0, 60) + '...' : null);
+
       if (paymentRequiredHeader) {
         paymentRequired = JSON.parse(atob(paymentRequiredHeader));
       } else {
-        // Fallback: try reading from response body (v1 compat or paywall response)
+        // Fallback: try reading from response body
         const body = await res.text();
+        console.log('[x402] Response body:', body.slice(0, 300));
         try {
           paymentRequired = JSON.parse(body);
         } catch (e) {
-          throw new Error('Cannot parse 402 response. Header missing and body is not JSON.');
+          throw new Error('Cannot parse 402 response. Header missing, body: ' + body.slice(0, 100));
         }
       }
+
+      console.log('[x402] Parsed payment requirements:', JSON.stringify(paymentRequired).slice(0, 300));
+
       const accept = paymentRequired.accepts && paymentRequired.accepts[0];
       if (!accept || accept.scheme !== 'exact') {
+        console.error('[x402] No valid accept found. paymentRequired:', paymentRequired);
         throw new Error('Unsupported payment scheme. Got: ' + JSON.stringify(paymentRequired).slice(0, 200));
       }
+      console.log('[x402] Using payment option:', accept);
 
       // Step 3: Build EIP-712 typed data for TransferWithAuthorization (EIP-3009)
       // The domain needs chainId (from network eip155:XXXXX) and verifyingContract (asset address)
