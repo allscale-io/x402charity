@@ -747,15 +747,23 @@
         throw new Error('Server returned ' + res.status);
       }
 
-      // Step 2: Parse x402 v2 requirements from PAYMENT-REQUIRED header
+      // Step 2: Parse x402 v2 requirements from PAYMENT-REQUIRED header (or body fallback)
+      let paymentRequired;
       const paymentRequiredHeader = res.headers.get('payment-required');
-      if (!paymentRequiredHeader) {
-        throw new Error('No payment-required header in 402 response');
+      if (paymentRequiredHeader) {
+        paymentRequired = JSON.parse(atob(paymentRequiredHeader));
+      } else {
+        // Fallback: try reading from response body (v1 compat or paywall response)
+        const body = await res.text();
+        try {
+          paymentRequired = JSON.parse(body);
+        } catch (e) {
+          throw new Error('Cannot parse 402 response. Header missing and body is not JSON.');
+        }
       }
-      const paymentRequired = JSON.parse(atob(paymentRequiredHeader));
       const accept = paymentRequired.accepts && paymentRequired.accepts[0];
       if (!accept || accept.scheme !== 'exact') {
-        throw new Error('Unsupported payment scheme');
+        throw new Error('Unsupported payment scheme. Got: ' + JSON.stringify(paymentRequired).slice(0, 200));
       }
 
       // Step 3: Build EIP-712 typed data for TransferWithAuthorization (EIP-3009)

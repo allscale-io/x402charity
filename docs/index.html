@@ -1214,16 +1214,23 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
           throw new Error('Unexpected response: ' + res.status + ' ' + res.statusText);
         }
 
-        // Step 2: Parse x402 v2 payment requirements from PAYMENT-REQUIRED header
+        // Step 2: Parse x402 v2 payment requirements from PAYMENT-REQUIRED header (or body fallback)
+        let paymentRequired;
         const paymentRequiredHeader = res.headers.get('payment-required');
-        if (!paymentRequiredHeader) {
-          throw new Error('No payment-required header in 402 response');
+        if (paymentRequiredHeader) {
+          paymentRequired = JSON.parse(atob(paymentRequiredHeader));
+        } else {
+          const body = await res.text();
+          try {
+            paymentRequired = JSON.parse(body);
+          } catch (e) {
+            throw new Error('Cannot parse 402 response. Header missing and body is not JSON.');
+          }
         }
-        const paymentRequired = JSON.parse(atob(paymentRequiredHeader));
         const accept = paymentRequired.accepts && paymentRequired.accepts[0];
 
         if (!accept || accept.scheme !== 'exact') {
-          throw new Error('Unsupported payment scheme');
+          throw new Error('Unsupported payment scheme. Got: ' + JSON.stringify(paymentRequired).slice(0, 200));
         }
 
         const amountUSDC = (Number(accept.amount) / 1e6).toFixed(6);
