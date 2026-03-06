@@ -1,0 +1,7 @@
+{
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm --filter @x402charity/core build && pnpm --filter @x402charity/server build",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api" }
+  ]
+}

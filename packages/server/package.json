@@ -1,9 +1,12 @@
 {
-  "name": "@x402charity/core",
+  "name": "@x402charity/server",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "x402charity-server": "./bin/server.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -12,37 +15,28 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "start": "node bin/server.js"
   },
   "dependencies": {
+    "@x402charity/core": "workspace:*",
     "@x402/core": "^2.5.0",
     "@x402/evm": "^2.5.0",
-    "@x402/fetch": "^2.5.0",
-    "viem": "^2.21.0"
+    "@x402/express": "^2.5.0",
+    "express": "^4.21.0"
   },
   "devDependencies": {
+    "@types/express": "^4.17.0",
     "@types/node": "^25.3.3",
     "typescript": "^5.4.0"
   },
-  "keywords": [
-    "x402",
-    "charity",
-    "donation",
-    "micropayments",
-    "usdc",
-    "base",
-    "stablecoin",
-    "web3",
-    "crypto",
-    "payments",
-    "http-402",
-    "blockchain"
-  ],
+  "description": "x402-gated charity donation server — host payment endpoints for registered charities",
+  "keywords": ["x402", "charity", "donation", "server", "express", "usdc", "base", "web3"],
   "homepage": "https://x402charity.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/allscale-io/x402charity.git",
-    "directory": "packages/core"
+    "directory": "packages/server"
   },
   "license": "MIT"
 }

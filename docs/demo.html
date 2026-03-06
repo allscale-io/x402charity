@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>x402 Charity — Coin Flip Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #111111;
+      --surface-hover: #1a1a1a;
+      --border: #222222;
+      --text: #ffffff;
+      --text-muted: #888888;
+      --accent: #20F58E;
+      --accent-hover: #1ad97d;
+      --accent-dim: rgba(32, 245, 142, 0.12);
+      --red: #ff4d4d;
+      --gold: #ffd700;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .container {
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    /* Header */
+    header {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .header-brand img { height: 22px; width: auto; }
+
+    .header-brand span {
+      font-family: 'Manrope', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    header nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    header nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    header nav a:hover { color: var(--text); }
+    header nav a.active { color: var(--accent); }
+
+    /* Main */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 24px 40px;
+    }
+
+    .game-title {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .game-title h2 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .game-title h2 span { color: var(--accent); }
+
+    .game-subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+      text-align: center;
+      margin-bottom: 40px;
+      max-width: 480px;
+    }
+
+    /* Connect card */
+    .connect-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .connect-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 28px;
+      border-radius: 24px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      text-decoration: none;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { border-color: var(--text-muted); }
+
+    .connect-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    .connect-hint a { color: var(--accent); }
+
+    .connect-error {
+      color: var(--red);
+      font-size: 13px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    /* Game area */
+    .game-area {
+      max-width: 480px;
+      width: 100%;
+      display: none;
+    }
+
+    .wallet-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 32px;
+      font-size: 13px;
+    }
+
+    .wallet-bar .addr {
+      font-family: 'Inconsolata', monospace;
+      color: var(--accent);
+    }
+
+    .network-badge {
+      font-size: 11px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 24px;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+
+    .disconnect-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 24px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 600;
+    }
+
+    .disconnect-btn:hover { border-color: var(--text-muted); }
+
+    /* Coin */
+    .coin-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .coin {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffd700 0%, #ffaa00 50%, #ffd700 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      box-shadow: 0 4px 24px rgba(255, 215, 0, 0.2), inset 0 -4px 8px rgba(0,0,0,0.2);
+      transition: transform 0.1s;
+      user-select: none;
+      position: relative;
+    }
+
+    .coin.flipping {
+      animation: coinFlip 0.6s ease-in-out;
+    }
+
+    @keyframes coinFlip {
+      0% { transform: rotateY(0deg) scale(1); }
+      50% { transform: rotateY(900deg) scale(1.1); }
+      100% { transform: rotateY(1800deg) scale(1); }
+    }
+
+    .coin.win {
+      box-shadow: 0 4px 40px rgba(32, 245, 142, 0.4), inset 0 -4px 8px rgba(0,0,0,0.2);
+    }
+
+    .coin.lose {
+      box-shadow: 0 4px 40px rgba(255, 77, 77, 0.3), inset 0 -4px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Pick buttons */
+    .pick-section {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .pick-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .pick-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .pick-btn {
+      width: 120px;
+      padding: 14px 0;
+      border-radius: 12px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+
+    .pick-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .pick-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .pick-btn:disabled:hover {
+      border-color: var(--border);
+      background: var(--surface);
+    }
+
+    /* Result */
+    .result-banner {
+      text-align: center;
+      padding: 16px;
+      border-radius: 12px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    .result-banner.win {
+      background: rgba(32, 245, 142, 0.1);
+      border: 1px solid rgba(32, 245, 142, 0.3);
+      color: var(--accent);
+      display: block;
+    }
+
+    .result-banner.lose {
+      background: rgba(255, 77, 77, 0.1);
+      border: 1px solid rgba(255, 77, 77, 0.3);
+      color: var(--red);
+      display: block;
+    }
+
+    .result-banner.donating {
+      background: rgba(32, 245, 142, 0.06);
+      border: 1px solid rgba(32, 245, 142, 0.15);
+      color: var(--accent);
+      display: block;
+    }
+
+    .result-banner.error {
+      background: rgba(255, 77, 77, 0.1);
+      border: 1px solid rgba(255, 77, 77, 0.3);
+      color: var(--red);
+      display: block;
+    }
+
+    .result-sub {
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Scoreboard */
+    .scoreboard {
+      display: flex;
+      gap: 1px;
+      background: var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .score-item {
+      flex: 1;
+      background: var(--surface);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .score-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .score-value {
+      font-family: 'Manrope', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .score-value.green { color: var(--accent); }
+    .score-value.red { color: var(--red); }
+
+    /* Log */
+    .log-section {
+      margin-top: 8px;
+    }
+
+    .log-header {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .log-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      padding: 10px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .log-entry:last-child { border-bottom: none; }
+
+    .log-entry .icon { margin-right: 8px; }
+    .log-entry .text { flex: 1; }
+    .log-entry .detail {
+      font-family: 'Inconsolata', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .log-empty {
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-brand { display: flex; align-items: center; gap: 8px; }
+
+    @media (max-width: 600px) {
+      .game-title h2 { font-size: 28px; }
+      .coin { width: 110px; height: 110px; font-size: 44px; }
+      header nav { gap: 14px; }
+      header nav a { font-size: 12px; }
+      .footer-content { flex-direction: column; gap: 12px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="header-brand">
+        <img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale">
+        <span>x402 Charity</span>
+      </a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/use-cases">Use Cases</a>
+        <a href="/demo" class="active">Demo</a>
+        <a href="https://github.com/allscale-io/x402charity">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="game-title">
+      <h2>Flip a Coin, <span>Fund a Cause</span></h2>
+    </div>
+    <p class="game-subtitle">Pick heads or tails. Win the flip and $0.01 USDC is donated to charity automatically via x402.</p>
+
+    <!-- Connect -->
+    <div class="connect-card" id="connect-card">
+      <p>Connect your wallet on Base Sepolia to play</p>
+      <div class="connect-error" id="connect-error"></div>
+      <button class="btn btn-primary" id="connect-btn">Connect Wallet</button>
+      <p class="connect-hint">
+        Requires <a href="https://metamask.io/download/" target="_blank">MetaMask</a> or a compatible wallet
+      </p>
+    </div>
+
+    <!-- Game -->
+    <div class="game-area" id="game-area">
+      <div class="wallet-bar">
+        <div>
+          <span class="addr" id="wallet-addr"></span>
+          <span class="network-badge">Base Sepolia</span>
+        </div>
+        <button class="disconnect-btn" id="disconnect-btn">Disconnect</button>
+      </div>
+
+      <div class="scoreboard">
+        <div class="score-item">
+          <div class="score-label">Wins</div>
+          <div class="score-value green" id="wins">0</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Losses</div>
+          <div class="score-value red" id="losses">0</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Donated</div>
+          <div class="score-value green" id="donated">$0.00</div>
+        </div>
+      </div>
+
+      <div class="coin-container">
+        <div class="coin" id="coin">?</div>
+      </div>
+
+      <div class="pick-section">
+        <div class="pick-label">Your call</div>
+        <div class="pick-buttons">
+          <button class="pick-btn" id="pick-heads" data-pick="heads">Heads</button>
+          <button class="pick-btn" id="pick-tails" data-pick="tails">Tails</button>
+        </div>
+      </div>
+
+      <div class="result-banner" id="result"></div>
+
+      <div class="log-section">
+        <div class="log-header">Game log</div>
+        <div class="log-list" id="log-list">
+          <div class="log-empty">No flips yet. Pick heads or tails to play!</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <span>Built by</span>
+          <a href="https://allscale.io" target="_blank" rel="noopener">
+            <img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale" style="height: 16px; opacity: 0.6;">
+          </a>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/allscale-io/x402charity">GitHub</a>
+          <a href="https://www.npmjs.com/package/x402charity">npm</a>
+          <a href="https://allscale.io">AllScale</a>
+        </div>
+        <div>MIT License</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const X402_SERVER = 'https://x402charity.vercel.app';
+    const BASE_SEPOLIA_CHAIN_ID = '0x14a34';
+    const CHARITY_ID = 'testing-charity';
+
+    let wins = 0, losses = 0, totalDonated = 0;
+    let userAddress = null;
+    let flipping = false;
+
+    const connectCard = document.getElementById('connect-card');
+    const gameArea = document.getElementById('game-area');
+    const connectBtn = document.getElementById('connect-btn');
+    const connectError = document.getElementById('connect-error');
+    const walletAddr = document.getElementById('wallet-addr');
+    const coin = document.getElementById('coin');
+    const resultBanner = document.getElementById('result');
+    const logList = document.getElementById('log-list');
+
+    // --- Connect ---
+    connectBtn.addEventListener('click', async () => {
+      connectError.style.display = 'none';
+
+      if (typeof window.ethereum === 'undefined') {
+        connectError.textContent = 'No wallet detected. Install MetaMask to play.';
+        connectError.style.display = 'block';
+        return;
+      }
+
+      connectBtn.textContent = 'Connecting...';
+      connectBtn.disabled = true;
+
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        if (!accounts || accounts.length === 0) {
+          connectError.textContent = 'No accounts found.';
+          connectError.style.display = 'block';
+          return;
+        }
+
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: BASE_SEPOLIA_CHAIN_ID }],
+          });
+        } catch (e) {
+          if (e.code === 4902) {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: BASE_SEPOLIA_CHAIN_ID,
+                chainName: 'Base Sepolia',
+                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                rpcUrls: ['https://sepolia.base.org'],
+                blockExplorerUrls: ['https://sepolia.basescan.org'],
+              }],
+            });
+          } else {
+            connectError.textContent = 'Please switch to Base Sepolia.';
+            connectError.style.display = 'block';
+            return;
+          }
+        }
+
+        userAddress = accounts[0];
+        walletAddr.textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+        connectCard.style.display = 'none';
+        gameArea.style.display = 'block';
+      } catch (err) {
+        connectError.textContent = err.code === 4001
+          ? 'Connection rejected.'
+          : 'Failed: ' + err.message;
+        connectError.style.display = 'block';
+      } finally {
+        connectBtn.textContent = 'Connect Wallet';
+        connectBtn.disabled = false;
+      }
+    });
+
+    document.getElementById('disconnect-btn').addEventListener('click', () => {
+      userAddress = null;
+      connectCard.style.display = 'block';
+      gameArea.style.display = 'none';
+      connectError.style.display = 'none';
+    });
+
+    // --- Game ---
+    document.querySelectorAll('.pick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (flipping) return;
+        flip(btn.dataset.pick);
+      });
+    });
+
+    async function flip(pick) {
+      flipping = true;
+      document.querySelectorAll('.pick-btn').forEach(b => b.disabled = true);
+      resultBanner.className = 'result-banner';
+      resultBanner.style.display = 'none';
+
+      // Animate coin
+      coin.className = 'coin flipping';
+      coin.textContent = '?';
+
+      // Wait for animation
+      await sleep(700);
+
+      // Resolve flip
+      const outcome = Math.random() < 0.5 ? 'heads' : 'tails';
+      const won = pick === outcome;
+
+      coin.className = 'coin ' + (won ? 'win' : 'lose');
+      coin.textContent = outcome === 'heads' ? 'H' : 'T';
+
+      if (won) {
+        wins++;
+        document.getElementById('wins').textContent = wins;
+        resultBanner.innerHTML = 'You won! Donating $0.01 USDC...<div class="result-sub">Signing x402 payment</div>';
+        resultBanner.className = 'result-banner donating';
+
+        addLog('win', 'Won the flip (' + pick + ')', 'donating...');
+
+        try {
+          const txHash = await donateViaX402();
+          totalDonated += 0.01;
+          document.getElementById('donated').textContent = '$' + totalDonated.toFixed(2);
+
+          const shortTx = txHash ? txHash.slice(0, 10) + '...' : 'confirmed';
+          resultBanner.innerHTML = 'Donated $0.01 USDC to charity!<div class="result-sub">Settled via x402 protocol</div>';
+          resultBanner.className = 'result-banner win';
+          updateLastLog('win', 'Donated $0.01 USDC', shortTx);
+        } catch (err) {
+          resultBanner.innerHTML = 'Won, but donation failed<div class="result-sub">' + escapeHtml(err.message) + '</div>';
+          resultBanner.className = 'result-banner error';
+          updateLastLog('error', 'Donation failed: ' + err.message, '');
+        }
+      } else {
+        losses++;
+        document.getElementById('losses').textContent = losses;
+        resultBanner.innerHTML = 'It was ' + outcome + '. Try again!';
+        resultBanner.className = 'result-banner lose';
+        addLog('lose', 'Lost (' + pick + ' vs ' + outcome + ')', '');
+      }
+
+      flipping = false;
+      document.querySelectorAll('.pick-btn').forEach(b => b.disabled = false);
+    }
+
+    // --- x402 Donation ---
+    async function donateViaX402() {
+      // Step 1: Hit x402 endpoint, get 402 with payment requirements
+      const res = await fetch(X402_SERVER + '/donate/' + CHARITY_ID);
+
+      if (res.ok) {
+        const data = await res.json();
+        return data.txHash || '';
+      }
+
+      if (res.status !== 402) {
+        throw new Error('Server returned ' + res.status);
+      }
+
+      // Step 2: Parse requirements
+      const requirements = await res.json();
+      const accept = requirements.accepts && requirements.accepts[0];
+      if (!accept || accept.scheme !== 'exact') {
+        throw new Error('Unsupported payment scheme');
+      }
+
+      const amountRaw = accept.maxAmountRequired;
+
+      // Step 3: Build EIP-712 typed data
+      const validBefore = String(Math.floor(Date.now() / 1000) + (accept.maxTimeoutSeconds || 86400));
+      const randomBytes = new Uint8Array(32);
+      crypto.getRandomValues(randomBytes);
+      const nonce = '0x' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const typedData = {
+        types: {
+          EIP712Domain: [
+            { name: 'name', type: 'string' },
+            { name: 'version', type: 'string' },
+            { name: 'chainId', type: 'uint256' },
+            { name: 'verifyingContract', type: 'address' },
+          ],
+          TransferWithAuthorization: [
+            { name: 'from', type: 'address' },
+            { name: 'to', type: 'address' },
+            { name: 'value', type: 'uint256' },
+            { name: 'validAfter', type: 'uint256' },
+            { name: 'validBefore', type: 'uint256' },
+            { name: 'nonce', type: 'bytes32' },
+          ],
+        },
+        domain: accept.extra,
+        primaryType: 'TransferWithAuthorization',
+        message: {
+          from: userAddress,
+          to: accept.payTo,
+          value: amountRaw,
+          validAfter: '0',
+          validBefore: validBefore,
+          nonce: nonce,
+        },
+      };
+
+      // Step 4: Sign
+      const signature = await window.ethereum.request({
+        method: 'eth_signTypedData_v4',
+        params: [userAddress, JSON.stringify(typedData)],
+      });
+
+      resultBanner.innerHTML = 'Submitting to facilitator...<div class="result-sub">Settling payment on-chain</div>';
+
+      // Step 5: Send payment
+      const payment = {
+        x402Version: requirements.x402Version || 1,
+        scheme: accept.scheme,
+        network: accept.network,
+        payload: {
+          signature: signature,
+          authorization: typedData.message,
+        },
+      };
+
+      const paidRes = await fetch(X402_SERVER + '/donate/' + CHARITY_ID, {
+        headers: { 'X-Payment': btoa(JSON.stringify(payment)) },
+      });
+
+      if (!paidRes.ok) {
+        const body = await paidRes.text().catch(() => '');
+        throw new Error('Payment rejected (' + paidRes.status + '): ' + (body || paidRes.statusText));
+      }
+
+      const data = await paidRes.json();
+      return data.txHash || data.transaction || '';
+    }
+
+    // --- Log ---
+    let logEntries = [];
+
+    function addLog(type, text, detail) {
+      const icons = { win: '\u2705', lose: '\u274C', error: '\u26A0\uFE0F' };
+      logEntries.unshift({ type, text, detail, icon: icons[type] || '' });
+      renderLog();
+    }
+
+    function updateLastLog(type, text, detail) {
+      const icons = { win: '\u2705', lose: '\u274C', error: '\u26A0\uFE0F' };
+      if (logEntries.length > 0) {
+        logEntries[0] = { type, text, detail, icon: icons[type] || '' };
+        renderLog();
+      }
+    }
+
+    function renderLog() {
+      if (logEntries.length === 0) {
+        logList.innerHTML = '<div class="log-empty">No flips yet. Pick heads or tails to play!</div>';
+        return;
+      }
+      logList.innerHTML = logEntries.slice(0, 20).map(e =>
+        '<div class="log-entry">' +
+          '<span class="icon">' + e.icon + '</span>' +
+          '<span class="text">' + escapeHtml(e.text) + '</span>' +
+          (e.detail ? '<span class="detail">' + escapeHtml(e.detail) + '</span>' : '') +
+        '</div>'
+      ).join('');
+    }
+
+    // --- Utils ---
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

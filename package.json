@@ -1,6 +1,7 @@
 {
   "name": "x402charity-monorepo",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "pnpm -r build",
     "clean": "pnpm -r clean"

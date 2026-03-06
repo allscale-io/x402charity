@@ -12,6 +12,7 @@ const FALLBACK_CHARITIES: Charity[] = [
     chain: 'base-sepolia',
     verified: false,
     category: 'testing',
+    x402Endpoint: 'http://localhost:3402/donate/testing-charity',
   },
 ];
 

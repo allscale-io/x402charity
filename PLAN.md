@@ -65,22 +65,39 @@ x402charity/
 
 ## Development Phases
 
-### Phase 1 — Core + CLI (Start here)
-- **`packages/core`** — Build the donation client that wraps x402 payments. Config a cause, an amount, call `donate()`. That's it.
-- **`packages/cli`** — `npx x402charity donate <cause> <amount>` — lets anyone donate from terminal
-- **`registry/charities.json`** — Seed with a few test charities, define the schema (name, wallet address, chain, description, verified status)
+### Phase 1 — Core + CLI ✅
+- **`packages/core`** — Donation client with ERC-20 USDC transfers via viem (balance check, simulate, send, verify receipt)
+- **`packages/cli`** — `npx x402charity donate <cause> <amount>` — donate from terminal, plus `list` and `config` commands
+- **`registry/charities.json`** — Seed with test charities, define the schema (name, wallet address, chain, description, verified status)
 
-### Phase 2 — Middleware
-- **`packages/express`** — Express middleware so any Node app can `app.use(x402charity(...))` and auto-donate on routes
-- **`packages/next`** — Same for Next.js apps
+### Phase 2 — Middleware ✅
+- **`packages/express`** — Express middleware: `app.use(x402charity(...))` auto-donates on routes
+- **`packages/next`** — Next.js middleware with path-based matching
 - Follows the same pattern as `@x402/express` and `@x402/next` from Coinbase's repo
 
-### Phase 3 — Registry & Discovery
+### Phase 3 — x402 Protocol Integration ← **current**
+Right now `packages/core` sends donations as direct ERC-20 transfers. This phase replaces that with the actual x402 protocol so donations flow through the standard HTTP 402 payment mechanism.
+
+- **Charity endpoints as x402 resource servers** — Each charity exposes an HTTP endpoint that returns `402 Payment Required` with payment details (amount, recipient address, facilitator URL, supported assets)
+- **Facilitator integration** — Use a Coinbase x402 facilitator (or self-hosted) to verify and settle payments. The client sends a signed payment payload to the facilitator, which validates it and submits the on-chain transfer
+- **Client-side x402 flow in `packages/core`**:
+  1. Client requests the charity's donation endpoint
+  2. Server responds with `402` + `X-Payment` header containing payment requirements
+  3. Client constructs and signs a payment payload (EIP-712 typed data)
+  4. Client retries the request with the signed payment in the `X-Payment` header
+  5. Facilitator settles the USDC transfer on-chain
+  6. Charity endpoint returns `200` with donation receipt
+- **Update middleware** — Express and Next.js middleware trigger the x402 flow instead of raw `writeContract` calls
+- **Fallback mode** — Keep direct ERC-20 transfer as a fallback for charities that don't run an x402 endpoint yet
+- **`specs/x402charity-spec.md`** — Document the charity endpoint spec: required headers, payment schema, facilitator requirements
+
+### Phase 4 — Registry & Discovery
 - Turn `charities.json` into a queryable API or x402 Bazaar-compatible endpoint
+- Each charity entry includes its x402 endpoint URL alongside wallet address
 - Let nonprofits submit PRs to add themselves (like how `awesome-x402` works)
 - Add verification flow (proof of nonprofit status)
 
-### Phase 4 — Ecosystem
+### Phase 5 — Ecosystem
 - **Dashboard** — web UI showing total donations, leaderboard of projects, per-charity stats
 - **MCP server** — so AI agents can discover and donate to charities via MCP
 - **Hooks** — Webhooks/callbacks so charities get notified on donations

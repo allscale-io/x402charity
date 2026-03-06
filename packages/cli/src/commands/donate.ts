@@ -22,7 +22,7 @@ export const donateCommand = new Command('donate')
       console.log('Donation successful!\n');
       console.log(`  Charity:  ${receipt.charity.name}`);
       console.log(`  Amount:   ${receipt.amount} ${receipt.currency}`);
-      console.log(`  Tx Hash:  ${receipt.txHash}`);
+      if (receipt.txHash) console.log(`  Tx Hash:  ${receipt.txHash}`);
       console.log(`  Chain:    ${receipt.chain}`);
       console.log(`  From:     ${receipt.from}`);
       console.log(`  To:       ${receipt.to}\n`);

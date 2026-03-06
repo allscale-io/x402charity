@@ -7,6 +7,8 @@ export interface Charity {
   verified: boolean;
   website?: string;
   category?: string;
+  /** x402-gated donation endpoint URL. */
+  x402Endpoint: string;
 }
 
 export interface DonationReceipt {
@@ -18,6 +20,4 @@ export interface DonationReceipt {
   chain: string;
   charity: Charity;
   timestamp: number;
-  blockNumber: number;
-  gasUsed: string;
 }

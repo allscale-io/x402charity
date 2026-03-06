@@ -7,7 +7,8 @@
       "walletAddress": "0x8DC1521132381aAB648e067c2Db3677D5BF70c6d",
       "chain": "base-sepolia",
       "verified": false,
-      "category": "testing"
+      "category": "testing",
+      "x402Endpoint": "http://localhost:3402/donate/testing-charity"
     }
   ]
 }

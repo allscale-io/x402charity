@@ -1,40 +1,17 @@
 import {
   createWalletClient,
-  createPublicClient,
   http,
-  parseUnits,
-  formatUnits,
-  type Address,
+  publicActions,
   type Chain,
-  type PublicClient,
-  type WalletClient,
-  type HttpTransport,
 } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts';
-import { USDC_ADDRESSES, USDC_DECIMALS, RPC_URLS } from './config.js';
+import { x402Client } from '@x402/core/client';
+import { ExactEvmScheme, toClientEvmSigner } from '@x402/evm';
+import { wrapFetchWithPayment } from '@x402/fetch';
+import { RPC_URLS, CAIP2_CHAIN_IDS } from './config.js';
 import { findCharity } from './registry.js';
 import type { DonationReceipt } from './types.js';
-
-const ERC20_ABI = [
-  {
-    name: 'transfer',
-    type: 'function',
-    inputs: [
-      { name: 'to', type: 'address' },
-      { name: 'amount', type: 'uint256' },
-    ],
-    outputs: [{ name: '', type: 'bool' }],
-    stateMutability: 'nonpayable',
-  },
-  {
-    name: 'balanceOf',
-    type: 'function',
-    inputs: [{ name: 'account', type: 'address' }],
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-] as const;
 
 const CHAINS: Record<string, Chain> = {
   base,
@@ -48,10 +25,8 @@ export interface ClientOptions {
 
 export class X402CharityClient {
   private network: 'base' | 'base-sepolia';
-  private chain: Chain;
   private account: PrivateKeyAccount;
-  private walletClient: WalletClient<HttpTransport, Chain, PrivateKeyAccount>;
-  private publicClient: PublicClient<HttpTransport, Chain>;
+  private paymentFetch: typeof globalThis.fetch;
 
   constructor(options: ClientOptions) {
     const privateKey = (
@@ -60,17 +35,26 @@ export class X402CharityClient {
         : `0x${options.privateKey}`
     ) as `0x${string}`;
     this.network = options.network || 'base-sepolia';
-    this.chain = CHAINS[this.network];
-
+    const chain = CHAINS[this.network];
     const transport = http(RPC_URLS[this.network]);
 
     this.account = privateKeyToAccount(privateKey);
-    this.walletClient = createWalletClient({
+
+    const viemClient = createWalletClient({
       account: this.account,
-      chain: this.chain,
+      chain,
       transport,
+    }).extend(publicActions);
+
+    const evmSigner = toClientEvmSigner({
+      address: this.account.address,
+      signTypedData: (msg) => viemClient.signTypedData(msg as Parameters<typeof viemClient.signTypedData>[0]),
+      readContract: (args) => viemClient.readContract(args as Parameters<typeof viemClient.readContract>[0]),
     });
-    this.publicClient = createPublicClient({ chain: this.chain, transport });
+
+    const caip2 = CAIP2_CHAIN_IDS[this.network] as `${string}:${string}`;
+    const client = new x402Client().register(caip2, new ExactEvmScheme(evmSigner));
+    this.paymentFetch = wrapFetchWithPayment(globalThis.fetch, client);
   }
 
   async donate(causeId: string, amount: string): Promise<DonationReceipt> {
@@ -81,43 +65,27 @@ export class X402CharityClient {
       );
     }
 
-    const usdcAddress = USDC_ADDRESSES[this.network];
-    const parsedAmount = parseUnits(amount, USDC_DECIMALS);
-    const recipient = charity.walletAddress as Address;
+    const url = new URL(charity.x402Endpoint);
+    url.searchParams.set('amount', amount);
 
-    // Check USDC balance before attempting transfer
-    const balance = await this.publicClient.readContract({
-      address: usdcAddress,
-      abi: ERC20_ABI,
-      functionName: 'balanceOf',
-      args: [this.account.address],
-    });
+    const response = await this.paymentFetch(url.toString());
 
-    if (balance < parsedAmount) {
+    if (!response.ok) {
+      const body = await response.text().catch(() => '');
       throw new Error(
-        `Insufficient USDC balance: have ${formatUnits(balance, USDC_DECIMALS)}, need ${amount}`,
+        `x402 donation failed (${response.status}): ${body || response.statusText}`,
       );
     }
 
-    // Simulate first to catch reverts before sending a real transaction
-    const { request } = await this.publicClient.simulateContract({
-      account: this.account,
-      address: usdcAddress,
-      abi: ERC20_ABI,
-      functionName: 'transfer',
-      args: [recipient, parsedAmount],
-    });
-
-    const txHash = await this.walletClient.writeContract(request);
-
-    const receipt = await this.publicClient.waitForTransactionReceipt({ hash: txHash });
-
-    if (receipt.status === 'reverted') {
-      throw new Error(`Transaction reverted: ${txHash}`);
+    let responseData: Record<string, string> = {};
+    try {
+      responseData = await response.json() as Record<string, string>;
+    } catch {
+      // Endpoint may not return JSON
     }
 
     return {
-      txHash,
+      txHash: responseData.txHash || responseData.transaction || '',
       from: this.account.address,
       to: charity.walletAddress,
       amount,
@@ -125,8 +93,6 @@ export class X402CharityClient {
       chain: this.network,
       charity,
       timestamp: Date.now(),
-      blockNumber: Number(receipt.blockNumber),
-      gasUsed: receipt.gasUsed.toString(),
     };
   }
 }

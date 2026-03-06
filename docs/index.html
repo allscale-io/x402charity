@@ -772,6 +772,7 @@
       <nav>
         <a href="#get-started">Get Started</a>
         <a href="/use-cases">Use Cases</a>
+        <a href="/demo">Demo</a>
         <a href="#try-it">Try It</a>
         <a href="#history">History</a>
         <a href="https://github.com/allscale-io/x402charity">GitHub</a>
@@ -961,7 +962,7 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
     <!-- Try it -->
     <section class="donate-section" id="try-it">
       <h3>Try It Now</h3>
-      <p class="subtitle">Connect your wallet and make a test donation on Base Sepolia</p>
+      <p class="subtitle">Connect your wallet and donate via the x402 protocol on Base Sepolia</p>
 
       <div class="donate-card">
         <div id="wallet-status"></div>
@@ -986,17 +987,11 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
           <div class="form-group">
             <label>Charity</label>
             <select id="charity-select">
-              <option value="0x8DC1521132381aAB648e067c2Db3677D5BF70c6d">Testing Charity</option>
+              <option value="testing-charity">Testing Charity</option>
             </select>
-            <div id="charity-address" style="margin-top: 6px; font-size: 12px; color: var(--text-muted); font-family: 'Inconsolata', monospace; word-break: break-all;">0x8DC1521132381aAB648e067c2Db3677D5BF70c6d</div>
           </div>
 
-          <div class="form-group">
-            <label>Amount (USDC)</label>
-            <input type="text" id="amount-input" value="0.0001" placeholder="0.0001">
-          </div>
-
-          <button id="donate-btn" class="btn">Donate</button>
+          <button id="donate-btn" class="btn">Donate via x402</button>
 
           <div id="status" class="status"></div>
         </div>
@@ -1085,11 +1080,9 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
       });
     }
 
-    // Wallet + Donate
+    // Wallet + Donate via x402
     const BASE_SEPOLIA_CHAIN_ID = '0x14a34';
-    const USDC_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
-    const USDC_DECIMALS = 6;
-    const TRANSFER_ABI = 'a9059cbb';
+    const X402_SERVER = 'https://x402charity.vercel.app';
 
     const connectBtn = document.getElementById('connect-btn');
     const donateBtn = document.getElementById('donate-btn');
@@ -1097,7 +1090,6 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
     const donateForm = document.getElementById('donate-form');
     const walletAddress = document.getElementById('wallet-address');
     const charitySelect = document.getElementById('charity-select');
-    const amountInput = document.getElementById('amount-input');
     const statusDiv = document.getElementById('status');
 
     function showStatus(message, type) {
@@ -1105,28 +1097,32 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
       statusDiv.className = 'status ' + type;
     }
 
-    function padHex(hex, length) {
-      return hex.replace('0x', '').padStart(length, '0');
-    }
-
-    function amountToHex(amount) {
-      const parts = amount.split('.');
-      const decimals = parts[1] ? parts[1].length : 0;
-      const missingDecimals = USDC_DECIMALS - decimals;
-      const intStr = parts.join('') + '0'.repeat(Math.max(0, missingDecimals));
-      return BigInt(intStr).toString(16);
-    }
-
-    const charityAddress = document.getElementById('charity-address');
-    charitySelect.addEventListener('change', () => {
-      charityAddress.textContent = charitySelect.value;
-    });
-
     const connectError = document.getElementById('connect-error');
     function showConnectError(message) {
       connectError.textContent = message;
       connectError.className = 'status error';
     }
+
+    // Load charities from the x402 server
+    async function loadCharities() {
+      try {
+        const res = await fetch(X402_SERVER + '/charities');
+        if (!res.ok) return;
+        const charities = await res.json();
+        if (Array.isArray(charities) && charities.length > 0) {
+          charitySelect.innerHTML = '';
+          charities.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.name;
+            charitySelect.appendChild(opt);
+          });
+        }
+      } catch (e) {
+        // Server not reachable — keep default options
+      }
+    }
+    loadCharities();
 
     connectBtn.addEventListener('click', async () => {
       connectError.style.display = 'none';
@@ -1171,21 +1167,6 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
           }
         }
 
-        try {
-          await window.ethereum.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: USDC_ADDRESS,
-                symbol: 'USDC',
-                decimals: USDC_DECIMALS,
-                image: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png',
-              },
-            },
-          });
-        } catch (e) {}
-
         walletAddress.textContent = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
         connectSection.style.display = 'none';
         donateForm.style.display = 'block';
@@ -1210,38 +1191,121 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
     });
 
     donateBtn.addEventListener('click', async () => {
-      const to = charitySelect.value;
-      const amount = amountInput.value;
-
-      if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-        showStatus('Please enter a valid amount.', 'error');
-        return;
-      }
-
+      const charityId = charitySelect.value;
       donateBtn.disabled = true;
-      showStatus('Sending donation...', 'pending');
+      showStatus('Requesting payment details via x402...', 'pending');
 
       try {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        const from = accounts[0];
 
-        const amountHex = padHex('0x' + amountToHex(amount), 64);
-        const toHex = padHex(to, 64);
-        const data = '0x' + TRANSFER_ABI + toHex + amountHex;
+        // Step 1: Hit the x402-gated endpoint — expect 402 with payment requirements
+        const res = await fetch(X402_SERVER + '/donate/' + charityId);
 
-        const txHash = await window.ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [{ from: accounts[0], to: USDC_ADDRESS, data: data }],
+        if (res.ok) {
+          const data = await res.json();
+          statusDiv.innerHTML = (data.message || 'Donation complete!') +
+            '<br><span style="font-size: 12px; color: var(--text-muted);">Verified via x402</span>';
+          statusDiv.className = 'status success';
+          return;
+        }
+
+        if (res.status !== 402) {
+          throw new Error('Unexpected response: ' + res.status + ' ' + res.statusText);
+        }
+
+        // Step 2: Parse x402 payment requirements
+        const requirements = await res.json();
+        const accept = requirements.accepts && requirements.accepts[0];
+
+        if (!accept || accept.scheme !== 'exact') {
+          throw new Error('Unsupported payment scheme');
+        }
+
+        const amountRaw = accept.maxAmountRequired;
+        const amountUSDC = (Number(amountRaw) / 1e6).toFixed(accept.extra?.decimals === 18 ? 18 : 6);
+        showStatus('Sign to pay ' + amountUSDC + ' USDC...', 'pending');
+
+        // Step 3: Build EIP-712 typed data for USDC TransferWithAuthorization (EIP-3009)
+        const validBefore = String(Math.floor(Date.now() / 1000) + (accept.maxTimeoutSeconds || 86400));
+        const randomBytes = new Uint8Array(32);
+        crypto.getRandomValues(randomBytes);
+        const nonce = '0x' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+        const typedData = {
+          types: {
+            EIP712Domain: [
+              { name: 'name', type: 'string' },
+              { name: 'version', type: 'string' },
+              { name: 'chainId', type: 'uint256' },
+              { name: 'verifyingContract', type: 'address' },
+            ],
+            TransferWithAuthorization: [
+              { name: 'from', type: 'address' },
+              { name: 'to', type: 'address' },
+              { name: 'value', type: 'uint256' },
+              { name: 'validAfter', type: 'uint256' },
+              { name: 'validBefore', type: 'uint256' },
+              { name: 'nonce', type: 'bytes32' },
+            ],
+          },
+          domain: accept.extra,
+          primaryType: 'TransferWithAuthorization',
+          message: {
+            from: from,
+            to: accept.payTo,
+            value: amountRaw,
+            validAfter: '0',
+            validBefore: validBefore,
+            nonce: nonce,
+          },
+        };
+
+        // Step 4: Sign with browser wallet
+        const signature = await window.ethereum.request({
+          method: 'eth_signTypedData_v4',
+          params: [from, JSON.stringify(typedData)],
         });
 
+        showStatus('Submitting payment to facilitator...', 'pending');
+
+        // Step 5: Build x402 payment token and retry
+        const payment = {
+          x402Version: requirements.x402Version || 1,
+          scheme: accept.scheme,
+          network: accept.network,
+          payload: {
+            signature: signature,
+            authorization: typedData.message,
+          },
+        };
+
+        const paymentHeader = btoa(JSON.stringify(payment));
+
+        const paidRes = await fetch(X402_SERVER + '/donate/' + charityId, {
+          headers: { 'X-Payment': paymentHeader },
+        });
+
+        if (!paidRes.ok) {
+          const errBody = await paidRes.text().catch(() => '');
+          throw new Error('Payment rejected (' + paidRes.status + '): ' + (errBody || paidRes.statusText));
+        }
+
+        const data = await paidRes.json();
         const charityName = charitySelect.options[charitySelect.selectedIndex].text;
-        const explorerUrl = 'https://sepolia.basescan.org/tx/' + txHash;
-        statusDiv.innerHTML = 'Donated ' + amount + ' USDC to ' + charityName + '!<br><a href="' + explorerUrl + '" target="_blank" style="color: var(--accent); text-decoration: underline;">View on BaseScan &rarr;</a>';
+        statusDiv.innerHTML = 'Donated ' + amountUSDC + ' USDC to ' + charityName + '!' +
+          '<br><span style="font-size: 12px; color: var(--text-muted);">Payment settled via x402 protocol</span>';
         statusDiv.className = 'status success';
 
-        // Refresh history after successful donation
         setTimeout(loadHistory, 5000);
       } catch (err) {
-        showStatus('Transaction failed: ' + err.message, 'error');
+        if (err.code === 4001) {
+          showStatus('Signing rejected. Please approve in your wallet.', 'error');
+        } else if (err.message && err.message.includes('Failed to fetch')) {
+          showStatus('Cannot reach x402 server at ' + X402_SERVER + '. Is it running?', 'error');
+        } else {
+          showStatus('Error: ' + err.message, 'error');
+        }
       } finally {
         donateBtn.disabled = false;
       }
