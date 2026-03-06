@@ -1,72 +1,29 @@
 import express, { type Express } from 'express';
-import { paymentMiddleware, x402ResourceServer } from '@x402/express';
-import { ExactEvmScheme } from '@x402/evm/exact/server';
-import { HTTPFacilitatorClient } from '@x402/core/server';
-import { listCharities, CAIP2_CHAIN_IDS } from '@x402charity/core';
+import { X402CharityClient, listCharities, findCharity } from '@x402charity/core';
 import type { Charity } from '@x402charity/core';
 
 export interface ServerOptions {
   /** Port to listen on. Default: 3402 */
   port?: number;
-  /** Override the facilitator URL. Default: https://facilitator.x402.org */
-  facilitatorUrl?: string;
+  /** Private key for the server's donation wallet (hex string). */
+  privateKey?: string;
+  /** Network to use. Default: base-sepolia */
+  network?: 'base' | 'base-sepolia';
   /** Only serve charities matching these IDs. Default: all charities. */
   charityIds?: string[];
 }
 
-export interface CharityRoute {
-  charityId: string;
-  method: string;
-  path: string;
-  network: string;
-  payTo: string;
-}
-
 /**
- * Build the x402 payment routes config from the charity registry.
- * Each charity gets a `GET /donate/:id` endpoint gated by a 402 payment.
- */
-function buildRoutes(charities: Charity[]) {
-  // We build the routes as a plain object keyed by "METHOD /path".
-  // The values must satisfy RouteConfig from @x402/core.
-  const routes: Record<string, unknown> = {};
-  const charityRoutes: CharityRoute[] = [];
-
-  for (const charity of charities) {
-    const caip2 = CAIP2_CHAIN_IDS[charity.chain];
-    if (!caip2) continue;
-
-    const pattern = `GET /donate/${charity.id}`;
-    routes[pattern] = {
-      accepts: {
-        scheme: 'exact',
-        price: '$0.01',
-        network: caip2 as `${string}:${string}`,
-        payTo: charity.walletAddress,
-      },
-      description: `Donate to ${charity.name}`,
-    };
-
-    charityRoutes.push({
-      charityId: charity.id,
-      method: 'GET',
-      path: `/donate/${charity.id}`,
-      network: caip2,
-      payTo: charity.walletAddress,
-    });
-  }
-
-  return { routes, charityRoutes };
-}
-
-/**
- * Create the Express app with x402 payment middleware for all registered charities.
+ * Create the Express app that donates on behalf of users using the server's own wallet.
  */
 export function createCharityServer(options: ServerOptions = {}): {
   app: Express;
-  charityRoutes: CharityRoute[];
 } {
-  const { facilitatorUrl = 'https://x402.org/facilitator', charityIds } = options;
+  const {
+    privateKey = process.env.DONATION_PRIVATE_KEY || '',
+    network = (process.env.DONATION_NETWORK as 'base' | 'base-sepolia') || 'base-sepolia',
+    charityIds,
+  } = options;
 
   let charities = listCharities();
   if (charityIds) {
@@ -77,26 +34,20 @@ export function createCharityServer(options: ServerOptions = {}): {
     throw new Error('No charities found. Add charities to the registry first.');
   }
 
-  const { routes, charityRoutes } = buildRoutes(charities);
-
-  // Set up the x402 resource server with EVM support
-  const facilitator = new HTTPFacilitatorClient({ url: facilitatorUrl });
-  const resourceServer = new x402ResourceServer(facilitator);
-
-  // Register the EVM scheme for each unique network
-  const networks = new Set(charityRoutes.map((r) => r.network));
-  for (const network of networks) {
-    resourceServer.register(network as `${string}:${string}`, new ExactEvmScheme());
+  // Only create the client if we have a private key (allows health/charities endpoints without it)
+  let donationClient: X402CharityClient | null = null;
+  if (privateKey) {
+    donationClient = new X402CharityClient({ privateKey, network });
   }
 
   const app = express();
+  app.use(express.json());
 
-  // CORS — allow the GitHub Pages frontend to call the server
+  // CORS
   app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Payment, PAYMENT-SIGNATURE, Content-Type');
-    res.setHeader('Access-Control-Expose-Headers', 'X-Payment, PAYMENT-REQUIRED, PAYMENT-RESPONSE');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     if (req.method === 'OPTIONS') {
       res.status(204).end();
       return;
@@ -106,17 +57,20 @@ export function createCharityServer(options: ServerOptions = {}): {
 
   // Health check
   app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', charities: charities.length });
+    res.json({
+      status: 'ok',
+      charities: charities.length,
+      walletConfigured: !!donationClient,
+    });
   });
 
-  // List available charity endpoints
+  // List available charities
   app.get('/charities', (_req, res) => {
     res.json(
       charities.map((c) => ({
         id: c.id,
         name: c.name,
         description: c.description,
-        donateUrl: `/donate/${c.id}`,
         walletAddress: c.walletAddress,
         chain: c.chain,
         verified: c.verified,
@@ -124,28 +78,47 @@ export function createCharityServer(options: ServerOptions = {}): {
     );
   });
 
-  // x402 payment middleware — gates /donate/:id routes
-  // Cast needed because RoutesConfig is a union type (Record<string, RouteConfig> | RouteConfig)
-  // and TypeScript can't narrow our object to the Record variant automatically.
-  app.use(paymentMiddleware(routes as Parameters<typeof paymentMiddleware>[0], resourceServer));
+  // Donate endpoint — server pays from its own wallet
+  app.post('/donate/:charityId', async (req, res) => {
+    const { charityId } = req.params;
 
-  // Donation endpoints — only reached after successful x402 payment
-  for (const charity of charities) {
-    app.get(`/donate/${charity.id}`, (_req, res) => {
+    if (!donationClient) {
+      res.status(503).json({
+        error: 'Donation wallet not configured. Set DONATION_PRIVATE_KEY env var.',
+      });
+      return;
+    }
+
+    const charity = findCharity(charityId);
+    if (!charity) {
+      res.status(404).json({ error: `Charity not found: ${charityId}` });
+      return;
+    }
+
+    try {
+      const amount = req.body?.amount || '$0.01';
+      const receipt = await donationClient.donate(charityId, amount);
       res.json({
         status: 'ok',
-        message: `Thank you for your donation to ${charity.name}`,
-        charity: {
-          id: charity.id,
-          name: charity.name,
-          walletAddress: charity.walletAddress,
+        message: `Donated to ${charity.name}`,
+        receipt: {
+          txHash: receipt.txHash,
+          from: receipt.from,
+          to: receipt.to,
+          amount: receipt.amount,
+          currency: receipt.currency,
+          chain: receipt.chain,
+          timestamp: receipt.timestamp,
         },
-        timestamp: Date.now(),
       });
-    });
-  }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error(`Donation to ${charityId} failed:`, message);
+      res.status(500).json({ error: 'Donation failed', details: message });
+    }
+  });
 
-  return { app, charityRoutes };
+  return { app };
 }
 
 /**
@@ -153,17 +126,13 @@ export function createCharityServer(options: ServerOptions = {}): {
  */
 export function startCharityServer(options: ServerOptions = {}): void {
   const port = options.port || 3402;
-  const { app, charityRoutes } = createCharityServer(options);
+  const { app } = createCharityServer(options);
 
   app.listen(port, () => {
     console.log(`\nx402 Charity Server running on http://localhost:${port}\n`);
     console.log('Endpoints:');
-    console.log(`  GET /health      — health check`);
-    console.log(`  GET /charities   — list available charities\n`);
-    console.log('Donation endpoints (x402-gated):');
-    for (const route of charityRoutes) {
-      console.log(`  ${route.method} ${route.path}  →  ${route.payTo} (${route.network})`);
-    }
-    console.log('');
+    console.log(`  GET  /health          — health check`);
+    console.log(`  GET  /charities       — list available charities`);
+    console.log(`  POST /donate/:id      — donate (server pays via x402)\n`);
   });
 }

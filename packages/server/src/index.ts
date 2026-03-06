@@ -1,1 +1,1 @@
-export { createCharityServer, startCharityServer, type ServerOptions, type CharityRoute } from './server.js';
+export { createCharityServer, startCharityServer, type ServerOptions } from './server.js';

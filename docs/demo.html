@@ -19,7 +19,6 @@
       --accent-hover: #1ad97d;
       --accent-dim: rgba(32, 245, 142, 0.12);
       --red: #ff4d4d;
-      --gold: #ffd700;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -46,7 +45,6 @@
       width: 100%;
     }
 
-    /* Header */
     header {
       padding: 20px 0;
       border-bottom: 1px solid var(--border);
@@ -92,7 +90,6 @@
     header nav a:hover { color: var(--text); }
     header nav a.active { color: var(--accent); }
 
-    /* Main */
     main {
       flex: 1;
       display: flex;
@@ -101,15 +98,11 @@
       padding: 60px 24px 40px;
     }
 
-    .game-title {
-      text-align: center;
-      margin-bottom: 8px;
-    }
-
     .game-title h2 {
       font-size: 36px;
       font-weight: 800;
       letter-spacing: -1px;
+      text-align: center;
     }
 
     .game-title h2 span { color: var(--accent); }
@@ -118,127 +111,57 @@
       color: var(--text-muted);
       font-size: 15px;
       text-align: center;
-      margin-bottom: 40px;
-      max-width: 480px;
+      margin: 8px 0 12px;
+      max-width: 520px;
     }
 
-    /* Connect card */
-    .connect-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 40px;
-      text-align: center;
-      max-width: 420px;
-      width: 100%;
-    }
-
-    .connect-card p {
+    .game-note {
       color: var(--text-muted);
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 28px;
-      border-radius: 24px;
-      font-family: 'Manrope', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-      text-decoration: none;
-      gap: 8px;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
-    }
-
-    .btn-primary:hover { background: var(--accent-hover); }
-
-    .btn-primary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover { border-color: var(--text-muted); }
-
-    .connect-hint {
       font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 12px;
+      text-align: center;
+      margin-bottom: 40px;
+      max-width: 520px;
+      font-style: italic;
     }
 
-    .connect-hint a { color: var(--accent); }
-
-    .connect-error {
-      color: var(--red);
-      font-size: 13px;
-      margin-bottom: 12px;
-      display: none;
-    }
-
-    /* Game area */
     .game-area {
       max-width: 480px;
       width: 100%;
-      display: none;
     }
 
-    .wallet-bar {
+    .scoreboard {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      gap: 1px;
+      background: var(--border);
       border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 32px;
-      font-size: 13px;
+      overflow: hidden;
+      margin-bottom: 24px;
     }
 
-    .wallet-bar .addr {
-      font-family: 'Inconsolata', monospace;
-      color: var(--accent);
+    .score-item {
+      flex: 1;
+      background: var(--surface);
+      padding: 16px;
+      text-align: center;
     }
 
-    .network-badge {
+    .score-label {
       font-size: 11px;
-      background: var(--accent-dim);
-      color: var(--accent);
-      padding: 2px 8px;
-      border-radius: 24px;
-      margin-left: 8px;
-      font-weight: 600;
-    }
-
-    .disconnect-btn {
-      background: none;
-      border: 1px solid var(--border);
       color: var(--text-muted);
-      padding: 4px 10px;
-      border-radius: 24px;
-      font-size: 11px;
-      cursor: pointer;
-      font-family: 'Manrope', sans-serif;
-      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
     }
 
-    .disconnect-btn:hover { border-color: var(--text-muted); }
+    .score-value {
+      font-family: 'Manrope', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+    }
 
-    /* Coin */
+    .score-value.green { color: var(--accent); }
+    .score-value.red { color: var(--red); }
+
     .coin-container {
       display: flex;
       flex-direction: column;
@@ -256,14 +179,10 @@
       justify-content: center;
       font-size: 56px;
       box-shadow: 0 4px 24px rgba(255, 215, 0, 0.2), inset 0 -4px 8px rgba(0,0,0,0.2);
-      transition: transform 0.1s;
       user-select: none;
-      position: relative;
     }
 
-    .coin.flipping {
-      animation: coinFlip 0.6s ease-in-out;
-    }
+    .coin.flipping { animation: coinFlip 0.6s ease-in-out; }
 
     @keyframes coinFlip {
       0% { transform: rotateY(0deg) scale(1); }
@@ -279,11 +198,7 @@
       box-shadow: 0 4px 40px rgba(255, 77, 77, 0.3), inset 0 -4px 8px rgba(0,0,0,0.2);
     }
 
-    /* Pick buttons */
-    .pick-section {
-      text-align: center;
-      margin-bottom: 24px;
-    }
+    .pick-section { text-align: center; margin-bottom: 24px; }
 
     .pick-label {
       font-size: 13px;
@@ -294,11 +209,7 @@
       letter-spacing: 1px;
     }
 
-    .pick-buttons {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
+    .pick-buttons { display: flex; gap: 12px; justify-content: center; }
 
     .pick-btn {
       width: 120px;
@@ -329,7 +240,6 @@
       background: var(--surface);
     }
 
-    /* Result */
     .result-banner {
       text-align: center;
       padding: 16px;
@@ -376,44 +286,7 @@
       margin-top: 4px;
     }
 
-    /* Scoreboard */
-    .scoreboard {
-      display: flex;
-      gap: 1px;
-      background: var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 24px;
-    }
-
-    .score-item {
-      flex: 1;
-      background: var(--surface);
-      padding: 16px;
-      text-align: center;
-    }
-
-    .score-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-    }
-
-    .score-value {
-      font-family: 'Manrope', sans-serif;
-      font-size: 24px;
-      font-weight: 800;
-    }
-
-    .score-value.green { color: var(--accent); }
-    .score-value.red { color: var(--red); }
-
-    /* Log */
-    .log-section {
-      margin-top: 8px;
-    }
+    .log-section { margin-top: 8px; }
 
     .log-header {
       font-size: 12px;
@@ -442,7 +315,6 @@
     }
 
     .log-entry:last-child { border-bottom: none; }
-
     .log-entry .icon { margin-right: 8px; }
     .log-entry .text { flex: 1; }
     .log-entry .detail {
@@ -458,7 +330,6 @@
       font-size: 13px;
     }
 
-    /* Footer */
     footer {
       padding: 32px 0;
       border-top: 1px solid var(--border);
@@ -507,28 +378,10 @@
     <div class="game-title">
       <h2>Flip a Coin, <span>Fund a Cause</span></h2>
     </div>
-    <p class="game-subtitle">Pick heads or tails. Win the flip and $0.01 USDC is donated to charity automatically via x402.</p>
+    <p class="game-subtitle">Pick heads or tails. Win the flip and $0.01 USDC is donated to charity automatically via the x402 protocol. No wallet needed — the server donates on your behalf.</p>
+    <p class="game-note">This demo shows how any app can embed automatic charitable giving into user actions. The donation is paid by the app owner's server wallet, not the user.</p>
 
-    <!-- Connect -->
-    <div class="connect-card" id="connect-card">
-      <p>Connect your wallet on Base Sepolia to play</p>
-      <div class="connect-error" id="connect-error"></div>
-      <button class="btn btn-primary" id="connect-btn">Connect Wallet</button>
-      <p class="connect-hint">
-        Requires <a href="https://metamask.io/download/" target="_blank">MetaMask</a> or a compatible wallet
-      </p>
-    </div>
-
-    <!-- Game -->
-    <div class="game-area" id="game-area">
-      <div class="wallet-bar">
-        <div>
-          <span class="addr" id="wallet-addr"></span>
-          <span class="network-badge">Base Sepolia</span>
-        </div>
-        <button class="disconnect-btn" id="disconnect-btn">Disconnect</button>
-      </div>
-
+    <div class="game-area">
       <div class="scoreboard">
         <div class="score-item">
           <div class="score-label">Wins</div>
@@ -587,90 +440,15 @@
   </footer>
 
   <script>
-    console.log('[x402 demo v3] loaded');
     const X402_SERVER = 'https://x402charity.vercel.app';
-    const BASE_SEPOLIA_CHAIN_ID = '0x14a34';
     const CHARITY_ID = 'testing-charity';
 
     let wins = 0, losses = 0, totalDonated = 0;
-    let userAddress = null;
     let flipping = false;
 
-    const connectCard = document.getElementById('connect-card');
-    const gameArea = document.getElementById('game-area');
-    const connectBtn = document.getElementById('connect-btn');
-    const connectError = document.getElementById('connect-error');
-    const walletAddr = document.getElementById('wallet-addr');
     const coin = document.getElementById('coin');
     const resultBanner = document.getElementById('result');
     const logList = document.getElementById('log-list');
-
-    // --- Connect ---
-    connectBtn.addEventListener('click', async () => {
-      connectError.style.display = 'none';
-
-      if (typeof window.ethereum === 'undefined') {
-        connectError.textContent = 'No wallet detected. Install MetaMask to play.';
-        connectError.style.display = 'block';
-        return;
-      }
-
-      connectBtn.textContent = 'Connecting...';
-      connectBtn.disabled = true;
-
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        if (!accounts || accounts.length === 0) {
-          connectError.textContent = 'No accounts found.';
-          connectError.style.display = 'block';
-          return;
-        }
-
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: BASE_SEPOLIA_CHAIN_ID }],
-          });
-        } catch (e) {
-          if (e.code === 4902) {
-            await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: BASE_SEPOLIA_CHAIN_ID,
-                chainName: 'Base Sepolia',
-                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                rpcUrls: ['https://sepolia.base.org'],
-                blockExplorerUrls: ['https://sepolia.basescan.org'],
-              }],
-            });
-          } else {
-            connectError.textContent = 'Please switch to Base Sepolia.';
-            connectError.style.display = 'block';
-            return;
-          }
-        }
-
-        userAddress = accounts[0];
-        walletAddr.textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
-        connectCard.style.display = 'none';
-        gameArea.style.display = 'block';
-      } catch (err) {
-        connectError.textContent = err.code === 4001
-          ? 'Connection rejected.'
-          : 'Failed: ' + err.message;
-        connectError.style.display = 'block';
-      } finally {
-        connectBtn.textContent = 'Connect Wallet';
-        connectBtn.disabled = false;
-      }
-    });
-
-    document.getElementById('disconnect-btn').addEventListener('click', () => {
-      userAddress = null;
-      connectCard.style.display = 'block';
-      gameArea.style.display = 'none';
-      connectError.style.display = 'none';
-    });
 
     // --- Game ---
     document.querySelectorAll('.pick-btn').forEach(btn => {
@@ -686,14 +464,11 @@
       resultBanner.className = 'result-banner';
       resultBanner.style.display = 'none';
 
-      // Animate coin
       coin.className = 'coin flipping';
       coin.textContent = '?';
 
-      // Wait for animation
       await sleep(700);
 
-      // Resolve flip
       const outcome = Math.random() < 0.5 ? 'heads' : 'tails';
       const won = pick === outcome;
 
@@ -703,17 +478,17 @@
       if (won) {
         wins++;
         document.getElementById('wins').textContent = wins;
-        resultBanner.innerHTML = 'You won! Donating $0.01 USDC...<div class="result-sub">Signing x402 payment</div>';
+        resultBanner.innerHTML = 'You won! Donating $0.01 USDC...<div class="result-sub">Server is donating via x402</div>';
         resultBanner.className = 'result-banner donating';
 
         addLog('win', 'Won the flip (' + pick + ')', 'donating...');
 
         try {
-          const txHash = await donateViaX402();
+          const receipt = await serverDonate();
           totalDonated += 0.01;
           document.getElementById('donated').textContent = '$' + totalDonated.toFixed(2);
 
-          const shortTx = txHash ? txHash.slice(0, 10) + '...' : 'confirmed';
+          const shortTx = receipt.txHash ? receipt.txHash.slice(0, 10) + '...' : 'confirmed';
           resultBanner.innerHTML = 'Donated $0.01 USDC to charity!<div class="result-sub">Settled via x402 protocol</div>';
           resultBanner.className = 'result-banner win';
           updateLastLog('win', 'Donated $0.01 USDC', shortTx);
@@ -734,128 +509,21 @@
       document.querySelectorAll('.pick-btn').forEach(b => b.disabled = false);
     }
 
-    // --- x402 Donation ---
-    async function donateViaX402() {
-      // Step 1: Hit x402 endpoint, get 402 with payment requirements in header
-      const res = await fetch(X402_SERVER + '/donate/' + CHARITY_ID);
-
-      if (res.ok) {
-        const data = await res.json();
-        return data.txHash || '';
-      }
-
-      if (res.status !== 402) {
-        throw new Error('Server returned ' + res.status);
-      }
-
-      // Step 2: Parse x402 v2 requirements from PAYMENT-REQUIRED header (or body fallback)
-      console.log('[x402] 402 response received');
-      console.log('[x402] Response headers:', [...res.headers.entries()]);
-
-      let paymentRequired;
-      const paymentRequiredHeader = res.headers.get('payment-required');
-      console.log('[x402] payment-required header:', paymentRequiredHeader ? paymentRequiredHeader.slice(0, 60) + '...' : null);
-
-      if (paymentRequiredHeader) {
-        paymentRequired = JSON.parse(atob(paymentRequiredHeader));
-      } else {
-        // Fallback: try reading from response body
-        const body = await res.text();
-        console.log('[x402] Response body:', body.slice(0, 300));
-        try {
-          paymentRequired = JSON.parse(body);
-        } catch (e) {
-          throw new Error('Cannot parse 402 response. Header missing, body: ' + body.slice(0, 100));
-        }
-      }
-
-      console.log('[x402] Parsed payment requirements:', JSON.stringify(paymentRequired).slice(0, 300));
-
-      const accept = paymentRequired.accepts && paymentRequired.accepts[0];
-      if (!accept || accept.scheme !== 'exact') {
-        console.error('[x402] No valid accept found. paymentRequired:', paymentRequired);
-        throw new Error('Unsupported payment scheme. Got: ' + JSON.stringify(paymentRequired).slice(0, 200));
-      }
-      console.log('[x402] Using payment option:', accept);
-
-      // Step 3: Build EIP-712 typed data for TransferWithAuthorization (EIP-3009)
-      // The domain needs chainId (from network eip155:XXXXX) and verifyingContract (asset address)
-      const chainId = accept.network.split(':')[1];
-      const now = Math.floor(Date.now() / 1000);
-      const validAfter = String(now - 600);
-      const validBefore = String(now + (accept.maxTimeoutSeconds || 300));
-      const randomBytes = new Uint8Array(32);
-      crypto.getRandomValues(randomBytes);
-      const nonce = '0x' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-
-      const domain = {
-        name: accept.extra.name,
-        version: accept.extra.version,
-        chainId: chainId,
-        verifyingContract: accept.asset,
-      };
-
-      const authorization = {
-        from: userAddress,
-        to: accept.payTo,
-        value: accept.amount,
-        validAfter: validAfter,
-        validBefore: validBefore,
-        nonce: nonce,
-      };
-
-      const typedData = {
-        types: {
-          EIP712Domain: [
-            { name: 'name', type: 'string' },
-            { name: 'version', type: 'string' },
-            { name: 'chainId', type: 'uint256' },
-            { name: 'verifyingContract', type: 'address' },
-          ],
-          TransferWithAuthorization: [
-            { name: 'from', type: 'address' },
-            { name: 'to', type: 'address' },
-            { name: 'value', type: 'uint256' },
-            { name: 'validAfter', type: 'uint256' },
-            { name: 'validBefore', type: 'uint256' },
-            { name: 'nonce', type: 'bytes32' },
-          ],
-        },
-        domain: domain,
-        primaryType: 'TransferWithAuthorization',
-        message: authorization,
-      };
-
-      // Step 4: Sign with browser wallet
-      const signature = await window.ethereum.request({
-        method: 'eth_signTypedData_v4',
-        params: [userAddress, JSON.stringify(typedData)],
+    // --- Server-side donation ---
+    async function serverDonate() {
+      const res = await fetch(X402_SERVER + '/donate/' + CHARITY_ID, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: '$0.01' }),
       });
 
-      resultBanner.innerHTML = 'Submitting to facilitator...<div class="result-sub">Settling payment on-chain via x402</div>';
+      const data = await res.json();
 
-      // Step 5: Build x402 v2 payment payload and send via PAYMENT-SIGNATURE header
-      const paymentPayload = {
-        x402Version: 2,
-        payload: {
-          signature: signature,
-          authorization: authorization,
-        },
-        resource: paymentRequired.resource,
-        accepted: accept,
-      };
-
-      const paidRes = await fetch(X402_SERVER + '/donate/' + CHARITY_ID, {
-        headers: { 'PAYMENT-SIGNATURE': btoa(JSON.stringify(paymentPayload)) },
-      });
-
-      if (!paidRes.ok) {
-        const body = await paidRes.text().catch(() => '');
-        throw new Error('Payment rejected (' + paidRes.status + '): ' + (body || paidRes.statusText));
+      if (!res.ok) {
+        throw new Error(data.details || data.error || 'Server error ' + res.status);
       }
 
-      const data = await paidRes.json();
-      return data.txHash || data.transaction || '';
+      return data.receipt || {};
     }
 
     // --- Log ---
@@ -889,7 +557,6 @@
       ).join('');
     }
 
-    // --- Utils ---
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
     function escapeHtml(str) {
