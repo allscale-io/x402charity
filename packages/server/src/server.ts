@@ -69,6 +69,9 @@ function resolveCharity(options: ServerOptions, network: string): Charity {
     || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3402');
 
   if (charityWallet) {
+    if (!/^0x[a-fA-F0-9]{40}$/.test(charityWallet)) {
+      throw new Error(`Invalid CHARITY_WALLET address: "${charityWallet}". Must be a 0x-prefixed 40-character hex string.`);
+    }
     const charity: Charity = {
       id: charityName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       name: charityName,
@@ -134,9 +137,20 @@ export function createCharityServer(options: ServerOptions = {}): {
   const app = express();
   app.use(express.json());
 
-  // CORS
+  // CORS — allow any origin for read-only GET endpoints (dashboard, public data).
+  // POST /donate is server-to-server (not browser-initiated), so CORS doesn't
+  // add protection there. The x402 payment signature is the access control.
+  const allowedOrigins = process.env.CORS_ORIGINS?.split(',').map(s => s.trim());
   app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin || '';
+    if (allowedOrigins) {
+      if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+      }
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Payment, Payment-Signature');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     if (req.method === 'OPTIONS') {
@@ -201,7 +215,7 @@ export function createCharityServer(options: ServerOptions = {}): {
 
     await Promise.all(
       Object.entries(chains).map(async ([name, { chain, rpc }]) => {
-        const client = createPublicClient({ chain, transport: http(rpc) });
+        const client = createPublicClient({ chain, transport: http(rpc, { timeout: 15_000 }) });
         const [ethBal, usdcBal] = await Promise.all([
           client.getBalance({ address }),
           client.readContract({
@@ -267,7 +281,7 @@ export function createCharityServer(options: ServerOptions = {}): {
   // Accepts ?daysAgo=N to scan a single day's worth of blocks (default: 0 = today)
   app.get('/donations', async (req, res) => {
     const charityAddr = charity.walletAddress as `0x${string}`;
-    const daysAgo = Math.max(0, parseInt(req.query.daysAgo as string) || 0);
+    const daysAgo = Math.min(365, Math.max(0, parseInt(req.query.daysAgo as string) || 0));
 
     const transferEvent = parseAbiItem(
       'event Transfer(address indexed from, address indexed to, uint256 value)',
@@ -286,7 +300,7 @@ export function createCharityServer(options: ServerOptions = {}): {
 
     await Promise.all(chains.map(async ({ name, chain, rpc }) => {
       try {
-        const client = createPublicClient({ chain, transport: http(rpc) });
+        const client = createPublicClient({ chain, transport: http(rpc, { timeout: 15_000 }) });
         const currentBlock = await client.getBlockNumber();
 
         const endBlock = currentBlock - BigInt(daysAgo) * BLOCKS_PER_DAY;
@@ -301,6 +315,7 @@ export function createCharityServer(options: ServerOptions = {}): {
         }
 
         // Fetch logs in batched parallel to respect RPC rate limits
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const allLogs: any[] = [];
         for (let i = 0; i < chunks.length; i += BATCH_CONCURRENCY) {
           const batch = chunks.slice(i, i + BATCH_CONCURRENCY);
@@ -379,7 +394,7 @@ export function createCharityServer(options: ServerOptions = {}): {
   const RETRY_DELAY_MS = 1000;
 
   // Trigger endpoint — server pays from its own wallet via x402 protocol
-  app.post('/donate', (req, res) => {
+  app.post('/donate', async (req, res) => {
     if (!donationClient) {
       res.status(503).json({
         error: 'Donation wallet not configured. Set DONATION_PRIVATE_KEY env var.',
@@ -387,36 +402,52 @@ export function createCharityServer(options: ServerOptions = {}): {
       return;
     }
 
-    const amount = req.body?.amount || '$0.001';
+    // Validate amount format: must be $N.NN with reasonable bounds
+    const rawAmount = req.body?.amount || '$0.001';
+    if (typeof rawAmount !== 'string' || !/^\$?\d+(\.\d+)?$/.test(rawAmount)) {
+      res.status(400).json({ error: 'Invalid amount format. Use e.g. "$0.001" or "0.001".' });
+      return;
+    }
+    const numericValue = parseFloat(rawAmount.replace('$', ''));
+    if (numericValue <= 0 || numericValue > 100) {
+      res.status(400).json({ error: 'Amount must be between $0.001 and $100.' });
+      return;
+    }
+    const amount = rawAmount.startsWith('$') ? rawAmount : `$${rawAmount}`;
 
-    donationQueue = donationQueue.then(async () => {
-      let lastError = '';
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        try {
-          if (attempt > 0) {
-            await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+    // Await the queue so the response is sent from within this handler
+    await new Promise<void>((resolveQueue) => {
+      donationQueue = donationQueue.then(async () => {
+        let lastError = '';
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+          try {
+            if (attempt > 0) {
+              await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+            }
+            const receipt = await donationClient!.donate(amount);
+            res.json({
+              status: 'ok',
+              message: `Donated to ${charity.name}`,
+              receipt: {
+                txHash: receipt.txHash,
+                from: receipt.from,
+                to: receipt.to,
+                amount: receipt.amount,
+                currency: receipt.currency,
+                chain: receipt.chain,
+                timestamp: receipt.timestamp,
+              },
+            });
+            resolveQueue();
+            return;
+          } catch (err) {
+            lastError = err instanceof Error ? err.message : 'Unknown error';
+            console.error(`Donation attempt ${attempt + 1}/${MAX_RETRIES} failed:`, lastError);
           }
-          const receipt = await donationClient!.donate(amount);
-          res.json({
-            status: 'ok',
-            message: `Donated to ${charity.name}`,
-            receipt: {
-              txHash: receipt.txHash,
-              from: receipt.from,
-              to: receipt.to,
-              amount: receipt.amount,
-              currency: receipt.currency,
-              chain: receipt.chain,
-              timestamp: receipt.timestamp,
-            },
-          });
-          return;
-        } catch (err) {
-          lastError = err instanceof Error ? err.message : 'Unknown error';
-          console.error(`Donation attempt ${attempt + 1}/${MAX_RETRIES} failed:`, lastError);
         }
-      }
-      res.status(500).json({ error: 'Donation failed', details: lastError });
+        res.status(500).json({ error: 'Donation failed', details: lastError });
+        resolveQueue();
+      });
     });
   });
 

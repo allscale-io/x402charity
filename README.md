@@ -119,6 +119,9 @@ console.log(receipt.txHash); // on-chain proof
 | `DONATION_NETWORK` | No | `base` (mainnet) or `base-sepolia` (testnet) | `base-sepolia` |
 | `BASE_URL` | No | Public URL of your server (auto-detected on Vercel) | `http://localhost:3402` |
 | `PORT` | No | Server port | `3402` |
+| `CORS_ORIGINS` | No | Comma-separated list of allowed CORS origins (e.g. `https://myapp.com,https://admin.myapp.com`). If unset, all origins are allowed. | `*` (all origins) |
+
+> **Security note:** Never commit your `DONATION_PRIVATE_KEY` to version control. Use environment variables or a secret manager (e.g. Vercel Environment Variables, AWS Secrets Manager). The private key controls the donation wallet funds.
 
 ## API Endpoints
 

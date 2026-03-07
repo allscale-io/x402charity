@@ -39,6 +39,9 @@ export class X402CharityClient {
         ? options.privateKey
         : `0x${options.privateKey}`
     ) as `0x${string}`;
+    if (!/^0x[a-fA-F0-9]{64}$/.test(privateKey)) {
+      throw new Error('Invalid private key format. Must be a 64-character hex string (with or without 0x prefix).');
+    }
     this.network = options.network || 'base-sepolia';
     this.donateEndpoint = options.donateEndpoint;
     this.charity = options.charity;
