@@ -777,7 +777,7 @@
       <p class="section-sub">Drop-in middleware that donates a fraction of a cent in USDC to charity every time a user takes an action — powered by the x402 payment protocol.</p>
       <div class="hero-buttons">
         <a href="#demo" class="btn btn-primary">Try the Demo</a>
-        <a href="https://github.com/allscale-io/x402charity" class="btn btn-secondary">View on GitHub</a>
+        <a href="https://github.com/allscale-io/x402charity" class="btn btn-secondary" id="star-btn">&#x2B50; Star on GitHub <span id="star-count"></span></a>
       </div>
     </div>
   </section>
@@ -1073,6 +1073,17 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
   </footer>
 
   <script>
+    // ===== GitHub stars =====
+    fetch('https://api.github.com/repos/allscale-io/x402charity')
+      .then(r => r.json())
+      .then(data => {
+        const count = data.stargazers_count;
+        if (typeof count === 'number') {
+          document.getElementById('star-count').textContent = '(' + count + ')';
+        }
+      })
+      .catch(() => {});
+
     // ===== Code tabs =====
     document.querySelectorAll('.code-tab').forEach(tab => {
       tab.addEventListener('click', () => {
