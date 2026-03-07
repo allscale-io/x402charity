@@ -61,6 +61,7 @@ export function createCharityServer(options: ServerOptions = {}): {
       status: 'ok',
       charities: charities.length,
       walletConfigured: !!donationClient,
+      donationWallet: donationClient?.account.address ?? null,
     });
   });
 

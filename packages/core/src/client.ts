@@ -25,7 +25,7 @@ export interface ClientOptions {
 
 export class X402CharityClient {
   private network: 'base' | 'base-sepolia';
-  private account: PrivateKeyAccount;
+  readonly account: PrivateKeyAccount;
   private paymentFetch: typeof globalThis.fetch;
 
   constructor(options: ClientOptions) {
