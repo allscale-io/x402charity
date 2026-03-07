@@ -277,7 +277,8 @@ export function createCharityServer(options: ServerOptions = {}): {
     ];
 
     const CHUNK_SIZE = 9999n;
-    const LOOKBACK = 50000n;
+    const LOOKBACK = 1300000n; // ~30 days on Base (~2s blocks)
+    const BATCH_CONCURRENCY = 10;
 
     const onChainDonations: DonationLog[] = [];
 
@@ -287,41 +288,41 @@ export function createCharityServer(options: ServerOptions = {}): {
         const currentBlock = await client.getBlockNumber();
         const startBlock = currentBlock > LOOKBACK ? currentBlock - LOOKBACK : 0n;
 
-        // Fetch logs in chunks to respect RPC range limits
-        const allLogs: any[] = [];
+        // Build chunk ranges
+        const chunks: { from: bigint; to: bigint }[] = [];
         for (let from = startBlock; from <= currentBlock; from += CHUNK_SIZE + 1n) {
           const to = from + CHUNK_SIZE > currentBlock ? currentBlock : from + CHUNK_SIZE;
-          try {
-            const logs = await client.getLogs({
-              address: USDC_ADDRESSES[name],
-              event: transferEvent,
-              args: { to: charityAddr },
-              fromBlock: from,
-              toBlock: to,
-            });
+          chunks.push({ from, to });
+        }
+
+        // Fetch logs in batched parallel to respect RPC rate limits
+        const allLogs: any[] = [];
+        for (let i = 0; i < chunks.length; i += BATCH_CONCURRENCY) {
+          const batch = chunks.slice(i, i + BATCH_CONCURRENCY);
+          const results = await Promise.all(
+            batch.map(({ from, to }) =>
+              client.getLogs({
+                address: USDC_ADDRESSES[name],
+                event: transferEvent,
+                args: { to: charityAddr },
+                fromBlock: from,
+                toBlock: to,
+              }).catch(() => []),
+            ),
+          );
+          for (const logs of results) {
             allLogs.push(...logs);
-          } catch {
-            // Skip chunk on error
           }
         }
 
-        const recentLogs = allLogs.slice(-50);
+        // Estimate timestamps from block numbers (avoids getBlock RPC calls)
+        const currentTimestamp = Date.now();
+        const BLOCK_TIME_MS = 2000; // ~2s per block on Base
 
-        // Fetch block timestamps in parallel
-        const blockNumbers = [...new Set(recentLogs.map((l) => l.blockNumber!))];
-        const blockMap = new Map<bigint, bigint>();
-        await Promise.all(
-          blockNumbers.map(async (bn) => {
-            try {
-              const block = await client.getBlock({ blockNumber: bn });
-              blockMap.set(bn, block.timestamp);
-            } catch { /* skip */ }
-          }),
-        );
-
-        for (const log of recentLogs) {
+        for (const log of allLogs) {
           const amount = formatUnits(log.args.value ?? 0n, 6);
-          const ts = blockMap.get(log.blockNumber!) ?? 0n;
+          const blockDiff = Number(currentBlock - log.blockNumber!);
+          const estimatedTimestamp = currentTimestamp - blockDiff * BLOCK_TIME_MS;
           onChainDonations.push({
             txHash: log.transactionHash ?? '',
             from: (log.args.from as string) ?? '',
@@ -331,7 +332,7 @@ export function createCharityServer(options: ServerOptions = {}): {
             amount: `$${amount}`,
             currency: 'USDC',
             chain: name,
-            timestamp: Number(ts) * 1000,
+            timestamp: estimatedTimestamp,
             status: 'ok',
           });
         }

@@ -778,6 +778,19 @@
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 12px;
     }
+    .dash-loading {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .dash-spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: dash-spin 0.8s linear infinite;
+    }
+    @keyframes dash-spin {
+      to { transform: rotate(360deg); }
+    }
     .dash-empty .hint {
       font-size: 12px; margin-top: 6px;
       font-family: 'Inconsolata', monospace; color: var(--accent);
@@ -1199,7 +1212,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       </div>
 
       <div id="dash-donations">
-        <div class="dash-empty">Loading donations...</div>
+        <div class="dash-empty dash-loading"><div class="dash-spinner"></div> Loading donations...</div>
       </div>
 
       <div class="dash-header" style="margin-top:24px;">
@@ -1207,7 +1220,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       </div>
 
       <div id="dash-history">
-        <div class="dash-empty">Loading history...</div>
+        <div class="dash-empty dash-loading"><div class="dash-spinner"></div> Loading history...</div>
       </div>
     </div>
   </section>

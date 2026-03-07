@@ -2,14 +2,27 @@
 
 ## TODO Checklist
 
-### Urgent (This Week)
+### 1. Ecosystem Listings (Do First -- quick PRs, high impact)
 - [ ] Submit PR to awesome-x402 (xpaysh): https://github.com/xpaysh/awesome-x402
 - [ ] Submit PR to awesome-x402 (Merit-Systems): https://github.com/Merit-Systems/awesome-x402
-- [ ] Submit to x402.org/ecosystem directory
+- [ ] Submit PR to awesome-x402-servers (a6b8): https://github.com/a6b8/awesome-x402-servers -- specifically lists x402 servers, x402charity is a perfect fit
+- [ ] Submit PR to awesome-base (wbnns): https://github.com/wbnns/awesome-base -- Base ecosystem list, add under a "Social Impact" or "Tools" section
+- [ ] Submit to x402.org/ecosystem directory (official x402 ecosystem page)
 - [ ] Submit to x402dev.com/awesome-projects
-- [ ] Post on Farcaster /base and /base-builds channels, tag @base
+- [ ] Open a discussion/issue on coinbase/x402 GitHub showcasing x402charity as a community project: https://github.com/coinbase/x402
+- [ ] Submit to Electric Capital open-dev-data (gets tracked in developer reports): https://github.com/electric-capital/crypto-ecosystems -- fork, add a .toml file under data/ecosystems/, open PR
+- [ ] Submit to RootData (crypto project database, has x402 tag): https://www.rootdata.com/Projects/submit
+- [ ] Submit to Base Ecosystem Page: https://www.base.org/ecosystem
+- [ ] Submit to Alchemy Dapp Store: https://www.alchemy.com/dapps
 
-### GitHub & npm Optimization
+### 2. Social & Community (Do This Week)
+- [ ] Post on Farcaster /base and /base-builds channels, tag @base
+- [ ] Join Build on Base Discord: https://discord.com/invite/buildonbase
+- [ ] Join Coinbase CDP Discord: https://discord.com/invite/cdp
+- [ ] Join AgentPay x402 Discord: https://discord.com/invite/uEmcWj8xMX
+- [ ] Start engaging (answer questions, provide value) before promoting
+
+### 3. GitHub & npm Optimization
 - [x] ~~Add 20 GitHub topics for discoverability~~ (done: x402, http-402, micropayments, micro-donations, charity, usdc, base, stablecoin, cryptocurrency, web3, ethereum, payments, express-middleware, nextjs, typescript, npm-package, open-source, developer-tools, coinbase, blockchain)
 - [x] ~~Update GitHub repo description (350 char, keyword-rich)~~
 - [x] ~~Set GitHub repo homepage to x402charity.com~~
@@ -18,40 +31,36 @@
 - [x] ~~Add shields.io badges to README (npm version, downloads, stars, TypeScript, license)~~
 - [x] ~~Improve README first paragraph for Google snippet / SEO~~
 - [ ] Add a GIF or screenshot of the CLI in action to README
+- [ ] Publish @x402charity packages to npm (core, cli, express, next) if not already done -- npm discoverability
 
-### Grants & Programs
+### 4. Grants & Programs (Apply This Month)
 - [ ] Apply for CDP Builder Grants (next round): https://www.coinbase.com/developer-platform/discover/launches
 - [ ] Self-nominate for Base Builder Grants: https://docs.base.org/get-started/get-funded
 - [ ] Apply for CDP AI Builder Grants: https://www.coinbase.com/developer-platform/discover/launches/ai-builder-grants
 
-### Community
-- [ ] Join Build on Base Discord: https://discord.com/invite/buildonbase
-- [ ] Join Coinbase CDP Discord: https://discord.com/invite/cdp
-- [ ] Join AgentPay x402 Discord: https://discord.com/invite/uEmcWj8xMX
-- [ ] Start engaging (answer questions, provide value) before promoting
-
-### Content & Launch (Weeks 2-4)
+### 5. Content & Launch (Weeks 2-4)
 - [ ] Write launch blog post: "How to Add Charitable Micro-Donations to Any Web App in 10 Lines of Code"
 - [ ] Publish on own domain, then cross-post to dev.to, Hashnode, Medium
 - [ ] Coordinated launch day: HN Show HN, Reddit r/ethdev + r/opensource, Twitter thread, Farcaster, dev.to, CDP Discord
+- [ ] Launch on Product Hunt (web3 category): https://www.producthunt.com/ -- prep a launch page with demo GIF
+- [ ] Launch on Web3Scout ("Product Hunt for Crypto"): https://web3scout.cryptechie.com/
 - [ ] Record 5-10 min YouTube tutorial
 - [ ] Start Twitter/X build-in-public cadence (1 post/day)
 
-### Partnerships (Weeks 4-8)
+### 6. Partnerships (Weeks 4-8)
 - [ ] Reach out to GiveDirectly (Tier 1 charity partner)
 - [ ] Reach out to UNICEF Venture Fund (Tier 1 charity partner)
 - [ ] Reach out to Save the Children (Tier 1 charity partner)
 - [ ] Explore Every.org or Endaoment as compliance/DAF intermediary
 - [ ] Build AgentKit / MCP server integration (Phase 4)
-- [ ] Submit to Base Ecosystem Page, Alchemy Dapp Store, RootData
 
-### Hackathons & Events
+### 7. Hackathons & Events
 - [ ] ETHGlobal Cannes (Apr 3-5, 2026) -- attend or submit bounty
 - [ ] ETHGlobal New York (Jun 12-14, 2026)
 - [ ] Create hackathon starter template repo
 - [ ] Create "good first issue" GitHub bounties ($25-$100)
 
-### Media & PR (Weeks 6-12)
+### 8. Media & PR (Weeks 6-12)
 - [ ] Pitch Crypto Altruists (cryptoaltruists.com) -- crypto + social impact
 - [ ] Pitch CoinDesk -- "programmable giving via x402"
 - [ ] Pitch Chronicle of Philanthropy -- "developer tool for programmable giving"
@@ -248,11 +257,19 @@ Submit x402charity for listing on:
 
 | Directory | URL | Notes |
 |-----------|-----|-------|
+| x402.org Ecosystem | https://www.x402.org/ecosystem | Official x402 directory -- highest priority |
+| awesome-x402 (xpaysh) | https://github.com/xpaysh/awesome-x402 | Curated x402 resources list -- open a PR |
+| awesome-x402 (Merit-Systems) | https://github.com/Merit-Systems/awesome-x402 | Another x402 ecosystem list -- open a PR |
+| awesome-x402-servers (a6b8) | https://github.com/a6b8/awesome-x402-servers | Specifically lists x402 servers -- perfect fit |
+| awesome-base (wbnns) | https://github.com/wbnns/awesome-base | Base ecosystem dApps/projects list |
+| coinbase/x402 Discussions | https://github.com/coinbase/x402 | Showcase as community project |
+| Electric Capital open-dev-data | https://github.com/electric-capital/crypto-ecosystems | Gets tracked in developer reports -- add .toml file |
 | Base Ecosystem Page | https://www.base.org/ecosystem | Share on Farcaster /base first |
-| x402.org Ecosystem | https://www.x402.org/ecosystem | Official x402 directory |
 | Alchemy Dapp Store | https://www.alchemy.com/dapps | Submit for listing |
-| RootData | https://www.rootdata.com | Tag with x402 and Base |
-| GitHub Topics x402 | https://github.com/topics/x402 | Add topic to repo |
+| RootData | https://www.rootdata.com/Projects/submit | Tag with x402 and Base |
+| Product Hunt | https://www.producthunt.com/ | Launch in web3 category |
+| Web3Scout | https://web3scout.cryptechie.com/ | "Product Hunt for Crypto" |
+| GitHub Topics x402 | https://github.com/topics/x402 | Add topic to repo (done) |
 
 ---
 
