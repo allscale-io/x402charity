@@ -7,9 +7,6 @@ WORKDIR /app
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages/core/package.json packages/core/
 COPY packages/server/package.json packages/server/
-COPY packages/cli/package.json packages/cli/
-COPY packages/express/package.json packages/express/
-COPY packages/next/package.json packages/next/
 
 RUN pnpm install --frozen-lockfile
 

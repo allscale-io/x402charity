@@ -103,8 +103,6 @@ export function createCharityServer(options: ServerOptions = {}): {
 
   const charity = resolveCharity(options, network);
 
-  // Donation history (in-memory)
-  const donationLog: DonationLog[] = [];
   const explorerUrl = EXPLORER_URLS[network];
 
   // Set up wallet for server-side x402 client (trigger-donate endpoint)
@@ -149,6 +147,8 @@ export function createCharityServer(options: ServerOptions = {}): {
   });
 
   // --- Static pages ---
+  // On Vercel, static files are served by the platform before Express sees the request.
+  // This route is only used for local/Docker development.
   const docsDir = options.docsDir || resolve(process.cwd(), 'docs');
 
   app.get('/', (_req, res) => res.sendFile(resolve(docsDir, 'index.html')));
@@ -340,17 +340,12 @@ export function createCharityServer(options: ServerOptions = {}): {
       }
     }));
 
-    // Merge: on-chain + in-memory (dedup by txHash)
-    const seenTxHashes = new Set(onChainDonations.map((d) => d.txHash).filter(Boolean));
-    const memOnly = donationLog.filter((d) => !d.txHash || !seenTxHashes.has(d.txHash));
-    const all = [...onChainDonations, ...memOnly].sort((a, b) => b.timestamp - a.timestamp);
-
-    const okDonations = all.filter((d) => d.status === 'ok');
-    const total = okDonations.reduce((sum, d) => sum + parseFloat(d.amount.replace('$', '')), 0);
+    const all = onChainDonations.sort((a, b) => b.timestamp - a.timestamp);
+    const total = all.reduce((sum, d) => sum + parseFloat(d.amount.replace('$', '')), 0);
 
     res.json({
       total: `$${total.toFixed(4)}`,
-      count: okDonations.length,
+      count: all.length,
       network,
       explorerUrl,
       donations: all,
@@ -396,19 +391,6 @@ export function createCharityServer(options: ServerOptions = {}): {
             await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
           }
           const receipt = await donationClient!.donate(amount);
-          const log: DonationLog = {
-            txHash: receipt.txHash,
-            from: receipt.from,
-            to: receipt.to,
-            charityId: charity.id,
-            charityName: charity.name,
-            amount: receipt.amount,
-            currency: receipt.currency,
-            chain: receipt.chain,
-            timestamp: receipt.timestamp,
-            status: 'ok',
-          };
-          donationLog.push(log);
           res.json({
             status: 'ok',
             message: `Donated to ${charity.name}`,
@@ -428,19 +410,6 @@ export function createCharityServer(options: ServerOptions = {}): {
           console.error(`Donation attempt ${attempt + 1}/${MAX_RETRIES} failed:`, lastError);
         }
       }
-      donationLog.push({
-        txHash: '',
-        from: account?.address ?? '',
-        to: charity.walletAddress,
-        charityId: charity.id,
-        charityName: charity.name,
-        amount,
-        currency: 'USDC',
-        chain: network,
-        timestamp: Date.now(),
-        status: 'failed',
-        error: lastError,
-      });
       res.status(500).json({ error: 'Donation failed', details: lastError });
     });
   });

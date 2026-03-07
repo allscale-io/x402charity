@@ -103,6 +103,7 @@ console.log(receipt.txHash); // on-chain proof
 | `CHARITY_NAME` | No | Display name for the charity | `My Charity` |
 | `CHARITY_DESCRIPTION` | No | Description of the charity | — |
 | `DONATION_NETWORK` | No | `base` (mainnet) or `base-sepolia` (testnet) | `base-sepolia` |
+| `BASE_URL` | No | Public URL of your server (auto-detected on Vercel) | `http://localhost:3402` |
 | `PORT` | No | Server port | `3402` |
 
 ## API Endpoints
@@ -130,8 +131,21 @@ You can also deploy to Vercel instead of Docker:
 
 1. Fork this repo
 2. Import it in [Vercel](https://vercel.com)
-3. Set the environment variables in your Vercel project settings
+3. Set the following environment variables in your Vercel project settings:
+   - `DONATION_PRIVATE_KEY` — private key of the wallet that funds donations
+   - `CHARITY_WALLET` — wallet address of the charity receiving donations
+   - `CHARITY_NAME` — display name for the charity (optional)
+   - `DONATION_NETWORK` — `base` for mainnet or `base-sepolia` for testnet (default: `base-sepolia`)
 4. Deploy
+
+> **Note:** `BASE_URL` is auto-detected on Vercel. If you deploy elsewhere (Railway, Fly, etc.), set `BASE_URL` to your server's public URL (e.g. `https://your-app.fly.dev`).
+
+### Funding Your Donation Wallet
+
+Before donations can work, your donation wallet needs funds on the correct network:
+
+- **If using `base-sepolia` (testnet, the default):** Get testnet USDC from the [Circle faucet](https://faucet.circle.com/) and testnet ETH from a [Base Sepolia faucet](https://www.alchemy.com/faucets/base-sepolia).
+- **If using `base` (mainnet):** Fund the wallet with real USDC and a small amount of ETH for gas on Base.
 
 ## Repository Structure
 
