@@ -212,6 +212,9 @@ export default x402charity({
 npx x402charity donate testing-charity '$0.001' --network base-sepolia
 ```
 
+#### Demo
+![x402charity CLI Demo](./cli-demo.gif)
+
 ## Example Use Cases
 
 - **DEX / Trading** — $0.001 per swap. 50K daily trades = $50/day to charity
