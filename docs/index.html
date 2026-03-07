@@ -1295,124 +1295,195 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     }
 
     function loadDashboard() {
-      fetch('/donations')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          document.getElementById('dash-total').textContent = data.total;
-          document.getElementById('dash-count').textContent = data.count;
-          document.getElementById('dash-network').textContent = data.network === 'base' ? 'Base' : 'Base Sepolia';
-          document.getElementById('dash-donation-count').textContent = '(' + data.donations.length + ')';
-          dashExplorerUrl = data.explorerUrl || '';
+      var MAX_DAYS = 30;
+      var DAY_BATCH = 5;
+      var allDonations = [];
+      var seenTx = {};
 
-          var container = document.getElementById('dash-donations');
-          var histContainer = document.getElementById('dash-history');
-          var okDonations = data.donations.filter(function(d) { return d.status === 'ok'; });
+      var container = document.getElementById('dash-donations');
+      var histContainer = document.getElementById('dash-history');
 
-          if (okDonations.length === 0) {
-            container.innerHTML = '<div class="dash-empty">No donations yet.<div class="hint">POST /donate to trigger a donation</div></div>';
-            histContainer.innerHTML = '<div class="dash-empty">No history yet.</div>';
-          } else {
-            // Recent: last 5
-            var recent = okDonations.slice(0, 5);
-            var html = '<table class="dash-table"><thead><tr><th>Time</th><th>Amount</th><th>From</th><th>Chain</th><th>Tx Hash</th></tr></thead><tbody>';
-            for (var i = 0; i < recent.length; i++) {
-              var d = recent[i];
-              var dExplorer = dashExplorerForChain(d.chain);
-              var txLink = d.txHash
-                ? '<a href="' + dExplorer + '/tx/' + d.txHash + '" target="_blank">' + dashShortHash(d.txHash) + '</a>'
-                : '-';
-              var fromShort = d.from ? d.from.slice(0, 6) + '...' + d.from.slice(-4) : '-';
-              var chainLabel = d.chain === 'base' ? 'Base' : 'Sepolia';
-              html += '<tr><td class="dash-time">' + dashTimeAgo(d.timestamp) + '</td><td class="amount">' + dashEscape(d.amount) + ' ' + d.currency + '</td><td class="tx-hash">' + fromShort + '</td><td class="dash-time">' + chainLabel + '</td><td class="tx-hash">' + txLink + '</td></tr>';
-            }
-            html += '</tbody></table>';
-            container.innerHTML = html;
+      container.innerHTML = '<div class="dash-empty dash-loading"><div class="dash-spinner"></div> Loading recent donations...</div>';
+      histContainer.innerHTML = '<div class="dash-empty dash-loading"><div class="dash-spinner"></div> Loading history...</div>';
 
-            // History: group by day
-            var days = {};
-            for (var i = 0; i < okDonations.length; i++) {
-              var d = okDonations[i];
-              var dateKey = new Date(d.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-              if (!days[dateKey]) days[dateKey] = { donations: [], total: 0 };
-              days[dateKey].donations.push(d);
-              days[dateKey].total += parseFloat(d.amount.replace('$', ''));
-            }
-            var hHtml = '';
-            var dayKeys = Object.keys(days);
-            for (var di = 0; di < dayKeys.length; di++) {
-              var dayKey = dayKeys[di];
-              var dayData = days[dayKey];
-              var dayId = 'hist-day-' + di;
-              hHtml += '<div class="dash-history-day">';
-              hHtml += '<div class="dash-history-day-header" onclick="document.getElementById(\'' + dayId + '\').classList.toggle(\'open\')">';
-              hHtml += '<span class="dash-history-day-date">' + dashEscape(dayKey) + '</span>';
-              hHtml += '<span class="dash-history-day-summary">' + dayData.donations.length + ' donation' + (dayData.donations.length !== 1 ? 's' : '') + ' · <span class="amt">$' + dayData.total.toFixed(3) + '</span> USDC</span>';
-              hHtml += '</div>';
-              hHtml += '<div class="dash-history-rows" id="' + dayId + '">';
-              for (var j = 0; j < dayData.donations.length; j++) {
-                var dd = dayData.donations[j];
-                var time = new Date(dd.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                var fromShort = dd.from ? dd.from.slice(0, 6) + '...' + dd.from.slice(-4) : '-';
-                var ddExplorer = dashExplorerForChain(dd.chain);
-                var txLink = dd.txHash
-                  ? '<a href="' + ddExplorer + '/tx/' + dd.txHash + '" target="_blank">' + dashShortHash(dd.txHash) + '</a>'
-                  : '-';
-                hHtml += '<div class="dash-history-row"><span class="h-time">' + time + '</span><span class="h-from">' + fromShort + '</span><span class="h-amount">' + dashEscape(dd.amount) + '</span><span class="h-tx">' + txLink + '</span></div>';
-              }
-              hHtml += '</div></div>';
-            }
-            histContainer.innerHTML = hHtml;
+      function addDonations(donations) {
+        for (var i = 0; i < donations.length; i++) {
+          var d = donations[i];
+          if (d.status === 'ok' && d.txHash && !seenTx[d.txHash]) {
+            seenTx[d.txHash] = true;
+            allDonations.push(d);
           }
+        }
+        allDonations.sort(function(a, b) { return b.timestamp - a.timestamp; });
+        var total = 0;
+        for (var i = 0; i < allDonations.length; i++) {
+          total += parseFloat(allDonations[i].amount.replace('$', ''));
+        }
+        document.getElementById('dash-total').textContent = '$' + total.toFixed(4);
+        document.getElementById('dash-count').textContent = allDonations.length;
+        document.getElementById('dash-donation-count').textContent = '(' + allDonations.length + ')';
+      }
 
-          // Load wallets
-          Promise.all([
-            fetch('/address').then(function(r) { return r.json(); }).catch(function() { return null; }),
-            fetch('/charity').then(function(r) { return r.json(); }).catch(function() { return null; }),
-          ]).then(function(results) {
-            var addr = results[0];
-            var charity = results[1];
+      function renderRecent() {
+        if (allDonations.length === 0) {
+          container.innerHTML = '<div class="dash-empty">No donations yet.<div class="hint">POST /donate to trigger a donation</div></div>';
+          return;
+        }
+        var recent = allDonations.slice(0, 5);
+        var html = '<table class="dash-table"><thead><tr><th>Time</th><th>Amount</th><th>From</th><th>Chain</th><th>Tx Hash</th></tr></thead><tbody>';
+        for (var i = 0; i < recent.length; i++) {
+          var d = recent[i];
+          var dExplorer = dashExplorerForChain(d.chain);
+          var txLink = d.txHash
+            ? '<a href="' + dExplorer + '/tx/' + d.txHash + '" target="_blank">' + dashShortHash(d.txHash) + '</a>'
+            : '-';
+          var fromShort = d.from ? d.from.slice(0, 6) + '...' + d.from.slice(-4) : '-';
+          var chainLabel = d.chain === 'base' ? 'Base' : 'Sepolia';
+          html += '<tr><td class="dash-time">' + dashTimeAgo(d.timestamp) + '</td><td class="amount">' + dashEscape(d.amount) + ' ' + d.currency + '</td><td class="tx-hash">' + fromShort + '</td><td class="dash-time">' + chainLabel + '</td><td class="tx-hash">' + txLink + '</td></tr>';
+        }
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      }
 
-            if (addr) {
-              document.getElementById('dash-sender-addr').textContent = addr.address;
-              var sep = addr.balances['base-sepolia'];
-              var bas = addr.balances['base'];
-              if (sep) {
-                document.getElementById('dash-sender-sepolia-usdc').textContent = parseFloat(sep.usdc).toFixed(2);
-                document.getElementById('dash-sender-sepolia-eth').textContent = parseFloat(sep.eth).toFixed(4);
+      function renderHistory(loading) {
+        if (allDonations.length === 0 && !loading) {
+          histContainer.innerHTML = '<div class="dash-empty">No history yet.</div>';
+          return;
+        }
+        if (allDonations.length === 0 && loading) return;
+
+        var days = {};
+        for (var i = 0; i < allDonations.length; i++) {
+          var d = allDonations[i];
+          var dateKey = new Date(d.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          if (!days[dateKey]) days[dateKey] = { donations: [], total: 0 };
+          days[dateKey].donations.push(d);
+          days[dateKey].total += parseFloat(d.amount.replace('$', ''));
+        }
+        var hHtml = '';
+        var dayKeys = Object.keys(days);
+        for (var di = 0; di < dayKeys.length; di++) {
+          var dayKey = dayKeys[di];
+          var dayData = days[dayKey];
+          var dayId = 'hist-day-' + di;
+          hHtml += '<div class="dash-history-day">';
+          hHtml += '<div class="dash-history-day-header" onclick="document.getElementById(\'' + dayId + '\').classList.toggle(\'open\')">';
+          hHtml += '<span class="dash-history-day-date">' + dashEscape(dayKey) + '</span>';
+          hHtml += '<span class="dash-history-day-summary">' + dayData.donations.length + ' donation' + (dayData.donations.length !== 1 ? 's' : '') + ' · <span class="amt">$' + dayData.total.toFixed(3) + '</span> USDC</span>';
+          hHtml += '</div>';
+          hHtml += '<div class="dash-history-rows" id="' + dayId + '">';
+          for (var j = 0; j < dayData.donations.length; j++) {
+            var dd = dayData.donations[j];
+            var time = new Date(dd.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            var fromShort = dd.from ? dd.from.slice(0, 6) + '...' + dd.from.slice(-4) : '-';
+            var ddExplorer = dashExplorerForChain(dd.chain);
+            var txLink = dd.txHash
+              ? '<a href="' + ddExplorer + '/tx/' + dd.txHash + '" target="_blank">' + dashShortHash(dd.txHash) + '</a>'
+              : '-';
+            hHtml += '<div class="dash-history-row"><span class="h-time">' + time + '</span><span class="h-from">' + fromShort + '</span><span class="h-amount">' + dashEscape(dd.amount) + '</span><span class="h-tx">' + txLink + '</span></div>';
+          }
+          hHtml += '</div></div>';
+        }
+        if (loading) {
+          hHtml += '<div class="dash-empty dash-loading" style="margin-top:8px"><div class="dash-spinner"></div> Loading more history...</div>';
+        }
+        histContainer.innerHTML = hHtml;
+      }
+
+      function fetchDay(n) {
+        return fetch('/donations?daysAgo=' + n)
+          .then(function(r) { return r.json(); })
+          .catch(function() { return { donations: [], network: '', explorerUrl: '' }; });
+      }
+
+      function loadWallets(addr, charity) {
+        if (addr) {
+          document.getElementById('dash-sender-addr').textContent = addr.address;
+          var sep = addr.balances['base-sepolia'];
+          var bas = addr.balances['base'];
+          if (sep) {
+            document.getElementById('dash-sender-sepolia-usdc').textContent = parseFloat(sep.usdc).toFixed(2);
+            document.getElementById('dash-sender-sepolia-eth').textContent = parseFloat(sep.eth).toFixed(4);
+          }
+          if (bas) {
+            document.getElementById('dash-sender-base-usdc').textContent = parseFloat(bas.usdc).toFixed(2);
+            document.getElementById('dash-sender-base-eth').textContent = parseFloat(bas.eth).toFixed(4);
+          }
+          document.getElementById('dash-sender-explorer-sepolia').href = 'https://sepolia.basescan.org/address/' + addr.address;
+          document.getElementById('dash-sender-explorer-base').href = 'https://basescan.org/address/' + addr.address;
+        } else {
+          document.getElementById('dash-sender-addr').textContent = 'Not configured';
+        }
+        if (charity) {
+          document.getElementById('dash-receiver-addr').textContent = charity.walletAddress;
+          document.getElementById('dash-charity-name').textContent = charity.name;
+          var csep = charity.balances && charity.balances['base-sepolia'];
+          var cbas = charity.balances && charity.balances['base'];
+          if (csep) {
+            document.getElementById('dash-receiver-sepolia-usdc').textContent = parseFloat(csep.usdc).toFixed(2);
+            document.getElementById('dash-receiver-sepolia-eth').textContent = parseFloat(csep.eth).toFixed(4);
+          }
+          if (cbas) {
+            document.getElementById('dash-receiver-base-usdc').textContent = parseFloat(cbas.usdc).toFixed(2);
+            document.getElementById('dash-receiver-base-eth').textContent = parseFloat(cbas.eth).toFixed(4);
+          }
+          document.getElementById('dash-receiver-explorer-sepolia').href = 'https://sepolia.basescan.org/address/' + charity.walletAddress;
+          document.getElementById('dash-receiver-explorer-base').href = 'https://basescan.org/address/' + charity.walletAddress;
+        } else {
+          document.getElementById('dash-receiver-addr').textContent = 'Not configured';
+        }
+      }
+
+      // Phase 1: Load today + wallets in parallel
+      Promise.all([
+        fetchDay(0),
+        fetch('/address').then(function(r) { return r.json(); }).catch(function() { return null; }),
+        fetch('/charity').then(function(r) { return r.json(); }).catch(function() { return null; }),
+      ]).then(function(results) {
+        var todayData = results[0];
+        dashExplorerUrl = todayData.explorerUrl || '';
+        document.getElementById('dash-network').textContent = todayData.network === 'base' ? 'Base' : 'Base Sepolia';
+
+        addDonations(todayData.donations || []);
+        renderRecent();
+        renderHistory(true);
+        loadWallets(results[1], results[2]);
+
+        // Phase 2: Load previous days in batches of DAY_BATCH
+        var dayIndex = 1;
+        var emptyBatches = 0;
+
+        function loadNextBatch() {
+          if (dayIndex >= MAX_DAYS || emptyBatches >= 3) {
+            renderHistory(false);
+            return;
+          }
+          var batch = [];
+          for (var i = 0; i < DAY_BATCH && dayIndex < MAX_DAYS; i++, dayIndex++) {
+            batch.push(fetchDay(dayIndex));
+          }
+          Promise.all(batch).then(function(results) {
+            var anyData = false;
+            for (var i = 0; i < results.length; i++) {
+              if (results[i].donations && results[i].donations.length > 0) {
+                addDonations(results[i].donations);
+                anyData = true;
               }
-              if (bas) {
-                document.getElementById('dash-sender-base-usdc').textContent = parseFloat(bas.usdc).toFixed(2);
-                document.getElementById('dash-sender-base-eth').textContent = parseFloat(bas.eth).toFixed(4);
-              }
-              document.getElementById('dash-sender-explorer-sepolia').href = 'https://sepolia.basescan.org/address/' + addr.address;
-              document.getElementById('dash-sender-explorer-base').href = 'https://basescan.org/address/' + addr.address;
-            } else {
-              document.getElementById('dash-sender-addr').textContent = 'Not configured';
             }
-
-            if (charity) {
-              document.getElementById('dash-receiver-addr').textContent = charity.walletAddress;
-              document.getElementById('dash-charity-name').textContent = charity.name;
-              var csep = charity.balances && charity.balances['base-sepolia'];
-              var cbas = charity.balances && charity.balances['base'];
-              if (csep) {
-                document.getElementById('dash-receiver-sepolia-usdc').textContent = parseFloat(csep.usdc).toFixed(2);
-                document.getElementById('dash-receiver-sepolia-eth').textContent = parseFloat(csep.eth).toFixed(4);
-              }
-              if (cbas) {
-                document.getElementById('dash-receiver-base-usdc').textContent = parseFloat(cbas.usdc).toFixed(2);
-                document.getElementById('dash-receiver-base-eth').textContent = parseFloat(cbas.eth).toFixed(4);
-              }
-              document.getElementById('dash-receiver-explorer-sepolia').href = 'https://sepolia.basescan.org/address/' + charity.walletAddress;
-              document.getElementById('dash-receiver-explorer-base').href = 'https://basescan.org/address/' + charity.walletAddress;
+            if (anyData) {
+              emptyBatches = 0;
+              renderRecent();
+              renderHistory(true);
             } else {
-              document.getElementById('dash-receiver-addr').textContent = 'Not configured';
+              emptyBatches++;
             }
+            loadNextBatch();
           });
-        })
-        .catch(function() {
-          document.getElementById('dash-donations').innerHTML = '<div class="dash-empty">Failed to load donations.</div>';
-        });
+        }
+        loadNextBatch();
+      }).catch(function() {
+        container.innerHTML = '<div class="dash-empty">Failed to load donations.</div>';
+      });
     }
 
     loadDashboard();

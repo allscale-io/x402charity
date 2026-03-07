@@ -264,8 +264,10 @@ export function createCharityServer(options: ServerOptions = {}): {
   });
 
   // Donation history API — fetches on-chain USDC transfers from both networks
-  app.get('/donations', async (_req, res) => {
+  // Accepts ?daysAgo=N to scan a single day's worth of blocks (default: 0 = today)
+  app.get('/donations', async (req, res) => {
     const charityAddr = charity.walletAddress as `0x${string}`;
+    const daysAgo = Math.max(0, parseInt(req.query.daysAgo as string) || 0);
 
     const transferEvent = parseAbiItem(
       'event Transfer(address indexed from, address indexed to, uint256 value)',
@@ -277,7 +279,7 @@ export function createCharityServer(options: ServerOptions = {}): {
     ];
 
     const CHUNK_SIZE = 9999n;
-    const LOOKBACK = 1300000n; // ~30 days on Base (~2s blocks)
+    const BLOCKS_PER_DAY = 43200n; // ~24h at ~2s/block on Base
     const BATCH_CONCURRENCY = 10;
 
     const onChainDonations: DonationLog[] = [];
@@ -286,12 +288,15 @@ export function createCharityServer(options: ServerOptions = {}): {
       try {
         const client = createPublicClient({ chain, transport: http(rpc) });
         const currentBlock = await client.getBlockNumber();
-        const startBlock = currentBlock > LOOKBACK ? currentBlock - LOOKBACK : 0n;
+
+        const endBlock = currentBlock - BigInt(daysAgo) * BLOCKS_PER_DAY;
+        let startBlock = endBlock - BLOCKS_PER_DAY;
+        if (startBlock < 0n) startBlock = 0n;
 
         // Build chunk ranges
         const chunks: { from: bigint; to: bigint }[] = [];
-        for (let from = startBlock; from <= currentBlock; from += CHUNK_SIZE + 1n) {
-          const to = from + CHUNK_SIZE > currentBlock ? currentBlock : from + CHUNK_SIZE;
+        for (let from = startBlock; from <= endBlock; from += CHUNK_SIZE + 1n) {
+          const to = from + CHUNK_SIZE > endBlock ? endBlock : from + CHUNK_SIZE;
           chunks.push({ from, to });
         }
 
