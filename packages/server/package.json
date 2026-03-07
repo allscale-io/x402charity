@@ -21,7 +21,7 @@
   "dependencies": {
     "@x402/evm": "^2.5.0",
     "@x402/express": "^2.6.0",
-    "@x402charity/core": "workspace:*",
+    "x402charity": "workspace:*",
     "express": "^5.0.0",
     "viem": "^2.21.0"
   },

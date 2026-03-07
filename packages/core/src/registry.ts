@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Charity } from './types.js';
 
-const FALLBACK_CHARITIES: Charity[] = [
+const DEFAULT_CHARITIES: Charity[] = [
   {
     id: 'testing-charity',
     name: 'Testing Charity',
@@ -17,15 +17,22 @@ const FALLBACK_CHARITIES: Charity[] = [
 ];
 
 function loadCharitiesFromFile(): Charity[] | null {
-  try {
-    const __dirname = dirname(fileURLToPath(import.meta.url));
-    const filePath = resolve(__dirname, '../../../registry/charities.json');
-    const data = JSON.parse(readFileSync(filePath, 'utf-8'));
-    if (Array.isArray(data.charities) && data.charities.length > 0) {
-      return data.charities;
+  // Try multiple paths — works in monorepo dev and in standalone installs
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    resolve(__dirname, '../../../registry/charities.json'),  // monorepo (src)
+    resolve(__dirname, '../../registry/charities.json'),     // standalone
+  ];
+
+  for (const filePath of candidates) {
+    try {
+      const data = JSON.parse(readFileSync(filePath, 'utf-8'));
+      if (Array.isArray(data.charities) && data.charities.length > 0) {
+        return data.charities;
+      }
+    } catch {
+      // Try next path
     }
-  } catch {
-    // File not found (e.g. installed as npm package outside the monorepo)
   }
   return null;
 }
@@ -39,7 +46,7 @@ export function setCharities(charities: Charity[]): void {
 }
 
 export function listCharities(): Charity[] {
-  return customCharities || registryCharities || FALLBACK_CHARITIES;
+  return customCharities || registryCharities || DEFAULT_CHARITIES;
 }
 
 export function findCharity(idOrName: string): Charity | undefined {

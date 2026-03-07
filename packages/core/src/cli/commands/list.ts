@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { listCharities } from '@x402charity/core';
+import { listCharities } from '../../registry.js';
 
 export const listCommand = new Command('list')
   .description('List available charities')

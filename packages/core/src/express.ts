@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { X402CharityClient, type ClientOptions } from '@x402charity/core';
+import { X402CharityClient, type ClientOptions } from './client.js';
 
 export interface X402CharityMiddlewareOptions extends ClientOptions {
   amount?: string;

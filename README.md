@@ -4,10 +4,12 @@
 [![Fork on GitHub](https://img.shields.io/github/forks/allscale-io/x402charity?style=social)](https://github.com/allscale-io/x402charity/fork)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://x402charity.com)
+[![npm](https://img.shields.io/npm/v/x402charity)](https://www.npmjs.com/package/x402charity)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fallscale-io%2Fx402charity&env=DONATION_PRIVATE_KEY,CHARITY_WALLET&envDescription=DONATION_PRIVATE_KEY%3A%20private%20key%20of%20wallet%20funding%20donations.%20CHARITY_WALLET%3A%20wallet%20address%20of%20the%20charity.&project-name=x402charity&repository-name=x402charity)
 
 Open-source micro-donation server powered by the [x402 protocol](https://www.x402.org/) on Base. Deploy your own server, then trigger USDC donations with a single HTTP call from any product.
 
-**[Live Demo](https://x402charity.com)** | **[Star on GitHub](https://github.com/allscale-io/x402charity/stargazers)** | **[Fork this repo](https://github.com/allscale-io/x402charity/fork)**
+**[Live Demo](https://x402charity.com)** | **[Deploy to Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fallscale-io%2Fx402charity&env=DONATION_PRIVATE_KEY,CHARITY_WALLET&envDescription=DONATION_PRIVATE_KEY%3A%20private%20key%20of%20wallet%20funding%20donations.%20CHARITY_WALLET%3A%20wallet%20address%20of%20the%20charity.&project-name=x402charity&repository-name=x402charity)** | **[npm install](https://www.npmjs.com/package/x402charity)** | **[Fork this repo](https://github.com/allscale-io/x402charity/fork)**
 
 Built and maintained by [AllScale Lab](https://allscale.io).
 
@@ -118,6 +120,10 @@ console.log(receipt.txHash); // on-chain proof
 
 ## Integrate with Your Product
 
+```bash
+npm install x402charity
+```
+
 ### Option A: Simple HTTP Call (any language)
 
 The simplest way — just call your deployed server's `POST /donate` endpoint:
@@ -132,40 +138,50 @@ await fetch('https://your-charity-server.com/donate', {
 
 ### Option B: Express Middleware
 
-Add automatic donations to any Express route:
-
 ```js
-import { x402charity } from '@x402charity/express';
+import { x402charity } from 'x402charity/express';
 
 app.use('/api', x402charity({
   privateKey: process.env.DONATION_PRIVATE_KEY,
   donateEndpoint: 'https://your-charity-server.com/donate',
-  charity: { id: 'my-charity', name: 'My Charity', walletAddress: '0x...', chain: 'base-sepolia', x402Endpoint: 'https://your-charity-server.com/donate', description: '', verified: false },
+  charity: {
+    id: 'my-charity',
+    name: 'My Charity',
+    walletAddress: '0x...',
+    chain: 'base-sepolia',
+    description: 'My charity description',
+    verified: false,
+    x402Endpoint: 'https://your-charity-server.com/donate',
+  },
   amount: '$0.001',
-  shouldDonate: (req) => req.method === 'POST', // only donate on POST requests
+  shouldDonate: (req) => req.method === 'POST',
 }));
 ```
 
 ### Option C: Next.js Middleware
 
-Add donations to Next.js API routes:
-
 ```js
 // middleware.ts
-import { x402charity } from '@x402charity/next';
+import { x402charity } from 'x402charity/next';
 
 export default x402charity({
   privateKey: process.env.DONATION_PRIVATE_KEY,
   donateEndpoint: 'https://your-charity-server.com/donate',
-  charity: { id: 'my-charity', name: 'My Charity', walletAddress: '0x...', chain: 'base-sepolia', x402Endpoint: 'https://your-charity-server.com/donate', description: '', verified: false },
+  charity: {
+    id: 'my-charity',
+    name: 'My Charity',
+    walletAddress: '0x...',
+    chain: 'base-sepolia',
+    description: 'My charity description',
+    verified: false,
+    x402Endpoint: 'https://your-charity-server.com/donate',
+  },
   amount: '$0.001',
   matcher: '/api/*',
 });
 ```
 
 ### Option D: CLI
-
-Donate from the command line:
 
 ```bash
 npx x402charity donate testing-charity '$0.001' --network base-sepolia
@@ -182,7 +198,9 @@ npx x402charity donate testing-charity '$0.001' --network base-sepolia
 
 ## Deploy on Vercel
 
-You can also deploy to Vercel instead of Docker:
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fallscale-io%2Fx402charity&env=DONATION_PRIVATE_KEY,CHARITY_WALLET&envDescription=DONATION_PRIVATE_KEY%3A%20private%20key%20of%20wallet%20funding%20donations.%20CHARITY_WALLET%3A%20wallet%20address%20of%20the%20charity.&project-name=x402charity&repository-name=x402charity)
+
+Or deploy manually:
 
 1. Fork this repo
 2. Import it in [Vercel](https://vercel.com)
@@ -207,11 +225,8 @@ Before donations can work, your donation wallet needs funds on the correct netwo
 ```
 x402charity/
 ├── packages/
-│   ├── core/            # x402 charity client + registry
-│   ├── server/          # Express server with x402 middleware
-│   ├── cli/             # CLI tool for donations
-│   ├── express/         # Express middleware for auto-donations
-│   └── next/            # Next.js middleware for auto-donations
+│   ├── core/            # npm package: client, middleware, CLI (x402charity)
+│   └── server/          # Deployable donation server
 ├── registry/
 │   └── charities.json   # Charity directory
 ├── docs/

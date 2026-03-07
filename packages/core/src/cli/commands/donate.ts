@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { X402CharityClient, findCharity } from '@x402charity/core';
+import { X402CharityClient } from '../../client.js';
+import { findCharity } from '../../registry.js';
 import { getPrivateKey, getNetwork } from '../config.js';
 
 export const donateCommand = new Command('donate')

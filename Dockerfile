@@ -16,7 +16,7 @@ COPY packages/server/ packages/server/
 COPY registry/ registry/
 COPY docs/ docs/
 
-RUN pnpm --filter @x402charity/core build && pnpm --filter @x402charity/server build
+RUN pnpm --filter x402charity build && pnpm --filter @x402charity/server build
 
 EXPOSE 3402
 

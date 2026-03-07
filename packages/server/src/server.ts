@@ -12,8 +12,8 @@ import { base, baseSepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 import { paymentMiddlewareFromConfig } from '@x402/express';
 import { ExactEvmScheme } from '@x402/evm/exact/server';
-import { X402CharityClient, listCharities, setCharities } from '@x402charity/core';
-import type { Charity } from '@x402charity/core';
+import { X402CharityClient, listCharities, setCharities } from 'x402charity';
+import type { Charity } from 'x402charity';
 
 const USDC_ADDRESSES: Record<string, `0x${string}`> = {
   base: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',

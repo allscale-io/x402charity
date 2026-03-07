@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server.js';
-import { X402CharityClient, type ClientOptions } from '@x402charity/core';
+import { X402CharityClient, type ClientOptions } from './client.js';
 
 export interface X402CharityMiddlewareOptions extends ClientOptions {
   amount?: string;
