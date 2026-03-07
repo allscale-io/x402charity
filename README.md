@@ -224,6 +224,10 @@ npx x402charity donate testing-charity '$0.001' --network base-sepolia
 - **Betting / Predictions** — $0.001 per bet placed
 - **Payments / Banking** — $0.001 per transfer processed
 
+## Examples
+
+- [Express Basic](./examples/express-basic) - Minimal Express application showing how to use the x402charity middleware
+
 ## Deploy on Vercel
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fallscale-io%2Fx402charity&env=DONATION_PRIVATE_KEY,CHARITY_WALLET,DONATE_API_KEY&envDescription=DONATION_PRIVATE_KEY%3A%20private%20key%20of%20wallet%20funding%20donations.%20CHARITY_WALLET%3A%20wallet%20address%20of%20the%20charity.%20DONATE_API_KEY%3A%20secret%20to%20protect%20POST%20%2Fdonate%20(generate%20with%3A%20openssl%20rand%20-hex%2032).&project-name=x402charity&repository-name=x402charity)

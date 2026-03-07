@@ -1,0 +1,27 @@
+{
+  "name": "express-basic-example",
+  "version": "1.0.0",
+  "description": "Basic Express example for x402charity middleware",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "express",
+    "x402",
+    "charity",
+    "donation",
+    "usdc",
+    "base"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "x402charity": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
