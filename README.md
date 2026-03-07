@@ -71,218 +71,113 @@ Create a new wallet (MetaMask, Coinbase Wallet, etc.) and export the private key
 ```bash
 git clone https://github.com/allscale-io/x402charity.git
 cd x402charity
-cp .env.example .env   # edit .env with your keys
-pnpm install
-pnpm dev
+cp .e
 ```
 
-**Option B: Docker**
+### CLI
+
+Install the CLI globally:
 
 ```bash
-git clone https://github.com/allscale-io/x402charity.git
-cd x402charity
-docker build -t x402charity .
-
-docker run -p 3402:3402 \
-  -e DONATION_PRIVATE_KEY="0xabc..." \
-  -e CHARITY_WALLET="0xdef..." \
-  -e CHARITY_NAME="Give Directly" \
-  -e DONATION_NETWORK="base" \
-  -e DONATE_API_KEY="$(openssl rand -hex 32)" \
-  x402charity
+npm install -g x402charity
 ```
 
-Your server is live at `http://localhost:3402` with a built-in dashboard.
-
-### 3. Trigger Donations
-
-From your product server — any language, any framework:
-
-```js
-const res = await fetch('https://your-charity-server.com/donate', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer YOUR_DONATE_API_KEY',
-  },
-  body: JSON.stringify({ amount: '$0.001' }),
-});
-
-const receipt = await res.json();
-console.log(receipt.txHash); // on-chain proof
-```
-
-## Environment Variables
-
-| Variable | Required | Description | Default |
-|----------|----------|-------------|---------|
-| `DONATION_PRIVATE_KEY` | Yes | Private key of the wallet that funds donations | — |
-| `CHARITY_WALLET` | Yes | Wallet address of the charity receiving donations | — |
-| `CHARITY_NAME` | No | Display name for the charity | `My Charity` |
-| `CHARITY_DESCRIPTION` | No | Description of the charity | — |
-| `DONATION_NETWORK` | No | `base` (mainnet) or `base-sepolia` (testnet) | `base-sepolia` |
-| `BASE_URL` | No | Public URL of your server (auto-detected on Vercel) | `http://localhost:3402` |
-| `PORT` | No | Server port | `3402` |
-| `DONATE_API_KEY` | No | Secret key to protect `POST /donate`. If set, callers must send `Authorization: Bearer <key>`. If unset, the endpoint is open. **Set this in production.** | — (open) |
-| `CORS_ORIGINS` | No | Comma-separated list of allowed CORS origins (e.g. `https://myapp.com,https://admin.myapp.com`). If unset, all origins are allowed. | `*` (all origins) |
-
-> **Security notes:**
-> - **Never commit your `DONATION_PRIVATE_KEY`** to version control. Use environment variables or a secret manager (e.g. Vercel Environment Variables, AWS Secrets Manager). The private key controls the donation wallet funds.
-> - **Set `DONATE_API_KEY` in production.** Without it, anyone who knows your server URL can trigger donations and drain your wallet. Generate one with: `openssl rand -hex 32`
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/donate` | Trigger a donation. Requires `Authorization: Bearer <DONATE_API_KEY>` if API key is set. Optional body: `{ "amount": "$0.001" }` |
-| `GET` | `/donations` | JSON list of all donations with totals |
-| `GET` | `/charity` | Charity info (name, wallet, chain) |
-| `GET` | `/address` | Donation wallet address and balances |
-| `GET` | `/health` | Health check |
-
-## Integrate with Your Product
+Or run with npx:
 
 ```bash
-npm install x402charity
+npx x402charity --help
 ```
 
-### Option A: Simple HTTP Call (any language)
+**Demo:**
 
-The simplest way — just call your deployed server's `POST /donate` endpoint:
+![CLI Demo](https://github.com/allscale-io/x402charity/raw/main/cli-demo.gif)
 
-```js
-await fetch('https://your-charity-server.com/donate', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer YOUR_DONATE_API_KEY',
-  },
-  body: JSON.stringify({ amount: '$0.001' }),
-});
-```
-
-### Option B: Express Middleware
-
-```js
-import { x402charity } from 'x402charity/express';
-
-app.use('/api', x402charity({
-  privateKey: process.env.DONATION_PRIVATE_KEY,
-  donateEndpoint: 'https://your-charity-server.com/donate',
-  charity: {
-    id: 'my-charity',
-    name: 'My Charity',
-    walletAddress: '0x...',
-    chain: 'base-sepolia',
-    description: 'My charity description',
-    verified: false,
-    x402Endpoint: 'https://your-charity-server.com/donate',
-  },
-  amount: '$0.001',
-  shouldDonate: (req) => req.method === 'POST',
-}));
-```
-
-### Option C: Next.js Middleware
-
-```js
-// middleware.ts
-import { x402charity } from 'x402charity/next';
-
-export default x402charity({
-  privateKey: process.env.DONATION_PRIVATE_KEY,
-  donateEndpoint: 'https://your-charity-server.com/donate',
-  charity: {
-    id: 'my-charity',
-    name: 'My Charity',
-    walletAddress: '0x...',
-    chain: 'base-sepolia',
-    description: 'My charity description',
-    verified: false,
-    x402Endpoint: 'https://your-charity-server.com/donate',
-  },
-  amount: '$0.001',
-  matcher: '/api/*',
-});
-```
-
-### Option D: CLI
+**Example donation:**
 
 ```bash
+# Donate $0.001 to testing-charity on Base Sepolia
 npx x402charity donate testing-charity '$0.001' --network base-sepolia
 ```
 
-## Example Use Cases
+**Available commands:**
 
-- **DEX / Trading** — $0.001 per swap. 50K daily trades = $50/day to charity
-- **AI Products / APIs** — $0.001 per API call or prompt
-- **Games** — $0.001 per level cleared or match played
-- **E-commerce** — $0.01 per order or checkout
-- **Betting / Predictions** — $0.001 per bet placed
-- **Payments / Banking** — $0.001 per transfer processed
+- `x402charity donate <cause> [amount]` - Donate USDC to a charity
+- `x402charity list` - List all available charities
+- `x402charity balance` - Check your donation wallet balance
+- `x402charity config` - Configure your donation wallet private key
 
-## Deploy on Vercel
+### 3. Configure Your Server
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fallscale-io%2Fx402charity&env=DONATION_PRIVATE_KEY,CHARITY_WALLET,DONATE_API_KEY&envDescription=DONATION_PRIVATE_KEY%3A%20private%20key%20of%20wallet%20funding%20donations.%20CHARITY_WALLET%3A%20wallet%20address%20of%20the%20charity.%20DONATE_API_KEY%3A%20secret%20to%20protect%20POST%20%2Fdonate%20(generate%20with%3A%20openssl%20rand%20-hex%2032).&project-name=x402charity&repository-name=x402charity)
+Set environment variables:
 
-Or deploy manually:
+```bash
+# Private key of the wallet funding donations (from step 1)
+export DONATION_PRIVATE_KEY=0x...
 
-1. Fork this repo
-2. Import it in [Vercel](https://vercel.com)
-3. Set the following environment variables in your Vercel project settings:
-   - `DONATION_PRIVATE_KEY` — private key of the wallet that funds donations
-   - `CHARITY_WALLET` — wallet address of the charity receiving donations
-   - `CHARITY_NAME` — display name for the charity (optional)
-   - `DONATION_NETWORK` — `base` for mainnet or `base-sepolia` for testnet (default: `base-sepolia`)
-   - `DONATE_API_KEY` — secret key to protect `POST /donate` (recommended). Generate with: `openssl rand -hex 32`
-4. Deploy
+# Wallet address of the charity (defaults to AllScale Lab's charity wallet)
+export CHARITY_WALLET=0x...
 
-> **Note:** `BASE_URL` is auto-detected on Vercel. If you deploy elsewhere (Railway, Fly, etc.), set `BASE_URL` to your server's public URL (e.g. `https://your-app.fly.dev`).
-
-### Funding Your Donation Wallet
-
-Before donations can work, your donation wallet needs funds on the correct network:
-
-- **If using `base-sepolia` (testnet, the default):** Get testnet USDC from the [Circle faucet](https://faucet.circle.com/) and testnet ETH from a [Base Sepolia faucet](https://www.alchemy.com/faucets/base-sepolia).
-- **If using `base` (mainnet):** Fund the wallet with real USDC and a small amount of ETH for gas on Base.
-
-## Repository Structure
-
-```
-x402charity/
-├── packages/
-│   ├── core/            # npm package: client, middleware, CLI (x402charity)
-│   └── server/          # Deployable donation server
-├── registry/
-│   └── charities.json   # Charity directory
-├── docs/
-│   └── index.html       # Landing page (x402charity.com)
-├── api/
-│   └── index.ts         # Vercel serverless entry point
-├── Dockerfile
-└── vercel.json
+# Secret to protect POST /donate endpoint (generate with: openssl rand -hex 32)
+export DONATE_API_KEY=...
 ```
 
-## Contributing
+### 4. Start the Server
 
-Contributions welcome. Please open an issue first to discuss what you'd like to change.
+```bash
+npm start
+```
 
-### Adding a Charity
+Server runs on `http://localhost:3000`.
 
-To add a charity to the public registry, submit a PR editing `registry/charities.json`:
+### 5. Trigger Donations from Your Product
+
+From your backend, call:
+
+```bash
+curl -X POST http://localhost:3000/donate \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_DONATE_API_KEY" \
+  -d '{"amount": "$0.001"}'
+```
+
+You'll receive a response with the transaction hash:
 
 ```json
 {
-  "id": "your-charity-id",
-  "name": "Your Charity Name",
-  "description": "What the charity does",
-  "walletAddress": "0x...",
+  "success": true,
+  "txHash": "0x...",
+  "amount": "0.001",
+  "currency": "USDC",
   "chain": "base",
-  "verified": false,
-  "category": "education",
-  "x402Endpoint": "https://your-charity-server.com/donate"
+  "from": "0x...",
+  "to": "0x..."
 }
 ```
+
+## Dashboard
+
+Visit `http://localhost:3000` in your browser to see the dashboard:
+- Recent donations
+- Donation wallet balance
+- Charity wallet balance
+- Transaction history
+
+## Available Charities
+
+Run `x402charity list` to see all available charities. Current options:
+
+- **testing-charity** - Test charity (USDC goes to AllScale Lab's charity wallet)
+- **give-directly** - GiveDirectly (coming soon)
+- **red-cross** - American Red Cross (coming soon)
+- **wikimedia** - Wikimedia Foundation (coming soon)
+
+## How It's Built
+
+- **Backend**: Node.js + Express
+- **Blockchain**: Base (Ethereum L2)
+- **Payments**: x402 protocol (Coinbase)
+- **Dashboard**: React + Vite
+- **CLI**: Commander.js
 
 ## License
 
