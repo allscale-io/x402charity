@@ -23,24 +23,36 @@ x402 Charity lets any company add micro-donations to their product. Every user a
 ## How It Works
 
 ```
-User Action  -->  Your Product Server  -->  POST /donate  -->  x402 Charity Server
-                                                                    |
-                                                              x402 Protocol
-                                                                    |
-                                                              x402.org Facilitator
-                                                                    |
-                                                              USDC on-chain
-                                                                    |
-                                                              Charity Wallet
+┌──────────┐      ┌──────────────────┐      ┌──────────────────────┐
+│   User   │      │  Your Product    │      │  x402 Charity Server │
+│  Action  │─────>│  Server          │─────>│  (this repo)         │
+└──────────┘      └──────────────────┘      └──────────┬───────────┘
+  e.g. swap,        calls POST /donate                 │
+  API call,          with amount                       │ signs payment
+  game move                                            │ via x402 protocol
+                                                       v
+                                              ┌──────────────────┐
+                                              │ x402 Facilitator │
+                                              │ (run by Coinbase)│
+                                              └────────┬─────────┘
+                                                       │ settles USDC
+                                                       │ on Base
+                                                       v
+                                              ┌──────────────────┐
+                                              │ Charity Wallet   │
+                                              │ receives USDC    │
+                                              └──────────────────┘
 ```
 
-1. A user takes an action in your product (swap, API call, game move, etc.)
-2. Your product server calls `POST /donate` on your x402 charity server
-3. The charity server uses the x402 protocol to send USDC to the charity wallet
-4. The [x402.org facilitator](https://x402.org) (run by Coinbase) settles the payment on-chain
-5. A receipt with the on-chain transaction hash is returned
+**Step by step:**
 
-The user never needs a wallet or even knows a donation happened.
+1. **User acts** — A user does something in your product (swap, API call, game move, checkout, etc.)
+2. **Your server calls ours** — Your backend sends `POST /donate` with an amount (e.g. `$0.001`) to your deployed x402 charity server
+3. **x402 protocol handles payment** — The charity server uses your pre-funded donation wallet to sign a USDC payment via the [x402 protocol](https://www.x402.org/)
+4. **On-chain settlement** — The x402 facilitator (operated by Coinbase) settles the payment on Base — USDC moves from your donation wallet to the charity wallet
+5. **Receipt returned** — Your server gets back a response with the on-chain transaction hash as proof
+
+The user never needs a wallet, never signs anything, and never even knows a donation happened. Your company funds all donations from a single pre-funded wallet.
 
 ## Get Started
 
