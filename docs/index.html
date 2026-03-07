@@ -1860,13 +1860,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
 
     function renderLog() {
       logList.innerHTML = logEntries.slice(0, 30).map(function(e) {
-        var detailHtml;
-        if (e.status === 'ok' && e.txHash) {
-          var href = explorerUrl + '/tx/' + escapeHtml(e.txHash);
-          detailHtml = '<a href="' + href + '" target="_blank" rel="noopener" title="View transaction on blockchain explorer">' + escapeHtml(e.detail) + '</a>';
-        } else {
-          detailHtml = escapeHtml(e.detail);
-        }
+        var detailHtml = escapeHtml(e.detail);
         var tooltipHtml = '';
         if (e.status === 'error' && e.errorReason) {
           tooltipHtml = '<div class="error-tooltip">' + escapeHtml(e.errorReason) + '</div>';
