@@ -1576,9 +1576,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     const DONATION_PER_OBSTACLE = 0.001;
     const EXPLORER_URLS = { 'base': 'https://basescan.org', 'base-sepolia': 'https://sepolia.basescan.org' };
     let explorerUrl = EXPLORER_URLS['base-sepolia'];
-    fetch(X402_SERVER + '/charity').then(r => r.json()).then(d => {
-      if (d.chain && EXPLORER_URLS[d.chain]) explorerUrl = EXPLORER_URLS[d.chain];
-    }).catch(() => {});
+    let charityWallet = '';
 
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
@@ -1793,6 +1791,9 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
             runConfirmed += DONATION_PER_OBSTACLE;
             totalDonated += DONATION_PER_OBSTACLE;
             if (state === 'dead') updateGameoverMsg();
+            var chain = data.receipt?.chain;
+            if (chain && EXPLORER_URLS[chain]) explorerUrl = EXPLORER_URLS[chain];
+            if (data.receipt?.to) charityWallet = data.receipt.to;
             const tx = data.receipt?.txHash;
             const short = tx ? tx.slice(0, 10) + '...' : 'confirmed';
             updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — $0.001', short, 'ok', tx);
@@ -1848,7 +1849,10 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         var detailHtml;
         if (e.status === 'ok' && e.txHash) {
           var href = explorerUrl + '/tx/' + escapeHtml(e.txHash);
-          detailHtml = '<a href="' + href + '" target="_blank" rel="noopener" title="View on blockchain explorer">' + escapeHtml(e.detail) + '</a>';
+          detailHtml = '<a href="' + href + '" target="_blank" rel="noopener" title="View transaction on blockchain explorer">' + escapeHtml(e.detail) + '</a>';
+        } else if (e.status === 'ok' && charityWallet) {
+          var href = explorerUrl + '/address/' + escapeHtml(charityWallet);
+          detailHtml = '<a href="' + href + '" target="_blank" rel="noopener" title="View all donations on blockchain explorer">' + escapeHtml(e.detail) + '</a>';
         } else {
           detailHtml = escapeHtml(e.detail);
         }
