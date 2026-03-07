@@ -580,7 +580,7 @@
       border-bottom-color: var(--accent);
     }
 
-    .code-panel { display: none; }
+    .code-panel { display: none; position: relative; }
     .code-panel.active { display: block; }
 
     pre {
@@ -593,6 +593,15 @@
       line-height: 1.7;
       margin: 0;
     }
+
+    .copy-btn {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--border); border: none; border-radius: 6px;
+      color: var(--text-muted); font-size: 12px; font-family: 'Manrope', sans-serif;
+      padding: 5px 10px; cursor: pointer; transition: all 0.2s; z-index: 1;
+    }
+    .copy-btn:hover { background: var(--text-muted); color: var(--bg); }
+    .copy-btn.copied { background: var(--accent); color: var(--bg); }
 
     code { font-family: 'Inconsolata', 'SF Mono', monospace; }
 
@@ -1027,6 +1036,7 @@
       </div>
 
       <div class="code-panel active" id="panel-wallet">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
 <pre><code><span class="code-comment"># Create a new wallet to fund donations.</span>
 <span class="code-comment"># Use any wallet provider (MetaMask, Coinbase Wallet, etc.)</span>
 <span class="code-comment"># and export the private key.</span>
@@ -1042,6 +1052,7 @@
       </div>
 
       <div class="code-panel" id="panel-deploy">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
 <pre><code><span class="code-comment"># Clone and build with Docker</span>
 $ git clone https://github.com/allscale-io/x402charity.git
 $ cd x402charity
@@ -1060,6 +1071,7 @@ $ docker run -p 3402:3402 \
       </div>
 
       <div class="code-panel" id="panel-trigger">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
 <pre><code><span class="code-comment">// From your product server — any language, any framework.</span>
 <span class="code-comment">// Call POST /donate whenever a user action should trigger a donation.</span>
 
@@ -1256,6 +1268,17 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         }
       })
       .catch(() => {});
+
+    // ===== Copy code =====
+    function copyCode(btn) {
+      var code = btn.parentElement.querySelector('code');
+      var text = code.textContent || code.innerText;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
 
     // ===== Code tabs =====
     document.querySelectorAll('.code-tab').forEach(tab => {
