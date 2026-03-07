@@ -1,7 +1,10 @@
 {
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm --filter @x402charity/core build && pnpm --filter @x402charity/server build",
+  "buildCommand": "pnpm --filter @x402charity/core build && pnpm --filter @x402charity/server build && cp docs/index.html public/index.html",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api" }
+    { "source": "/health", "destination": "/api" },
+    { "source": "/address", "destination": "/api" },
+    { "source": "/charities", "destination": "/api" },
+    { "source": "/donate/:path*", "destination": "/api" }
   ]
 }
