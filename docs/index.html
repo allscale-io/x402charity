@@ -1825,6 +1825,9 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       if (d.indexOf('insufficient') !== -1 || d.indexOf('balance') !== -1 || d.indexOf('fund') !== -1) {
         return 'The demo donation wallet has run out of testnet USDC. This is expected in a demo environment with limited funds. To fix: visit faucet.circle.com to get free testnet USDC and send it to the donation wallet.';
       }
+      if (status === 401) {
+        return 'The server has DONATE_API_KEY set, so the demo game cannot trigger donations. This is expected — in production, only your backend (with the API key) can trigger donations.';
+      }
       if (status === 503) {
         return 'The donation wallet is not configured on the server. The server admin needs to set the DONATION_PRIVATE_KEY environment variable.';
       }
