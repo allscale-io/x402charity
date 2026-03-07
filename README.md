@@ -163,6 +163,8 @@ await fetch('https://your-charity-server.com/donate', {
 
 ### Option B: Express Middleware
 
+For a complete example, see [examples/express-app](examples/express-app).
+
 ```js
 import { x402charity } from 'x402charity/express';
 
