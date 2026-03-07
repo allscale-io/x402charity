@@ -357,8 +357,13 @@ export function createCharityServer(options: ServerOptions = {}): {
     });
   });
 
+  // Donation queue — serializes x402 payments to avoid nonce conflicts
+  let donationQueue: Promise<void> = Promise.resolve();
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 1000;
+
   // Trigger endpoint — server pays from its own wallet via x402 protocol
-  app.post('/donate', async (req, res) => {
+  app.post('/donate', (req, res) => {
     if (!donationClient) {
       res.status(503).json({
         error: 'Donation wallet not configured. Set DONATION_PRIVATE_KEY env var.',
@@ -366,53 +371,63 @@ export function createCharityServer(options: ServerOptions = {}): {
       return;
     }
 
-    try {
-      const amount = req.body?.amount || '$0.001';
-      const receipt = await donationClient.donate(amount);
-      const log: DonationLog = {
-        txHash: receipt.txHash,
-        from: receipt.from,
-        to: receipt.to,
-        charityId: charity.id,
-        charityName: charity.name,
-        amount: receipt.amount,
-        currency: receipt.currency,
-        chain: receipt.chain,
-        timestamp: receipt.timestamp,
-        status: 'ok',
-      };
-      donationLog.push(log);
-      res.json({
-        status: 'ok',
-        message: `Donated to ${charity.name}`,
-        receipt: {
-          txHash: receipt.txHash,
-          from: receipt.from,
-          to: receipt.to,
-          amount: receipt.amount,
-          currency: receipt.currency,
-          chain: receipt.chain,
-          timestamp: receipt.timestamp,
-        },
-      });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      console.error(`Donation failed:`, message);
+    const amount = req.body?.amount || '$0.001';
+
+    donationQueue = donationQueue.then(async () => {
+      let lastError = '';
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        try {
+          if (attempt > 0) {
+            await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+          }
+          const receipt = await donationClient!.donate(amount);
+          const log: DonationLog = {
+            txHash: receipt.txHash,
+            from: receipt.from,
+            to: receipt.to,
+            charityId: charity.id,
+            charityName: charity.name,
+            amount: receipt.amount,
+            currency: receipt.currency,
+            chain: receipt.chain,
+            timestamp: receipt.timestamp,
+            status: 'ok',
+          };
+          donationLog.push(log);
+          res.json({
+            status: 'ok',
+            message: `Donated to ${charity.name}`,
+            receipt: {
+              txHash: receipt.txHash,
+              from: receipt.from,
+              to: receipt.to,
+              amount: receipt.amount,
+              currency: receipt.currency,
+              chain: receipt.chain,
+              timestamp: receipt.timestamp,
+            },
+          });
+          return;
+        } catch (err) {
+          lastError = err instanceof Error ? err.message : 'Unknown error';
+          console.error(`Donation attempt ${attempt + 1}/${MAX_RETRIES} failed:`, lastError);
+        }
+      }
       donationLog.push({
         txHash: '',
         from: account?.address ?? '',
         to: charity.walletAddress,
         charityId: charity.id,
         charityName: charity.name,
-        amount: req.body?.amount || '$0.001',
+        amount,
         currency: 'USDC',
         chain: network,
         timestamp: Date.now(),
         status: 'failed',
-        error: message,
+        error: lastError,
       });
-      res.status(500).json({ error: 'Donation failed', details: message });
-    }
+      res.status(500).json({ error: 'Donation failed', details: lastError });
+    });
   });
 
   return { app };
