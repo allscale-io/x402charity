@@ -1345,6 +1345,8 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     let score = 0;
     let bestScore = parseInt(localStorage.getItem('x402runner_best') || '0', 10);
     let totalDonated = 0;
+    let runDonated = 0;
+    let runConfirmed = 0;
     let speed = BASE_SPEED;
     let frameId = null;
     let groundOffset = 0;
@@ -1384,12 +1386,14 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
 
     function startGame() {
       score = 0; speed = BASE_SPEED; groundOffset = 0;
+      runDonated = 0; runConfirmed = 0;
       player = { x: 60, y: GROUND_Y - PLAYER_H, vy: 0, onGround: true };
       obstacles = []; nextObstacleIn = 90;
       state = 'running';
       startOverlay.classList.add('hidden');
       gameoverOverlay.classList.add('hidden');
       scoreEl.textContent = '0';
+      donatedEl.textContent = '$0.000';
       if (frameId) cancelAnimationFrame(frameId);
       loop();
     }
@@ -1447,6 +1451,16 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       }
     }
 
+    function updateGameoverMsg() {
+      var msg = 'You cleared ' + score + ' obstacle' + (score !== 1 ? 's' : '');
+      if (runConfirmed > 0) {
+        msg += ' and donated $' + runConfirmed.toFixed(3) + ' USDC';
+      } else if (runDonated > 0) {
+        msg += ' — donations confirming...';
+      }
+      gameoverSub.textContent = msg;
+    }
+
     function die() {
       state = 'dead';
       if (score > bestScore) {
@@ -1457,11 +1471,8 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       } else {
         gameoverTitle.textContent = 'Game Over';
       }
-      var msg = 'You cleared ' + score + ' obstacle' + (score !== 1 ? 's' : '');
-      if (totalDonated > 0) {
-        msg += ' and donated $' + totalDonated.toFixed(3) + ' USDC';
-      }
-      gameoverSub.textContent = msg;
+      updateGameoverMsg();
+
       gameoverOverlay.classList.remove('hidden');
     }
 
@@ -1512,8 +1523,8 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
 
     function triggerDonation(obstacleNum) {
       const logIdx = addLog('Obstacle #' + obstacleNum + ' cleared', 'donating...');
-      totalDonated += DONATION_PER_OBSTACLE;
-      donatedEl.textContent = '$' + totalDonated.toFixed(3);
+      runDonated += DONATION_PER_OBSTACLE;
+      donatedEl.textContent = '$' + runDonated.toFixed(3);
 
       fetch(X402_SERVER + DONATE_PATH, {
         method: 'POST',
@@ -1523,6 +1534,8 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         .then(r => r.json().then(data => ({ ok: r.ok, data })))
         .then(({ ok, data }) => {
           if (ok) {
+            runConfirmed += DONATION_PER_OBSTACLE;
+            if (state === 'dead') updateGameoverMsg();
             const tx = data.receipt?.txHash;
             const short = tx ? tx.slice(0, 10) + '...' : 'confirmed';
             updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — $0.001', short, 'ok');
