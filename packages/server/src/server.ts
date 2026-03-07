@@ -89,8 +89,6 @@ export function createCharityServer(options: ServerOptions = {}): {
   const docsDir = options.docsDir || resolve(process.cwd(), 'docs');
 
   app.get('/', (_req, res) => res.sendFile(resolve(docsDir, 'index.html')));
-  app.get('/demo', (_req, res) => res.sendFile(resolve(docsDir, 'demo.html')));
-  app.get('/use-cases', (_req, res) => res.sendFile(resolve(docsDir, 'use-cases.html')));
 
   // --- x402 payment middleware ---
   // Gate GET /donate/<charityId> behind x402 paywall.

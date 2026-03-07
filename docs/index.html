@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>x402 Charity — Micro-Donations Powered by x402</title>
+  <meta name="description" content="Open-source middleware that triggers a small charitable USDC donation whenever a user takes an action. Add giving to any product in under 5 minutes.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
@@ -23,6 +24,8 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    html { scroll-behavior: smooth; }
+
     body {
       font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
@@ -36,15 +39,20 @@
     }
 
     .container {
-      max-width: 840px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 0 24px;
     }
 
-    /* Header */
+    /* ---- Header ---- */
     header {
       padding: 20px 0;
       border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
     }
 
     header .container {
@@ -61,10 +69,7 @@
       color: var(--text);
     }
 
-    .header-brand img {
-      height: 22px;
-      width: auto;
-    }
+    .header-brand img { height: 22px; width: auto; }
 
     .header-brand span {
       font-family: 'Manrope', sans-serif;
@@ -89,28 +94,57 @@
 
     header nav a:hover { color: var(--text); }
 
-    /* Hero */
+    /* ---- Section shared ---- */
+    section {
+      padding: 80px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    section:last-of-type { border-bottom: none; }
+
+    .section-label {
+      font-family: 'Manrope', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+
+    .section-title span { color: var(--accent); }
+
+    .section-sub {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 560px;
+      margin-bottom: 40px;
+    }
+
+    /* ---- Hero ---- */
     .hero {
-      padding: 100px 0 72px;
+      padding: 100px 0 80px;
       text-align: center;
     }
 
-    .hero h2 {
+    .hero .section-title {
       font-size: 52px;
-      font-weight: 800;
-      line-height: 1.08;
-      margin-bottom: 20px;
       letter-spacing: -1.5px;
+      max-width: 700px;
+      margin: 0 auto 20px;
     }
 
-    .hero h2 span { color: var(--accent); }
-
-    .hero p {
+    .hero .section-sub {
       font-size: 18px;
-      color: var(--text-muted);
-      max-width: 520px;
       margin: 0 auto 36px;
-      line-height: 1.7;
+      max-width: 540px;
     }
 
     .hero-buttons {
@@ -135,7 +169,7 @@
 
     .btn-primary {
       background: var(--accent);
-      color: #000000;
+      color: #000;
     }
 
     .btn-primary:hover { background: var(--accent-hover); }
@@ -146,70 +180,211 @@
       border: 1px solid var(--border);
     }
 
-    .btn-secondary:hover { border-color: #444; color: var(--text); }
+    .btn-secondary:hover { border-color: #444; }
 
-    /* Features */
-    .features {
-      padding: 60px 0;
+    /* ---- How it works ---- */
+    .steps {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 20px;
+      counter-reset: step;
     }
 
-    .feature {
+    .step-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 28px;
-      transition: border-color 0.2s;
+      position: relative;
+      counter-increment: step;
     }
 
-    .feature:hover { border-color: #333; }
+    .step-card::before {
+      content: counter(step);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #000;
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
 
-    .feature h3 {
+    .step-card h3 {
       font-size: 16px;
       font-weight: 700;
       margin-bottom: 8px;
     }
 
-    .feature p {
+    .step-card p {
       font-size: 14px;
       color: var(--text-muted);
       line-height: 1.6;
     }
 
-    /* Getting started */
-    .getting-started {
-      padding: 60px 0;
+    /* ---- Demo ---- */
+    .demo-section { padding-bottom: 60px; }
+
+    .demo-area {
+      max-width: 660px;
+      margin: 0 auto;
     }
 
-    .getting-started > h3 {
-      font-size: 30px;
-      font-weight: 800;
+    .scoreboard {
+      display: flex;
+      gap: 1px;
+      background: var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .score-item {
+      flex: 1;
+      background: var(--surface);
+      padding: 14px;
       text-align: center;
-      margin-bottom: 10px;
-      letter-spacing: -0.5px;
     }
 
-    .getting-started > p {
+    .score-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .score-value {
+      font-family: 'Manrope', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .score-value.green { color: var(--accent); }
+
+    .canvas-wrap {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #0a0a0a;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 10;
+    }
+
+    .overlay.hidden { display: none; }
+
+    .overlay h3 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .overlay p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .overlay .hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .play-btn {
+      padding: 12px 36px;
+      border-radius: 10px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      transition: background 0.2s;
+    }
+
+    .play-btn:hover { background: var(--accent-hover); }
+
+    .donation-log {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .log-header {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .log-entry {
+      padding: 8px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .log-entry:last-child { border-bottom: none; }
+    .log-entry .text { flex: 1; }
+    .log-entry .detail {
+      font-family: 'Inconsolata', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .log-entry.pending .detail { color: var(--accent); }
+    .log-entry.error .detail { color: var(--red); }
+
+    .log-empty {
+      padding: 20px;
       text-align: center;
       color: var(--text-muted);
-      font-size: 16px;
-      margin-bottom: 40px;
+      font-size: 13px;
     }
 
-    /* Tabs */
-    .tabs {
+    /* ---- Integration ---- */
+    .code-tabs {
       display: flex;
       gap: 0;
       border-bottom: 1px solid var(--border);
       margin-bottom: 0;
     }
 
-    .tab {
-      padding: 12px 24px;
+    .code-tab {
+      padding: 10px 20px;
       font-family: 'Manrope', sans-serif;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text-muted);
       background: none;
@@ -219,57 +394,25 @@
       transition: all 0.2s;
     }
 
-    .tab:hover { color: var(--text); }
+    .code-tab:hover { color: var(--text); }
 
-    .tab.active {
+    .code-tab.active {
       color: var(--accent);
       border-bottom-color: var(--accent);
     }
 
-    .tab-panel {
-      display: none;
-    }
-
-    .tab-panel.active {
-      display: block;
-    }
-
-    /* Code block */
-    .code-section {
-      padding: 0;
-    }
-
-    .code-section h4 {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin: 24px 0 10px;
-      font-weight: 600;
-    }
-
-    .code-section h4:first-child {
-      margin-top: 24px;
-    }
-
-    .code-section p {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
+    .code-panel { display: none; }
+    .code-panel.active { display: block; }
 
     pre {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 0 0 16px 16px;
       padding: 20px 24px;
       overflow-x: auto;
       font-size: 13px;
       line-height: 1.7;
-      margin-bottom: 0;
-      position: relative;
-    }
-
-    pre + h4 {
-      margin-top: 24px;
+      margin: 0;
     }
 
     code { font-family: 'Inconsolata', 'SF Mono', monospace; }
@@ -289,8 +432,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 0;
-      position: relative;
+      margin-bottom: 20px;
     }
 
     .install-cmd .prompt {
@@ -298,754 +440,400 @@
       user-select: none;
     }
 
-    .copy-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: var(--border);
-      border: none;
-      color: var(--text-muted);
-      padding: 4px 12px;
-      border-radius: 24px;
-      font-size: 11px;
-      font-weight: 700;
-      font-family: 'Manrope', sans-serif;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      transition: all 0.2s;
+    /* ---- Use cases ---- */
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
     }
 
-    .copy-btn:hover { background: #333; color: var(--text); }
-
-    /* Steps */
-    .step {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-
-    .step-num {
-      flex-shrink: 0;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      margin-top: 2px;
-    }
-
-    .step-content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .step-content h4 {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      margin: 0 0 8px;
-    }
-
-    .step-content p {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
-
-    /* Donate section */
-    .donate-section {
-      padding: 60px 0;
-    }
-
-    .donate-section h3 {
-      font-size: 26px;
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 8px;
-      letter-spacing: -0.3px;
-    }
-
-    .donate-section .subtitle {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 14px;
-      margin-bottom: 32px;
-    }
-
-    .donate-card {
+    .case-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 32px;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
-      display: block;
-      font-family: 'Manrope', sans-serif;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .form-group select,
-    .form-group input {
-      width: 100%;
-      padding: 10px 14px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: 'Lato', sans-serif;
-      font-size: 15px;
-      outline: none;
+      padding: 28px;
       transition: border-color 0.2s;
     }
 
-    .form-group select:focus,
-    .form-group input:focus {
-      border-color: var(--accent);
+    .case-card:hover { border-color: #333; }
+
+    .case-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
     }
 
-    .network-badge {
-      display: inline-block;
-      font-family: 'Manrope', sans-serif;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 24px;
-      background: var(--accent-dim);
-      color: var(--accent);
-      margin-left: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    #connect-btn, #donate-btn {
-      width: 100%;
-      padding: 14px;
+    .case-card h3 {
       font-size: 16px;
-      border-radius: 24px;
-    }
-
-    #donate-btn {
-      background: var(--accent);
-      color: #000;
       font-weight: 700;
-    }
-
-    #donate-btn:hover { background: var(--accent-hover); }
-    #donate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .status {
-      margin-top: 16px;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 14px;
-      display: none;
-    }
-
-    .status.success {
-      display: block;
-      background: rgba(32, 245, 142, 0.08);
-      border: 1px solid rgba(32, 245, 142, 0.25);
-      color: var(--accent);
-    }
-
-    .status.error {
-      display: block;
-      background: rgba(255, 77, 77, 0.08);
-      border: 1px solid rgba(255, 77, 77, 0.25);
-      color: var(--red);
-    }
-
-    .status.pending {
-      display: block;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-    }
-
-    .wallet-info {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      word-break: break-all;
-    }
-
-    /* History section */
-    .history-section {
-      padding: 60px 0;
-    }
-
-    .history-section h3 {
-      font-size: 26px;
-      font-weight: 800;
-      text-align: center;
       margin-bottom: 8px;
-      letter-spacing: -0.3px;
     }
 
-    .history-section .subtitle {
-      text-align: center;
-      color: var(--text-muted);
+    .case-card p {
       font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    .network-toggle {
-      display: flex;
-      justify-content: center;
-      gap: 0;
-      margin-bottom: 24px;
-    }
-
-    .network-btn {
-      padding: 8px 20px;
-      font-family: 'Manrope', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
       color: var(--text-muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: all 0.2s;
+      line-height: 1.6;
     }
 
-    .network-btn:first-child {
-      border-radius: 24px 0 0 24px;
+    .case-card .case-example {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
     }
 
-    .network-btn:last-child {
-      border-radius: 0 24px 24px 0;
-      border-left: none;
+    /* ---- Wallet ---- */
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    .network-btn.active {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-      font-weight: 700;
-    }
-
-    .network-btn:not(.active):hover {
-      color: var(--text);
-      border-color: #444;
-    }
-
-    .network-btn:last-child:not(.active) {
-      border-left: none;
-    }
-
-    .history-stats {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-
-    .history-stat {
+    .wallet-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 16px 28px;
-      text-align: center;
+      padding: 24px;
     }
 
-    .history-stat .label {
-      font-family: 'Manrope', sans-serif;
-      font-size: 11px;
+    .wallet-card h4 {
+      font-size: 13px;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      margin-bottom: 12px;
       font-weight: 600;
-      margin-bottom: 4px;
     }
 
-    .history-stat .value {
-      font-family: 'Manrope', sans-serif;
-      font-size: 22px;
-      font-weight: 800;
-    }
-
-    .history-stat .value.green { color: var(--accent); }
-
-    .history-header {
+    .wallet-bal {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
+      padding: 6px 0;
+      font-size: 15px;
     }
 
-    .history-header .live-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      margin-right: 6px;
-      animation: pulse-dot 2s infinite;
-    }
+    .wallet-bal .label { color: var(--text-muted); }
+    .wallet-bal .val { font-family: 'Inconsolata', monospace; font-weight: 700; }
+    .wallet-bal .val.green { color: var(--accent); }
 
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    .history-header .live-label {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    .refresh-btn {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 6px 16px;
-      border-radius: 24px;
-      font-family: 'Manrope', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .refresh-btn:hover { border-color: #444; color: var(--text); }
-
-    .history-table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-    }
-
-    .history-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    .history-table th {
-      text-align: left;
-      padding: 12px 16px;
-      font-family: 'Manrope', sans-serif;
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 600;
-      border-bottom: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .history-table td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-      color: var(--text);
-    }
-
-    .history-table tr:last-child td {
-      border-bottom: none;
-    }
-
-    .history-table tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .history-table .mono {
-      font-family: 'Inconsolata', monospace;
-      font-size: 13px;
-    }
-
-    .history-table .amount-cell {
-      color: var(--accent);
-      font-weight: 700;
-    }
-
-    .history-table a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .history-table a:hover { text-decoration: underline; }
-
-    .history-empty, .history-loading, .history-error {
+    .wallet-address {
       text-align: center;
-      padding: 40px 16px;
-      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .wallet-address .addr {
+      font-family: 'Inconsolata', monospace;
       font-size: 14px;
+      color: var(--text-muted);
+      word-break: break-all;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 20px;
+      display: inline-block;
     }
 
-    .history-error { color: var(--red); }
-
-    @media (max-width: 640px) {
-      .history-table th:nth-child(2),
-      .history-table td:nth-child(2) { display: none; }
-      .history-stats { gap: 10px; }
-      .history-stat { padding: 12px 18px; }
-      .history-stat .value { font-size: 18px; }
+    .wallet-address .addr-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
     }
 
-    /* Divider */
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 0;
-    }
-
-    /* Footer */
+    /* ---- Footer ---- */
     footer {
-      padding: 48px 0;
+      padding: 40px 0;
       border-top: 1px solid var(--border);
     }
 
     .footer-content {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-      gap: 16px;
-    }
-
-    .footer-brand {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .footer-brand img {
-      height: 18px;
-      width: auto;
-      opacity: 0.5;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 24px;
       font-size: 13px;
-    }
-
-    .footer-links a {
       color: var(--text-muted);
-      text-decoration: none;
-      transition: color 0.2s;
     }
 
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; }
     .footer-links a:hover { color: var(--text); }
+    .footer-brand { display: flex; align-items: center; gap: 8px; }
 
-    .footer-copy {
-      font-size: 12px;
-      color: #444;
-    }
-
-    @media (max-width: 640px) {
-      .hero h2 { font-size: 36px; letter-spacing: -1px; }
-      .features { grid-template-columns: 1fr; }
-      .tabs { overflow-x: auto; }
-      .tab { white-space: nowrap; padding: 12px 16px; }
-      header nav { gap: 16px; }
-      header nav a { font-size: 13px; }
+    /* ---- Responsive ---- */
+    @media (max-width: 700px) {
+      .hero .section-title { font-size: 34px; }
+      .hero .section-sub { font-size: 16px; }
+      .steps { grid-template-columns: 1fr; }
+      .cases-grid { grid-template-columns: 1fr; }
+      .wallet-grid { grid-template-columns: 1fr; }
+      header nav { gap: 14px; }
+      header nav a { font-size: 12px; }
+      .footer-content { flex-direction: column; gap: 12px; text-align: center; }
+      section { padding: 60px 0; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Header -->
   <header>
     <div class="container">
-      <a href="/" class="header-brand">
+      <a href="#" class="header-brand">
         <img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale">
         <span>x402 Charity</span>
       </a>
       <nav>
-        <a href="#get-started">Get Started</a>
-        <a href="/use-cases">Use Cases</a>
-        <a href="/demo">Demo</a>
-        <a href="#try-it">Try It</a>
-        <a href="#history">History</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#demo">Demo</a>
+        <a href="#integrate">Integrate</a>
+        <a href="#use-cases">Use Cases</a>
         <a href="https://github.com/allscale-io/x402charity">GitHub</a>
       </nav>
     </div>
   </header>
 
+  <!-- 1. Hero -->
   <section class="hero">
     <div class="container">
-      <h2>Micro-donations,<br><span>built into every payment.</span></h2>
-      <p>Embed automatic charitable giving into any payment flow. No extra steps. No separate UI. Just part of the transaction.</p>
+      <div class="section-label">Open Source</div>
+      <h2 class="section-title">Turn every user action into a <span>micro-donation</span></h2>
+      <p class="section-sub">Drop-in middleware that donates a fraction of a cent in USDC to charity every time a user takes an action — powered by the x402 payment protocol.</p>
       <div class="hero-buttons">
-        <a href="#get-started" class="btn btn-primary">Get Started</a>
-        <a href="https://github.com/allscale-io/x402charity" class="btn btn-secondary">View Source</a>
+        <a href="#demo" class="btn btn-primary">Try the Demo</a>
+        <a href="https://github.com/allscale-io/x402charity" class="btn btn-secondary">View on GitHub</a>
       </div>
     </div>
   </section>
 
-  <div class="container">
-    <div class="features">
-      <div class="feature">
-        <h3>Programmable Giving</h3>
-        <p>Attach a cause to any event — a trade, an API call, a subscription. Donations happen in the background.</p>
-      </div>
-      <div class="feature">
-        <h3>Powered by x402</h3>
-        <p>Uses the x402 protocol for native HTTP stablecoin payments. USDC on Base — fast, cheap, and gas-efficient.</p>
-      </div>
-      <div class="feature">
-        <h3>Open Source</h3>
-        <p>MIT licensed. Add your charity to the registry. Integrate with Express, Next.js, or the CLI.</p>
+  <!-- 2. How it works -->
+  <section id="how-it-works">
+    <div class="container">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Three steps. <span>Five minutes.</span></h2>
+      <p class="section-sub">Add charitable giving to any app without changing your user experience.</p>
+      <div class="steps">
+        <div class="step-card">
+          <h3>User takes an action</h3>
+          <p>A page load, API call, trade, purchase, or any event you choose triggers the donation flow.</p>
+        </div>
+        <div class="step-card">
+          <h3>x402 payment settles</h3>
+          <p>Your server pays a fraction of a cent in USDC through the x402 protocol. The user doesn't need a wallet.</p>
+        </div>
+        <div class="step-card">
+          <h3>Charity receives funds</h3>
+          <p>USDC lands in the charity's wallet on Base. Fully on-chain, transparent, and verifiable.</p>
+        </div>
       </div>
     </div>
+  </section>
 
-    <hr class="divider">
+  <!-- 3. Live Demo -->
+  <section id="demo" class="demo-section">
+    <div class="container">
+      <div class="section-label">Live Demo</div>
+      <h2 class="section-title">Run to <span>Donate</span></h2>
+      <p class="section-sub">Jump over obstacles to donate $0.001 USDC for each one cleared. No wallet needed — the server pays via x402.</p>
 
-    <!-- Getting Started -->
-    <section class="getting-started" id="get-started">
-      <h3>Get Started</h3>
-      <p>Pick how you want to integrate — CLI, Express middleware, or Next.js middleware.</p>
-
-      <div class="tabs">
-        <button class="tab active" data-tab="cli">CLI</button>
-        <button class="tab" data-tab="express">Express</button>
-        <button class="tab" data-tab="next">Next.js</button>
-        <button class="tab" data-tab="core">Core Library</button>
-      </div>
-
-      <!-- CLI Tab -->
-      <div class="tab-panel active" id="tab-cli">
-        <div class="code-section">
-          <h4>1. Install globally</h4>
-          <div class="install-cmd">
-            <span class="prompt">$</span> npm install -g x402charity
-            <button class="copy-btn" onclick="copyText('npm install -g x402charity')">Copy</button>
+      <div class="demo-area">
+        <div class="scoreboard">
+          <div class="score-item">
+            <div class="score-label">Score</div>
+            <div class="score-value green" id="score">0</div>
           </div>
-
-          <h4>2. Set your private key</h4>
-          <div class="install-cmd">
-            <span class="prompt">$</span> x402charity config set-key YOUR_PRIVATE_KEY
-            <button class="copy-btn" onclick="copyText('x402charity config set-key YOUR_PRIVATE_KEY')">Copy</button>
+          <div class="score-item">
+            <div class="score-label">Best</div>
+            <div class="score-value" id="best">0</div>
           </div>
-
-          <h4>3. Pick a network</h4>
-          <div class="install-cmd">
-            <span class="prompt">$</span> x402charity config set-network base-sepolia
-            <button class="copy-btn" onclick="copyText('x402charity config set-network base-sepolia')">Copy</button>
+          <div class="score-item">
+            <div class="score-label">Donated</div>
+            <div class="score-value green" id="donated">$0.000</div>
           </div>
+        </div>
 
-          <h4>4. Donate</h4>
-          <div class="install-cmd">
-            <span class="prompt">$</span> x402charity donate testing-charity 0.01
-            <button class="copy-btn" onclick="copyText('x402charity donate testing-charity 0.01')">Copy</button>
+        <div class="canvas-wrap" id="canvas-wrap">
+          <canvas id="game" width="640" height="260"></canvas>
+          <div class="overlay" id="start-overlay">
+            <h3>Charity Runner</h3>
+            <p>Every obstacle cleared = $0.001 USDC donated</p>
+            <button class="play-btn" id="start-btn">Play</button>
+            <span class="hint">Space / Tap to jump</span>
           </div>
+          <div class="overlay hidden" id="gameover-overlay">
+            <h3 id="gameover-title">Game Over</h3>
+            <p id="gameover-sub">You cleared 0 obstacles</p>
+            <button class="play-btn" id="restart-btn">Play Again</button>
+            <span class="hint">Space / Tap to restart</span>
+          </div>
+        </div>
 
-          <h4>List available charities</h4>
-          <div class="install-cmd">
-            <span class="prompt">$</span> x402charity list
-            <button class="copy-btn" onclick="copyText('x402charity list')">Copy</button>
+        <div>
+          <div class="log-header">Donation log</div>
+          <div class="donation-log" id="log-list">
+            <div class="log-empty" id="log-empty">Start running to trigger donations!</div>
           </div>
         </div>
       </div>
+    </div>
+  </section>
 
-      <!-- Express Tab -->
-      <div class="tab-panel" id="tab-express">
-        <div class="code-section">
-          <h4>1. Install</h4>
-          <div class="install-cmd">
-            <span class="prompt">$</span> npm install @x402charity/express
-            <button class="copy-btn" onclick="copyText('npm install @x402charity/express')">Copy</button>
-          </div>
+  <!-- 4. Integration -->
+  <section id="integrate">
+    <div class="container">
+      <div class="section-label">Integrate</div>
+      <h2 class="section-title">Add to your app in <span>3 lines</span></h2>
+      <p class="section-sub">Works with Express, Next.js, or any Node.js server. Install and wrap your routes.</p>
 
-          <h4>2. Add middleware to your app</h4>
-          <pre><code><span class="code-keyword">import</span> express <span class="code-keyword">from</span> <span class="code-string">'express'</span>;
+      <div class="install-cmd">
+        <span class="prompt">$</span>
+        <span>npm install @x402charity/express</span>
+      </div>
+
+      <div class="code-tabs">
+        <button class="code-tab active" data-tab="express">Express</button>
+        <button class="code-tab" data-tab="nextjs">Next.js</button>
+        <button class="code-tab" data-tab="server">Standalone Server</button>
+      </div>
+
+      <div class="code-panel active" id="panel-express">
+<pre><code><span class="code-keyword">import</span> express <span class="code-keyword">from</span> <span class="code-string">'express'</span>;
 <span class="code-keyword">import</span> { <span class="code-func">x402charity</span> } <span class="code-keyword">from</span> <span class="code-string">'@x402charity/express'</span>;
 
 <span class="code-keyword">const</span> app = <span class="code-func">express</span>();
 
-<span class="code-comment">// Auto-donate 0.0001 USDC on every request to /api/trade</span>
-app.<span class="code-func">use</span>(<span class="code-string">'/api/trade'</span>, <span class="code-func">x402charity</span>({
-  <span class="code-string">privateKey</span>: process.env.X402_PRIVATE_KEY,
-  <span class="code-string">cause</span>: <span class="code-string">'testing-charity'</span>,
-  <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,
-  <span class="code-string">network</span>: <span class="code-string">'base-sepolia'</span>,
+app.<span class="code-func">use</span>(<span class="code-func">x402charity</span>({
+  <span class="code-keyword">privateKey</span>: process.env.DONATION_PRIVATE_KEY,
+  <span class="code-keyword">charityId</span>: <span class="code-string">'testing-charity'</span>,
 }));
 
-app.<span class="code-func">post</span>(<span class="code-string">'/api/trade'</span>, (req, res) => {
-  <span class="code-comment">// your trade logic — donation happens automatically</span>
-  res.<span class="code-func">json</span>({ <span class="code-string">ok</span>: <span class="code-keyword">true</span> });
-});
-
-app.<span class="code-func">listen</span>(<span class="code-string">3000</span>);</code></pre>
-
-          <h4>Options</h4>
-          <pre><code><span class="code-func">x402charity</span>({
-  <span class="code-string">privateKey</span>: <span class="code-string">'0x...'</span>,        <span class="code-comment">// Wallet private key (required)</span>
-  <span class="code-string">cause</span>: <span class="code-string">'testing-charity'</span>,  <span class="code-comment">// Charity ID (required)</span>
-  <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,          <span class="code-comment">// USDC per event (default: 0.0001)</span>
-  <span class="code-string">network</span>: <span class="code-string">'base-sepolia'</span>,   <span class="code-comment">// base or base-sepolia (default)</span>
-  <span class="code-string">silent</span>: <span class="code-keyword">true</span>,              <span class="code-comment">// Suppress errors (default: true)</span>
-  <span class="code-string">shouldDonate</span>: (req) => {   <span class="code-comment">// Optional filter function</span>
-    <span class="code-keyword">return</span> req.method === <span class="code-string">'POST'</span>;
-  },
-});</code></pre>
-        </div>
+<span class="code-comment">// Every request now triggers a $0.001 USDC donation</span>
+app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (req, res) => res.<span class="code-func">send</span>(<span class="code-string">'Hello!'</span>));</code></pre>
       </div>
 
-      <!-- Next.js Tab -->
-      <div class="tab-panel" id="tab-next">
-        <div class="code-section">
-          <h4>1. Install</h4>
-          <div class="install-cmd">
-            <span class="prompt">$</span> npm install @x402charity/next
-            <button class="copy-btn" onclick="copyText('npm install @x402charity/next')">Copy</button>
-          </div>
-
-          <h4>2. Add to your middleware.ts</h4>
-          <pre><code><span class="code-comment">// middleware.ts</span>
+      <div class="code-panel" id="panel-nextjs">
+<pre><code><span class="code-comment">// middleware.ts</span>
 <span class="code-keyword">import</span> { <span class="code-func">x402charity</span> } <span class="code-keyword">from</span> <span class="code-string">'@x402charity/next'</span>;
 
-<span class="code-keyword">export default</span> <span class="code-func">x402charity</span>({
-  <span class="code-string">privateKey</span>: process.env.X402_PRIVATE_KEY,
-  <span class="code-string">cause</span>: <span class="code-string">'testing-charity'</span>,
-  <span class="code-string">amount</span>: <span class="code-string">'0.0001'</span>,
-  <span class="code-string">network</span>: <span class="code-string">'base-sepolia'</span>,
-  <span class="code-string">matcher</span>: <span class="code-string">'/api/*'</span>,       <span class="code-comment">// Only donate on API routes</span>
+<span class="code-keyword">export const</span> middleware = <span class="code-func">x402charity</span>({
+  <span class="code-keyword">privateKey</span>: process.env.DONATION_PRIVATE_KEY,
+  <span class="code-keyword">charityId</span>: <span class="code-string">'testing-charity'</span>,
 });
 
-<span class="code-comment">// Or match multiple paths:</span>
-<span class="code-comment">// matcher: ['/api/trade', '/api/subscribe']</span></code></pre>
-        </div>
+<span class="code-keyword">export const</span> config = {
+  <span class="code-keyword">matcher</span>: [<span class="code-string">'/api/:path*'</span>],
+};</code></pre>
       </div>
 
-      <!-- Core Library Tab -->
-      <div class="tab-panel" id="tab-core">
-        <div class="code-section">
-          <h4>1. Install</h4>
-          <div class="install-cmd">
-            <span class="prompt">$</span> npm install @x402charity/core
-            <button class="copy-btn" onclick="copyText('npm install @x402charity/core')">Copy</button>
-          </div>
+      <div class="code-panel" id="panel-server">
+<pre><code><span class="code-comment">// Run a standalone donation server</span>
+<span class="code-keyword">import</span> { <span class="code-func">startCharityServer</span> } <span class="code-keyword">from</span> <span class="code-string">'@x402charity/server'</span>;
 
-          <h4>2. Use the client directly</h4>
-          <pre><code><span class="code-keyword">import</span> { <span class="code-func">X402CharityClient</span>, <span class="code-func">listCharities</span> } <span class="code-keyword">from</span> <span class="code-string">'@x402charity/core'</span>;
-
-<span class="code-comment">// List available charities</span>
-<span class="code-keyword">const</span> charities = <span class="code-func">listCharities</span>();
-console.<span class="code-func">log</span>(charities);
-
-<span class="code-comment">// Create a client and donate</span>
-<span class="code-keyword">const</span> client = <span class="code-keyword">new</span> <span class="code-func">X402CharityClient</span>({
-  <span class="code-string">privateKey</span>: process.env.X402_PRIVATE_KEY,
-  <span class="code-string">network</span>: <span class="code-string">'base-sepolia'</span>,
+<span class="code-func">startCharityServer</span>({
+  <span class="code-keyword">privateKey</span>: process.env.DONATION_PRIVATE_KEY,
+  <span class="code-keyword">network</span>: <span class="code-string">'base-sepolia'</span>,
 });
 
-<span class="code-keyword">const</span> receipt = <span class="code-keyword">await</span> client.<span class="code-func">donate</span>(<span class="code-string">'testing-charity'</span>, <span class="code-string">'0.01'</span>);
-console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'</span>, receipt.txHash);</code></pre>
+<span class="code-comment">// Endpoints:</span>
+<span class="code-comment">// GET  /charities     — list charities</span>
+<span class="code-comment">// GET  /donate/:id    — x402 paywall</span>
+<span class="code-comment">// POST /donate/:id    — trigger donation</span></code></pre>
+      </div>
+    </div>
+  </section>
 
-          <h4>Build your own integration</h4>
-          <p>The core library gives you <code>X402CharityClient</code>, <code>listCharities()</code>, <code>findCharity()</code>, and <code>setCharities()</code>. Use them to build donations into any workflow — cron jobs, webhooks, AI agents, or custom middleware.</p>
+  <!-- 5. Use Cases -->
+  <section id="use-cases">
+    <div class="container">
+      <div class="section-label">Use Cases</div>
+      <h2 class="section-title">Works for <span>every product</span></h2>
+      <p class="section-sub">Any user action can become a micro-donation. Here are a few examples.</p>
+
+      <div class="cases-grid">
+        <div class="case-card">
+          <div class="case-icon">&#x1F4B1;</div>
+          <h3>DEX & Trading</h3>
+          <p>Donate a fraction of a cent on every swap or trade. 50K daily trades = $50/day to charity.</p>
+          <div class="case-example">$0.001 per trade</div>
+        </div>
+        <div class="case-card">
+          <div class="case-icon">&#x1F916;</div>
+          <h3>AI Products & APIs</h3>
+          <p>Attach a micro-donation to every API call or prompt. High-volume APIs add up fast.</p>
+          <div class="case-example">$0.001 per API call</div>
+        </div>
+        <div class="case-card">
+          <div class="case-icon">&#x1F3AE;</div>
+          <h3>Games</h3>
+          <p>Every level cleared, match played, or in-game action triggers a small donation.</p>
+          <div class="case-example">$0.001 per action</div>
+        </div>
+        <div class="case-card">
+          <div class="case-icon">&#x1F6D2;</div>
+          <h3>E-commerce</h3>
+          <p>Round up every checkout or donate per order. Customers love brands that give back.</p>
+          <div class="case-example">$0.01 per order</div>
+        </div>
+        <div class="case-card">
+          <div class="case-icon">&#x1F3B2;</div>
+          <h3>Betting & Predictions</h3>
+          <p>Donate on every bet placed or market resolved. Turn speculation into impact.</p>
+          <div class="case-example">$0.001 per bet</div>
+        </div>
+        <div class="case-card">
+          <div class="case-icon">&#x1F3E6;</div>
+          <h3>Payments & Banking</h3>
+          <p>Micro-donate on every transfer, bill payment, or card swipe processed by your platform.</p>
+          <div class="case-example">$0.001 per transaction</div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <hr class="divider">
+  <!-- 6. Wallet Status -->
+  <section id="wallet">
+    <div class="container" style="text-align:center;">
+      <div class="section-label">Live Wallet</div>
+      <h2 class="section-title">Donation wallet <span>status</span></h2>
+      <p class="section-sub" style="margin:0 auto 32px;">The server wallet that funds all demo donations. Balances update live from the blockchain.</p>
 
-    <!-- Try it -->
-    <section class="donate-section" id="try-it">
-      <h3>Try It Now</h3>
-      <p class="subtitle">Connect your wallet and donate via the x402 protocol on Base Sepolia</p>
+      <div class="wallet-address">
+        <div class="addr-label">Donation Wallet Address</div>
+        <div class="addr" id="wallet-addr">Loading...</div>
+      </div>
 
-      <div class="donate-card">
-        <div id="wallet-status"></div>
-
-        <div id="connect-section">
-          <div id="connect-error" class="status" style="margin-bottom: 12px;"></div>
-          <button id="connect-btn" class="btn btn-primary">Connect Wallet</button>
-          <p style="margin-top: 10px; font-size: 12px; color: var(--text-muted); text-align: center;">
-            Requires <a href="https://metamask.io/download/" target="_blank" style="color: var(--accent);">MetaMask</a> or a compatible browser wallet
-          </p>
-        </div>
-
-        <div id="donate-form" style="display: none;">
-          <div class="wallet-info" style="display: flex; align-items: center; justify-content: space-between;">
-            <div>
-              Connected: <span id="wallet-address"></span>
-              <span class="network-badge">Base Sepolia</span>
-            </div>
-            <button id="disconnect-btn" style="background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 10px; border-radius: 24px; font-size: 11px; cursor: pointer; font-family: 'Manrope', sans-serif; font-weight: 600;">Disconnect</button>
+      <div class="wallet-grid">
+        <div class="wallet-card">
+          <h4>Base Sepolia (testnet)</h4>
+          <div class="wallet-bal">
+            <span class="label">ETH</span>
+            <span class="val" id="bal-sepolia-eth">-</span>
           </div>
-
-          <div class="form-group">
-            <label>Charity</label>
-            <select id="charity-select">
-              <option value="testing-charity">Testing Charity</option>
-            </select>
+          <div class="wallet-bal">
+            <span class="label">USDC</span>
+            <span class="val green" id="bal-sepolia-usdc">-</span>
           </div>
-
-          <button id="donate-btn" class="btn">Donate via x402</button>
-
-          <div id="status" class="status"></div>
+        </div>
+        <div class="wallet-card">
+          <h4>Base (mainnet)</h4>
+          <div class="wallet-bal">
+            <span class="label">ETH</span>
+            <span class="val" id="bal-base-eth">-</span>
+          </div>
+          <div class="wallet-bal">
+            <span class="label">USDC</span>
+            <span class="val green" id="bal-base-usdc">-</span>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <hr class="divider">
-
-    <!-- Donation History -->
-    <section class="history-section" id="history">
-      <h3>Donation History</h3>
-      <p class="subtitle">Live USDC donations to registered charities</p>
-
-      <div class="network-toggle">
-        <button class="network-btn active" data-network="base-sepolia">Base Sepolia</button>
-        <button class="network-btn" data-network="base">Base Mainnet</button>
-      </div>
-
-      <div class="history-stats">
-        <div class="history-stat">
-          <div class="label">Total Donated</div>
-          <div class="value green" id="total-donated">&mdash;</div>
-        </div>
-        <div class="history-stat">
-          <div class="label">Transactions</div>
-          <div class="value" id="total-txs">&mdash;</div>
-        </div>
-        <div class="history-stat">
-          <div class="label">Unique Donors</div>
-          <div class="value" id="total-donors">&mdash;</div>
-        </div>
-      </div>
-
-      <div class="history-header">
-        <div>
-          <span class="live-dot"></span>
-          <span class="live-label">Live from Blockscout</span>
-        </div>
-        <button class="refresh-btn" id="refresh-history" onclick="loadHistory()">Refresh</button>
-      </div>
-
-      <div class="history-table-wrap">
-        <div id="history-content">
-          <div class="history-loading">Loading donation history...</div>
-        </div>
-      </div>
-    </section>
-  </div>
-
+  <!-- Footer -->
   <footer>
     <div class="container">
       <div class="footer-content">
         <div class="footer-brand">
-          <span style="font-size: 13px; color: var(--text-muted);">Built by</span>
+          <span>Built by</span>
           <a href="https://allscale.io" target="_blank" rel="noopener">
             <img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale" style="height: 16px; opacity: 0.6;">
           </a>
@@ -1055,435 +843,277 @@ console.<span class="code-func">log</span>(<span class="code-string">'Tx hash:'<
           <a href="https://www.npmjs.com/package/x402charity">npm</a>
           <a href="https://allscale.io">AllScale</a>
         </div>
-        <div class="footer-copy">MIT License</div>
+        <div>MIT License</div>
       </div>
     </div>
   </footer>
 
   <script>
-    // Tabs
-    document.querySelectorAll('.tab').forEach(tab => {
+    // ===== Code tabs =====
+    document.querySelectorAll('.code-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
         tab.classList.add('active');
-        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
       });
     });
 
-    // Copy button
-    function copyText(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = event.target;
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    // ===== Wallet status =====
+    fetch('/address')
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('wallet-addr').textContent = data.address;
+        const s = data.balances['base-sepolia'];
+        const b = data.balances['base'];
+        document.getElementById('bal-sepolia-eth').textContent = parseFloat(s.eth).toFixed(4);
+        document.getElementById('bal-sepolia-usdc').textContent = parseFloat(s.usdc).toFixed(2);
+        document.getElementById('bal-base-eth').textContent = parseFloat(b.eth).toFixed(4);
+        document.getElementById('bal-base-usdc').textContent = parseFloat(b.usdc).toFixed(2);
+      })
+      .catch(() => {
+        document.getElementById('wallet-addr').textContent = 'Could not load';
       });
-    }
 
-    // Wallet + Donate via x402
-    const BASE_SEPOLIA_CHAIN_ID = '0x14a34';
-    const X402_SERVER = 'https://x402charity.vercel.app';
+    // ===== Game =====
+    const X402_SERVER = '';
+    const CHARITY_ID = 'testing-charity';
+    const DONATION_PER_OBSTACLE = 0.001;
 
-    const connectBtn = document.getElementById('connect-btn');
-    const donateBtn = document.getElementById('donate-btn');
-    const connectSection = document.getElementById('connect-section');
-    const donateForm = document.getElementById('donate-form');
-    const walletAddress = document.getElementById('wallet-address');
-    const charitySelect = document.getElementById('charity-select');
-    const statusDiv = document.getElementById('status');
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
 
-    function showStatus(message, type) {
-      statusDiv.textContent = message;
-      statusDiv.className = 'status ' + type;
-    }
+    const GROUND_Y = H - 40;
+    const PLAYER_W = 28;
+    const PLAYER_H = 44;
+    const GRAVITY = 0.55;
+    const JUMP_VEL = -11.5;
+    const BASE_SPEED = 4;
+    const SPEED_INC = 0.0003;
+    const MIN_GAP = 160;
+    const MAX_GAP = 320;
 
-    const connectError = document.getElementById('connect-error');
-    function showConnectError(message) {
-      connectError.textContent = message;
-      connectError.className = 'status error';
-    }
+    let state = 'idle';
+    let score = 0;
+    let bestScore = parseInt(localStorage.getItem('x402runner_best') || '0', 10);
+    let totalDonated = 0;
+    let speed = BASE_SPEED;
+    let frameId = null;
+    let groundOffset = 0;
 
-    // Load charities from the x402 server
-    async function loadCharities() {
-      try {
-        const res = await fetch(X402_SERVER + '/charities');
-        if (!res.ok) return;
-        const charities = await res.json();
-        if (Array.isArray(charities) && charities.length > 0) {
-          charitySelect.innerHTML = '';
-          charities.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.id;
-            opt.textContent = c.name;
-            charitySelect.appendChild(opt);
-          });
-        }
-      } catch (e) {
-        // Server not reachable — keep default options
+    let player = { x: 60, y: GROUND_Y - PLAYER_H, vy: 0, onGround: true };
+    let obstacles = [];
+    let nextObstacleIn = 120;
+    let logEntries = [];
+
+    const scoreEl = document.getElementById('score');
+    const bestEl = document.getElementById('best');
+    const donatedEl = document.getElementById('donated');
+    const startOverlay = document.getElementById('start-overlay');
+    const gameoverOverlay = document.getElementById('gameover-overlay');
+    const gameoverTitle = document.getElementById('gameover-title');
+    const gameoverSub = document.getElementById('gameover-sub');
+    const logList = document.getElementById('log-list');
+    const logEmpty = document.getElementById('log-empty');
+
+    bestEl.textContent = bestScore;
+
+    function jump() {
+      if (state === 'idle') { startGame(); return; }
+      if (state === 'dead') { startGame(); return; }
+      if (player.onGround) {
+        player.vy = JUMP_VEL;
+        player.onGround = false;
       }
     }
-    loadCharities();
 
-    connectBtn.addEventListener('click', async () => {
-      connectError.style.display = 'none';
-      connectError.className = 'status';
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
+    });
+    document.getElementById('canvas-wrap').addEventListener('click', jump);
+    document.getElementById('start-btn').addEventListener('click', e => { e.stopPropagation(); startGame(); });
+    document.getElementById('restart-btn').addEventListener('click', e => { e.stopPropagation(); startGame(); });
 
-      if (typeof window.ethereum === 'undefined') {
-        showConnectError('No wallet detected. Please install MetaMask or open this page in a wallet browser.');
-        return;
+    function startGame() {
+      score = 0; speed = BASE_SPEED; groundOffset = 0;
+      player = { x: 60, y: GROUND_Y - PLAYER_H, vy: 0, onGround: true };
+      obstacles = []; nextObstacleIn = 90;
+      state = 'running';
+      startOverlay.classList.add('hidden');
+      gameoverOverlay.classList.add('hidden');
+      scoreEl.textContent = '0';
+      if (frameId) cancelAnimationFrame(frameId);
+      loop();
+    }
+
+    function loop() {
+      update(); draw();
+      if (state === 'running') frameId = requestAnimationFrame(loop);
+    }
+
+    function update() {
+      speed += SPEED_INC;
+      groundOffset = (groundOffset + speed) % 40;
+
+      player.vy += GRAVITY;
+      player.y += player.vy;
+      if (player.y >= GROUND_Y - PLAYER_H) {
+        player.y = GROUND_Y - PLAYER_H;
+        player.vy = 0;
+        player.onGround = true;
       }
 
-      connectBtn.textContent = 'Connecting...';
-      connectBtn.disabled = true;
-
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-        if (!accounts || accounts.length === 0) {
-          showConnectError('No accounts found. Please unlock your wallet and try again.');
-          return;
+      nextObstacleIn -= speed;
+      if (nextObstacleIn <= 0) {
+        const difficulty = Math.min(score / 30, 1);
+        const roll = Math.random();
+        let h, w;
+        if (roll < 0.3) {
+          h = 30 + difficulty * 25 + Math.random() * 10;
+          w = 14 + Math.random() * 8;
+        } else if (roll < 0.6) {
+          h = 18 + Math.random() * 12;
+          w = 20 + difficulty * 30 + Math.random() * 10;
+        } else {
+          h = 18 + difficulty * 15 + Math.random() * 10;
+          w = 14 + difficulty * 12 + Math.random() * 8;
         }
+        obstacles.push({ x: W + 10, w, h, scored: false });
+        const gap = MIN_GAP + Math.random() * (MAX_GAP - MIN_GAP) - difficulty * 80;
+        nextObstacleIn = Math.max(gap, 100);
+      }
 
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: BASE_SEPOLIA_CHAIN_ID }],
-          });
-        } catch (switchError) {
-          if (switchError.code === 4902) {
-            await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: BASE_SEPOLIA_CHAIN_ID,
-                chainName: 'Base Sepolia',
-                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                rpcUrls: ['https://sepolia.base.org'],
-                blockExplorerUrls: ['https://sepolia.basescan.org'],
-              }],
-            });
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        const ob = obstacles[i];
+        ob.x -= speed;
+        if (!ob.scored && ob.x + ob.w < player.x) {
+          ob.scored = true;
+          score++;
+          scoreEl.textContent = score;
+          triggerDonation(score);
+        }
+        if (player.x < ob.x + ob.w && player.x + PLAYER_W > ob.x && player.y + PLAYER_H > GROUND_Y - ob.h) {
+          die(); return;
+        }
+        if (ob.x + ob.w < -10) obstacles.splice(i, 1);
+      }
+    }
+
+    function die() {
+      state = 'dead';
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('x402runner_best', String(bestScore));
+        bestEl.textContent = bestScore;
+        gameoverTitle.textContent = 'New High Score!';
+      } else {
+        gameoverTitle.textContent = 'Game Over';
+      }
+      gameoverSub.textContent = 'You cleared ' + score + ' obstacle' + (score !== 1 ? 's' : '');
+      gameoverOverlay.classList.remove('hidden');
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(W, GROUND_Y); ctx.stroke();
+
+      ctx.strokeStyle = '#222';
+      for (let x = -groundOffset; x < W; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, GROUND_Y + 8); ctx.lineTo(x + 16, GROUND_Y + 8); ctx.stroke();
+      }
+      for (let x = 20 - groundOffset; x < W; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, GROUND_Y + 20); ctx.lineTo(x + 10, GROUND_Y + 20); ctx.stroke();
+      }
+
+      const px = player.x, py = player.y;
+      ctx.fillStyle = '#20F58E';
+      ctx.fillRect(px + 4, py + 8, 20, 24);
+      ctx.fillRect(px + 6, py, 16, 14);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(px + 16, py + 4, 4, 4);
+      ctx.fillStyle = '#20F58E';
+      if (player.onGround) {
+        const step = Math.floor(Date.now() / 100) % 2;
+        if (step === 0) { ctx.fillRect(px + 6, py + 32, 6, 12); ctx.fillRect(px + 16, py + 36, 6, 8); }
+        else { ctx.fillRect(px + 6, py + 36, 6, 8); ctx.fillRect(px + 16, py + 32, 6, 12); }
+      } else {
+        ctx.fillRect(px + 6, py + 32, 6, 8); ctx.fillRect(px + 16, py + 32, 6, 8);
+      }
+
+      ctx.fillStyle = '#888';
+      for (const ob of obstacles) {
+        const ox = ob.x, oy = GROUND_Y - ob.h;
+        ctx.fillRect(ox + ob.w * 0.3, oy, ob.w * 0.4, ob.h);
+        if (ob.h > 30) {
+          ctx.fillRect(ox, oy + ob.h * 0.3, ob.w * 0.35, ob.w * 0.25);
+          ctx.fillRect(ox, oy + ob.h * 0.3 - ob.w * 0.3, ob.w * 0.25, ob.w * 0.3);
+          ctx.fillRect(ox + ob.w * 0.65, oy + ob.h * 0.5, ob.w * 0.35, ob.w * 0.25);
+          ctx.fillRect(ox + ob.w * 0.75, oy + ob.h * 0.5 - ob.w * 0.25, ob.w * 0.25, ob.w * 0.25);
+        }
+      }
+
+      ctx.fillStyle = '#333'; ctx.font = '11px Inconsolata, monospace';
+      ctx.fillText('Speed: ' + speed.toFixed(1), W - 90, 20);
+    }
+
+    function triggerDonation(obstacleNum) {
+      const logIdx = addLog('Obstacle #' + obstacleNum + ' cleared', 'donating...');
+      totalDonated += DONATION_PER_OBSTACLE;
+      donatedEl.textContent = '$' + totalDonated.toFixed(3);
+
+      fetch(X402_SERVER + '/donate/' + CHARITY_ID, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: '$' + DONATION_PER_OBSTACLE }),
+      })
+        .then(r => r.json().then(data => ({ ok: r.ok, data })))
+        .then(({ ok, data }) => {
+          if (ok) {
+            const tx = data.receipt?.txHash;
+            const short = tx ? tx.slice(0, 10) + '...' : 'confirmed';
+            updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — $0.001', short, 'ok');
           } else {
-            showConnectError('Please switch to Base Sepolia network in your wallet.');
-            return;
+            updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — failed', data.error || 'error', 'error');
           }
-        }
-
-        walletAddress.textContent = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
-        connectSection.style.display = 'none';
-        donateForm.style.display = 'block';
-      } catch (err) {
-        if (err.code === 4001) {
-          showConnectError('Connection rejected. Please approve the connection in your wallet.');
-        } else {
-          showConnectError('Failed to connect: ' + err.message);
-        }
-      } finally {
-        connectBtn.textContent = 'Connect Wallet';
-        connectBtn.disabled = false;
-      }
-    });
-
-    document.getElementById('disconnect-btn').addEventListener('click', () => {
-      connectSection.style.display = 'block';
-      donateForm.style.display = 'none';
-      statusDiv.className = 'status';
-      connectError.style.display = 'none';
-      connectError.className = 'status';
-    });
-
-    donateBtn.addEventListener('click', async () => {
-      const charityId = charitySelect.value;
-      donateBtn.disabled = true;
-      showStatus('Requesting payment details via x402...', 'pending');
-
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        const from = accounts[0];
-
-        // Step 1: Hit the x402-gated endpoint — expect 402 with payment requirements
-        const res = await fetch(X402_SERVER + '/donate/' + charityId);
-
-        if (res.ok) {
-          const data = await res.json();
-          statusDiv.innerHTML = (data.message || 'Donation complete!') +
-            '<br><span style="font-size: 12px; color: var(--text-muted);">Verified via x402</span>';
-          statusDiv.className = 'status success';
-          return;
-        }
-
-        if (res.status !== 402) {
-          throw new Error('Unexpected response: ' + res.status + ' ' + res.statusText);
-        }
-
-        // Step 2: Parse x402 v2 payment requirements from PAYMENT-REQUIRED header (or body fallback)
-        let paymentRequired;
-        const paymentRequiredHeader = res.headers.get('payment-required');
-        if (paymentRequiredHeader) {
-          paymentRequired = JSON.parse(atob(paymentRequiredHeader));
-        } else {
-          const body = await res.text();
-          try {
-            paymentRequired = JSON.parse(body);
-          } catch (e) {
-            throw new Error('Cannot parse 402 response. Header missing and body is not JSON.');
-          }
-        }
-        const accept = paymentRequired.accepts && paymentRequired.accepts[0];
-
-        if (!accept || accept.scheme !== 'exact') {
-          throw new Error('Unsupported payment scheme. Got: ' + JSON.stringify(paymentRequired).slice(0, 200));
-        }
-
-        const amountUSDC = (Number(accept.amount) / 1e6).toFixed(6);
-        showStatus('Sign to pay ' + amountUSDC + ' USDC...', 'pending');
-
-        // Step 3: Build EIP-712 typed data for USDC TransferWithAuthorization (EIP-3009)
-        const chainId = accept.network.split(':')[1];
-        const now = Math.floor(Date.now() / 1000);
-        const validAfter = String(now - 600);
-        const validBefore = String(now + (accept.maxTimeoutSeconds || 300));
-        const randomBytes = new Uint8Array(32);
-        crypto.getRandomValues(randomBytes);
-        const nonce = '0x' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-
-        const domain = {
-          name: accept.extra.name,
-          version: accept.extra.version,
-          chainId: chainId,
-          verifyingContract: accept.asset,
-        };
-
-        const authorization = {
-          from: from,
-          to: accept.payTo,
-          value: accept.amount,
-          validAfter: validAfter,
-          validBefore: validBefore,
-          nonce: nonce,
-        };
-
-        const typedData = {
-          types: {
-            EIP712Domain: [
-              { name: 'name', type: 'string' },
-              { name: 'version', type: 'string' },
-              { name: 'chainId', type: 'uint256' },
-              { name: 'verifyingContract', type: 'address' },
-            ],
-            TransferWithAuthorization: [
-              { name: 'from', type: 'address' },
-              { name: 'to', type: 'address' },
-              { name: 'value', type: 'uint256' },
-              { name: 'validAfter', type: 'uint256' },
-              { name: 'validBefore', type: 'uint256' },
-              { name: 'nonce', type: 'bytes32' },
-            ],
-          },
-          domain: domain,
-          primaryType: 'TransferWithAuthorization',
-          message: authorization,
-        };
-
-        // Step 4: Sign with browser wallet
-        const signature = await window.ethereum.request({
-          method: 'eth_signTypedData_v4',
-          params: [from, JSON.stringify(typedData)],
+        })
+        .catch(() => {
+          updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — failed', 'network error', 'error');
         });
-
-        showStatus('Submitting payment to facilitator...', 'pending');
-
-        // Step 5: Build x402 v2 payment payload and send via PAYMENT-SIGNATURE header
-        const paymentPayload = {
-          x402Version: 2,
-          payload: {
-            signature: signature,
-            authorization: authorization,
-          },
-          resource: paymentRequired.resource,
-          accepted: accept,
-        };
-
-        const paidRes = await fetch(X402_SERVER + '/donate/' + charityId, {
-          headers: { 'PAYMENT-SIGNATURE': btoa(JSON.stringify(paymentPayload)) },
-        });
-
-        if (!paidRes.ok) {
-          const errBody = await paidRes.text().catch(() => '');
-          throw new Error('Payment rejected (' + paidRes.status + '): ' + (errBody || paidRes.statusText));
-        }
-
-        const data = await paidRes.json();
-        const charityName = charitySelect.options[charitySelect.selectedIndex].text;
-        statusDiv.innerHTML = 'Donated ' + amountUSDC + ' USDC to ' + charityName + '!' +
-          '<br><span style="font-size: 12px; color: var(--text-muted);">Payment settled via x402 protocol</span>';
-        statusDiv.className = 'status success';
-
-        setTimeout(loadHistory, 5000);
-      } catch (err) {
-        if (err.code === 4001) {
-          showStatus('Signing rejected. Please approve in your wallet.', 'error');
-        } else if (err.message && err.message.includes('Failed to fetch')) {
-          showStatus('Cannot reach x402 server at ' + X402_SERVER + '. Is it running?', 'error');
-        } else {
-          showStatus('Error: ' + err.message, 'error');
-        }
-      } finally {
-        donateBtn.disabled = false;
-      }
-    });
-
-    // --- Donation History ---
-    // Uses Blockscout API (free, no key, CORS enabled, single request)
-    const NETWORKS = {
-      'base-sepolia': {
-        blockscout: 'https://base-sepolia.blockscout.com',
-        explorer: 'https://sepolia.basescan.org',
-        usdc: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
-        charities: [
-          { address: '0x8DC1521132381aAB648e067c2Db3677D5BF70c6d', name: 'Testing Charity' },
-        ],
-      },
-      'base': {
-        blockscout: 'https://base.blockscout.com',
-        explorer: 'https://basescan.org',
-        usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-        charities: [
-          { address: '0x8DC1521132381aAB648e067c2Db3677D5BF70c6d', name: 'Testing Charity' },
-        ],
-      },
-    };
-
-    let currentNetwork = 'base-sepolia';
-
-    // Network toggle
-    document.querySelectorAll('.network-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const network = btn.dataset.network;
-        if (network === currentNetwork) return;
-        currentNetwork = network;
-        document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        loadHistory();
-      });
-    });
-
-    function shortAddr(addr) {
-      return addr.slice(0, 6) + '...' + addr.slice(-4);
     }
 
-    function formatDate(isoString) {
-      const d = new Date(isoString);
-      const now = new Date();
-      const diff = (now - d) / 1000;
-
-      if (diff < 60) return 'just now';
-      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-      if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
-
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+    function addLog(text, detail) {
+      if (logEmpty) logEmpty.style.display = 'none';
+      const idx = logEntries.length;
+      logEntries.unshift({ text, detail, status: 'pending' });
+      renderLog();
+      return idx;
     }
 
-    function formatUsdc(rawValue, decimals) {
-      const num = Number(rawValue) / Math.pow(10, decimals || 6);
-      if (num >= 1) return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      if (num >= 0.01) return num.toFixed(4);
-      return num.toFixed(6);
+    function updateLog(idx, text, detail, status) {
+      const entry = logEntries[logEntries.length - 1 - idx];
+      if (entry) { entry.text = text; entry.detail = detail; entry.status = status; renderLog(); }
     }
 
-    async function loadHistory() {
-      const net = NETWORKS[currentNetwork];
-      const content = document.getElementById('history-content');
-      const refreshBtn = document.getElementById('refresh-history');
-      refreshBtn.textContent = 'Loading...';
-      refreshBtn.disabled = true;
-
-      try {
-        const allTxs = [];
-
-        for (const charity of net.charities) {
-          const url = net.blockscout + '/api/v2/addresses/' + charity.address +
-            '/token-transfers?type=ERC-20&token=' + net.usdc;
-
-          const resp = await fetch(url);
-          if (!resp.ok) throw new Error('Blockscout returned ' + resp.status);
-          const data = await resp.json();
-
-          const items = data.items || [];
-          // Only include incoming transfers (to = charity wallet)
-          const incoming = items.filter(
-            item => item.to && item.to.hash && item.to.hash.toLowerCase() === charity.address.toLowerCase()
-          );
-
-          incoming.forEach(item => {
-            allTxs.push({
-              from: item.from.hash,
-              to: item.to.hash,
-              value: item.total.value,
-              decimals: Number(item.total.decimals) || 6,
-              hash: item.transaction_hash,
-              timestamp: item.timestamp,
-              charityName: charity.name,
-            });
-          });
-        }
-
-        // Sort by timestamp descending
-        allTxs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-        // Update stats
-        const totalUsdc = allTxs.reduce((sum, tx) => sum + Number(tx.value) / Math.pow(10, tx.decimals), 0);
-        const uniqueDonors = new Set(allTxs.map(tx => tx.from.toLowerCase()));
-
-        const totalStr = totalUsdc >= 1
-          ? totalUsdc.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-          : totalUsdc.toFixed(6);
-        document.getElementById('total-donated').textContent = totalStr + ' USDC';
-        document.getElementById('total-txs').textContent = allTxs.length.toString();
-        document.getElementById('total-donors').textContent = uniqueDonors.size.toString();
-
-        if (allTxs.length === 0) {
-          content.innerHTML = '<div class="history-empty">No donations yet on ' + (currentNetwork === 'base' ? 'Base Mainnet' : 'Base Sepolia') + '. Be the first!</div>';
-          return;
-        }
-
-        let html = '<table class="history-table">';
-        html += '<thead><tr><th>Date</th><th>From</th><th>To</th><th>Amount</th><th>Tx</th></tr></thead>';
-        html += '<tbody>';
-
-        for (const tx of allTxs.slice(0, 25)) {
-          const date = formatDate(tx.timestamp);
-          const from = shortAddr(tx.from);
-          const charityName = tx.charityName;
-          const amount = formatUsdc(tx.value, tx.decimals);
-          const txLink = net.explorer + '/tx/' + tx.hash;
-
-          html += '<tr>';
-          html += '<td>' + date + '</td>';
-          html += '<td class="mono">' + from + '</td>';
-          html += '<td>' + charityName + '</td>';
-          html += '<td class="amount-cell">' + amount + '</td>';
-          html += '<td><a href="' + txLink + '" target="_blank" rel="noopener">' + shortAddr(tx.hash) + '</a></td>';
-          html += '</tr>';
-        }
-
-        html += '</tbody></table>';
-
-        if (allTxs.length > 25) {
-          html += '<div style="text-align: center; padding: 12px; font-size: 13px; color: var(--text-muted);">Showing 25 of ' + allTxs.length + ' donations</div>';
-        }
-
-        content.innerHTML = html;
-
-      } catch (err) {
-        content.innerHTML = '<div class="history-error">Failed to load donation history: ' + err.message + '</div>';
-      } finally {
-        refreshBtn.textContent = 'Refresh';
-        refreshBtn.disabled = false;
-      }
+    function renderLog() {
+      logList.innerHTML = logEntries.slice(0, 30).map(e =>
+        '<div class="log-entry ' + e.status + '">' +
+          '<span class="text">' + escapeHtml(e.text) + '</span>' +
+          '<span class="detail">' + escapeHtml(e.detail) + '</span>' +
+        '</div>'
+      ).join('');
     }
 
-    // Load history on page load
-    loadHistory();
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    draw();
   </script>
 </body>
 </html>
