@@ -182,49 +182,225 @@
 
     .btn-secondary:hover { border-color: #444; }
 
-    /* ---- How it works ---- */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      counter-reset: step;
-    }
-
-    .step-card {
+    /* ---- How it works — sequence diagram ---- */
+    .seq-diagram {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 28px;
+      padding: 32px 24px 24px;
       position: relative;
-      counter-increment: step;
+      overflow: hidden;
     }
 
-    .step-card::before {
-      content: counter(step);
+    .seq-actors {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .seq-actor {
+      text-align: center;
+      width: 110px;
+      flex-shrink: 0;
+    }
+
+    .seq-actor-box {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 8px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .seq-actor-box.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(32, 245, 142, 0.15);
+    }
+
+    .seq-actor-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .seq-lifelines {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      height: 340px;
+      margin-bottom: 20px;
+    }
+
+    .seq-lifeline {
+      width: 110px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .seq-lifeline-bar {
+      width: 2px;
+      height: 100%;
+      background: repeating-linear-gradient(to bottom, var(--border) 0, var(--border) 6px, transparent 6px, transparent 12px);
+    }
+
+    /* Arrows */
+    .seq-arrows {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .seq-arrow {
+      position: absolute;
+      height: 24px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .seq-arrow.visible { opacity: 1; }
+
+    .seq-arrow-line {
+      height: 2px;
+      flex: 1;
+      position: relative;
+    }
+
+    .seq-arrow-line.solid { background: var(--accent); }
+    .seq-arrow-line.dashed {
+      background: repeating-linear-gradient(to right, var(--accent) 0, var(--accent) 6px, transparent 6px, transparent 12px);
+    }
+
+    .seq-arrow-head {
+      width: 0; height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      flex-shrink: 0;
+    }
+
+    .seq-arrow-head.right { border-left: 8px solid var(--accent); }
+    .seq-arrow-head.left { border-right: 8px solid var(--accent); }
+
+    .seq-arrow-label {
+      position: absolute;
+      top: -18px;
+      font-family: 'Inconsolata', monospace;
+      font-size: 11px;
+      white-space: nowrap;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .seq-arrow-label.ltr { left: 8px; }
+    .seq-arrow-label.rtl { right: 8px; }
+
+    .seq-arrow-sublabel {
+      position: absolute;
+      bottom: -16px;
+      font-family: 'Lato', sans-serif;
+      font-size: 10px;
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+
+    .seq-arrow-sublabel.ltr { left: 8px; }
+    .seq-arrow-sublabel.rtl { right: 8px; }
+
+    /* Controls & description */
+    .seq-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .seq-btn {
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+
+    .seq-btn:hover { border-color: var(--accent); }
+    .seq-btn:disabled { opacity: 0.3; cursor: default; }
+    .seq-btn:disabled:hover { border-color: var(--border); }
+
+    .seq-btn.primary {
       background: var(--accent);
       color: #000;
-      font-family: 'Manrope', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 14px;
+      border-color: var(--accent);
     }
 
-    .step-card h3 {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 8px;
+    .seq-btn.primary:hover { background: var(--accent-hover); }
+
+    .seq-progress {
+      flex: 1;
+      display: flex;
+      gap: 6px;
+      align-items: center;
     }
 
-    .step-card p {
+    .seq-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+
+    .seq-dot.active { background: var(--accent); }
+    .seq-dot.done { background: rgba(32, 245, 142, 0.4); }
+
+    .seq-desc {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      min-height: 76px;
+      transition: border-color 0.3s;
+    }
+
+    .seq-desc.active { border-color: rgba(32, 245, 142, 0.3); }
+
+    .seq-desc h4 {
       font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .seq-desc p {
+      font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.6;
+      line-height: 1.5;
+    }
+
+    .seq-desc code {
+      font-size: 12px;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 700px) {
+      .seq-actor { width: 70px; }
+      .seq-actor-box { font-size: 10px; padding: 8px 4px; }
+      .seq-actor-icon { font-size: 16px; }
+      .seq-lifeline { width: 70px; }
+      .seq-arrow-label { font-size: 9px; }
+      .seq-arrow-sublabel { font-size: 9px; }
+      .seq-lifelines { height: 280px; }
     }
 
     /* ---- Demo ---- */
@@ -563,7 +739,7 @@
     @media (max-width: 700px) {
       .hero .section-title { font-size: 34px; }
       .hero .section-sub { font-size: 16px; }
-      .steps { grid-template-columns: 1fr; }
+      .seq-diagram { padding: 20px 12px 16px; }
       .cases-grid { grid-template-columns: 1fr; }
       .wallet-grid { grid-template-columns: 1fr; }
       header nav { gap: 14px; }
@@ -605,24 +781,64 @@
     </div>
   </section>
 
-  <!-- 2. How it works -->
+  <!-- 2. How it works — interactive x402 sequence diagram -->
   <section id="how-it-works">
     <div class="container">
       <div class="section-label">How It Works</div>
-      <h2 class="section-title">Three steps. <span>Five minutes.</span></h2>
-      <p class="section-sub">Add charitable giving to any app without changing your user experience.</p>
-      <div class="steps">
-        <div class="step-card">
-          <h3>User takes an action</h3>
-          <p>A page load, API call, trade, purchase, or any event you choose triggers the donation flow.</p>
+      <h2 class="section-title">The x402 <span>payment flow</span></h2>
+      <p class="section-sub">See exactly how a micro-donation travels from your app to a charity wallet — step by step.</p>
+
+      <div class="seq-diagram" id="seq-diagram">
+        <!-- Actors -->
+        <div class="seq-actors">
+          <div class="seq-actor" data-actor="app">
+            <div class="seq-actor-box" id="actor-app">
+              <div class="seq-actor-icon">&#x1F4F1;</div>
+              Your App
+            </div>
+          </div>
+          <div class="seq-actor" data-actor="server">
+            <div class="seq-actor-box" id="actor-server">
+              <div class="seq-actor-icon">&#x1F5A5;</div>
+              x402 Server
+            </div>
+          </div>
+          <div class="seq-actor" data-actor="facilitator">
+            <div class="seq-actor-box" id="actor-facilitator">
+              <div class="seq-actor-icon">&#x1F3E6;</div>
+              Facilitator
+            </div>
+          </div>
+          <div class="seq-actor" data-actor="wallet">
+            <div class="seq-actor-box" id="actor-wallet">
+              <div class="seq-actor-icon">&#x1F4B0;</div>
+              Charity Wallet
+            </div>
+          </div>
         </div>
-        <div class="step-card">
-          <h3>x402 payment settles</h3>
-          <p>Your server pays a fraction of a cent in USDC through the x402 protocol. The user doesn't need a wallet.</p>
+
+        <!-- Lifelines -->
+        <div class="seq-lifelines" id="seq-lifelines">
+          <div class="seq-lifeline" data-actor="app"><div class="seq-lifeline-bar"></div></div>
+          <div class="seq-lifeline" data-actor="server"><div class="seq-lifeline-bar"></div></div>
+          <div class="seq-lifeline" data-actor="facilitator"><div class="seq-lifeline-bar"></div></div>
+          <div class="seq-lifeline" data-actor="wallet"><div class="seq-lifeline-bar"></div></div>
+
+          <!-- Arrows container — populated by JS -->
+          <div class="seq-arrows" id="seq-arrows"></div>
         </div>
-        <div class="step-card">
-          <h3>Charity receives funds</h3>
-          <p>USDC lands in the charity's wallet on Base. Fully on-chain, transparent, and verifiable.</p>
+
+        <!-- Description panel -->
+        <div class="seq-desc" id="seq-desc">
+          <h4 id="seq-desc-title">Click "Next" to walk through the x402 flow</h4>
+          <p id="seq-desc-text">Each step shows how a $0.001 USDC micro-donation moves from your app to a charity wallet using the HTTP 402 payment protocol.</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="seq-controls">
+          <button class="seq-btn" id="seq-prev" disabled>&larr; Back</button>
+          <div class="seq-progress" id="seq-progress"></div>
+          <button class="seq-btn primary" id="seq-next">Next &rarr;</button>
         </div>
       </div>
     </div>
@@ -1114,6 +1330,207 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
     }
 
     draw();
+
+    // ===== Sequence Diagram =====
+    (function() {
+      const steps = [
+        {
+          from: 'app', to: 'server', dir: 'ltr',
+          label: 'GET /donate/charity-id',
+          sublabel: 'No payment header',
+          title: '1. Your app requests the donation endpoint',
+          desc: 'Your app (or the server acting as an x402 client) sends a regular HTTP GET request to the x402-gated donation endpoint. No special headers needed yet.',
+          activeActors: ['app', 'server'],
+        },
+        {
+          from: 'server', to: 'app', dir: 'rtl', style: 'dashed',
+          label: '402 Payment Required',
+          sublabel: 'PaymentRequirements in body',
+          title: '2. Server responds with 402 + payment details',
+          desc: 'The x402 middleware detects no payment header and returns HTTP 402 with a JSON body specifying: price ($0.001), currency (USDC), network (Base), payTo address, and the facilitator URL.',
+          activeActors: ['server', 'app'],
+        },
+        {
+          from: 'app', to: 'app', dir: 'self',
+          label: 'Sign USDC authorization',
+          sublabel: 'EIP-3009 / EIP-712',
+          title: '3. Client signs a USDC transfer authorization',
+          desc: 'The x402 client library reads the 402 response, then uses the server wallet\'s private key to sign a USDC transferWithAuthorization (EIP-3009). No on-chain transaction yet — just a cryptographic signature.',
+          activeActors: ['app'],
+        },
+        {
+          from: 'app', to: 'server', dir: 'ltr',
+          label: 'GET /donate/charity-id',
+          sublabel: 'X-PAYMENT: {signed payload}',
+          title: '4. Retry with signed payment header',
+          desc: 'The client retries the same GET request, this time including the signed payment payload in the X-PAYMENT header. The server\'s x402 middleware intercepts it before reaching the route handler.',
+          activeActors: ['app', 'server'],
+        },
+        {
+          from: 'server', to: 'facilitator', dir: 'ltr',
+          label: 'Verify & settle payment',
+          sublabel: 'POST to facilitator',
+          title: '5. Server forwards payment to facilitator',
+          desc: 'The x402 middleware sends the signed payment to the facilitator service, which verifies the signature, checks the USDC allowance, and submits the on-chain transaction to Base.',
+          activeActors: ['server', 'facilitator'],
+        },
+        {
+          from: 'facilitator', to: 'wallet', dir: 'ltr',
+          label: 'USDC transfer on Base',
+          sublabel: '$0.001 settled on-chain',
+          title: '6. USDC lands in the charity wallet',
+          desc: 'The facilitator executes the USDC transferWithAuthorization on Base. The charity receives $0.001 USDC directly in their wallet. Fully on-chain, transparent, and verifiable.',
+          activeActors: ['facilitator', 'wallet'],
+        },
+        {
+          from: 'server', to: 'app', dir: 'rtl',
+          label: '200 OK',
+          sublabel: '{ receipt, txHash }',
+          title: '7. Success! Receipt returned',
+          desc: 'The server returns a 200 response with a donation receipt including the on-chain transaction hash. The entire flow takes ~2 seconds. Your user never needed a wallet.',
+          activeActors: ['server', 'app'],
+        },
+      ];
+
+      const actors = ['app', 'server', 'facilitator', 'wallet'];
+      const arrowsEl = document.getElementById('seq-arrows');
+      const descTitle = document.getElementById('seq-desc-title');
+      const descText = document.getElementById('seq-desc-text');
+      const descPanel = document.getElementById('seq-desc');
+      const prevBtn = document.getElementById('seq-prev');
+      const nextBtn = document.getElementById('seq-next');
+      const progressEl = document.getElementById('seq-progress');
+      const lifelines = document.getElementById('seq-lifelines');
+
+      let currentStep = -1; // -1 = intro
+
+      // Build progress dots
+      for (let i = 0; i < steps.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'seq-dot';
+        dot.addEventListener('click', () => goToStep(i));
+        progressEl.appendChild(dot);
+      }
+
+      function getActorCenter(actorName) {
+        const idx = actors.indexOf(actorName);
+        // Each actor is equally spaced across the width
+        return ((idx + 0.5) / actors.length) * 100;
+      }
+
+      function buildArrowEl(step, yPercent) {
+        const arrow = document.createElement('div');
+        arrow.className = 'seq-arrow';
+        arrow.style.top = yPercent + '%';
+
+        if (step.dir === 'self') {
+          // Self-arrow: a small loop
+          const cx = getActorCenter(step.from);
+          arrow.style.left = cx + '%';
+          arrow.style.width = '0px';
+          arrow.innerHTML =
+            '<div class="seq-arrow-label ltr" style="white-space:nowrap;transform:translateX(-50%)">' + step.label + '</div>' +
+            '<div class="seq-arrow-sublabel ltr" style="white-space:nowrap;transform:translateX(-50%);top:18px">' + step.sublabel + '</div>' +
+            '<svg width="40" height="30" style="position:absolute;left:-20px;top:24px" viewBox="0 0 40 30">' +
+              '<path d="M20 0 Q40 0 40 15 Q40 30 20 30" fill="none" stroke="#20F58E" stroke-width="2"/>' +
+              '<polygon points="20,26 26,30 20,34" fill="#20F58E" transform="translate(0,-4)"/>' +
+            '</svg>';
+          return arrow;
+        }
+
+        const fromX = getActorCenter(step.from);
+        const toX = getActorCenter(step.to);
+        const leftX = Math.min(fromX, toX);
+        const rightX = Math.max(fromX, toX);
+
+        arrow.style.left = leftX + '%';
+        arrow.style.width = (rightX - leftX) + '%';
+
+        const lineClass = step.style === 'dashed' ? 'dashed' : 'solid';
+        const headDir = step.dir === 'ltr' ? 'right' : 'left';
+        const labelDir = step.dir;
+
+        arrow.innerHTML =
+          '<div class="seq-arrow-line ' + lineClass + '"></div>' +
+          '<div class="seq-arrow-head ' + headDir + '" style="' + (headDir === 'right' ? 'right:-4px' : 'left:-4px') + '"></div>' +
+          '<div class="seq-arrow-label ' + labelDir + '">' + step.label + '</div>' +
+          '<div class="seq-arrow-sublabel ' + labelDir + '">' + step.sublabel + '</div>';
+
+        return arrow;
+      }
+
+      function goToStep(n) {
+        currentStep = Math.max(-1, Math.min(n, steps.length - 1));
+        render();
+      }
+
+      function render() {
+        // Update buttons
+        prevBtn.disabled = currentStep <= -1;
+        if (currentStep >= steps.length - 1) {
+          nextBtn.textContent = 'Replay';
+          nextBtn.classList.remove('primary');
+        } else {
+          nextBtn.textContent = 'Next \u2192';
+          nextBtn.classList.add('primary');
+        }
+
+        // Update progress dots
+        const dots = progressEl.children;
+        for (let i = 0; i < dots.length; i++) {
+          dots[i].className = 'seq-dot' + (i === currentStep ? ' active' : (i < currentStep ? ' done' : ''));
+        }
+
+        // Update description
+        if (currentStep < 0) {
+          descTitle.textContent = 'Click "Next" to walk through the x402 flow';
+          descText.textContent = 'Each step shows how a $0.001 USDC micro-donation moves from your app to a charity wallet using the HTTP 402 payment protocol.';
+          descPanel.classList.remove('active');
+        } else {
+          const s = steps[currentStep];
+          descTitle.textContent = s.title;
+          descText.textContent = s.desc;
+          descPanel.classList.add('active');
+        }
+
+        // Update actor highlights
+        const activeActors = currentStep >= 0 ? steps[currentStep].activeActors : [];
+        actors.forEach(a => {
+          const el = document.getElementById('actor-' + a);
+          if (activeActors.includes(a)) el.classList.add('active');
+          else el.classList.remove('active');
+        });
+
+        // Build arrows — show all arrows up to currentStep
+        arrowsEl.innerHTML = '';
+        const totalSlots = steps.length;
+        for (let i = 0; i <= Math.max(currentStep, -1); i++) {
+          if (i < 0) continue;
+          const yPct = ((i + 0.5) / totalSlots) * 100;
+          const el = buildArrowEl(steps[i], yPct);
+          el.classList.add('visible');
+          if (i === currentStep) el.style.opacity = '0';
+          arrowsEl.appendChild(el);
+          // Animate the latest arrow in
+          if (i === currentStep) {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => { el.style.transition = 'opacity 0.4s'; el.style.opacity = '1'; });
+            });
+          }
+        }
+      }
+
+      prevBtn.addEventListener('click', () => goToStep(currentStep - 1));
+      nextBtn.addEventListener('click', () => {
+        if (currentStep >= steps.length - 1) {
+          goToStep(-1); // replay
+        } else {
+          goToStep(currentStep + 1);
+        }
+      });
+
+      render();
+    })();
   </script>
 </body>
 </html>

@@ -382,12 +382,12 @@
     const GROUND_Y = H - 40;
     const PLAYER_W = 28;
     const PLAYER_H = 44;
-    const GRAVITY = 0.6;
-    const JUMP_VEL = -12;
-    const BASE_SPEED = 5;
-    const SPEED_INC = 0.0008; // per frame
-    const MIN_GAP = 80;
-    const MAX_GAP = 200;
+    const GRAVITY = 0.55;
+    const JUMP_VEL = -11.5;
+    const BASE_SPEED = 4;
+    const SPEED_INC = 0.0003; // per frame
+    const MIN_GAP = 160;
+    const MAX_GAP = 320;
 
     // --- State ---
     let state = 'idle'; // idle | running | dead
@@ -469,13 +469,33 @@
         player.onGround = true;
       }
 
-      // Spawn obstacles
+      // Spawn obstacles — get harder as score increases
       nextObstacleIn -= speed;
       if (nextObstacleIn <= 0) {
-        const h = 20 + Math.random() * 30;
-        const w = 16 + Math.random() * 14;
+        const difficulty = Math.min(score / 30, 1); // ramps from 0 to 1 over 30 obstacles
+
+        // Obstacle variety: randomly tall, wide, or both
+        const roll = Math.random();
+        let h, w;
+        if (roll < 0.3) {
+          // Tall obstacle
+          h = 30 + difficulty * 25 + Math.random() * 10;
+          w = 14 + Math.random() * 8;
+        } else if (roll < 0.6) {
+          // Wide obstacle
+          h = 18 + Math.random() * 12;
+          w = 20 + difficulty * 30 + Math.random() * 10;
+        } else {
+          // Normal — grows with difficulty
+          h = 18 + difficulty * 15 + Math.random() * 10;
+          w = 14 + difficulty * 12 + Math.random() * 8;
+        }
+
         obstacles.push({ x: W + 10, w: w, h: h, scored: false });
-        nextObstacleIn = MIN_GAP + Math.random() * (MAX_GAP - MIN_GAP);
+
+        // Gap shrinks with difficulty
+        const gap = MIN_GAP + Math.random() * (MAX_GAP - MIN_GAP) - difficulty * 80;
+        nextObstacleIn = Math.max(gap, 100);
       }
 
       // Move obstacles & check collisions
