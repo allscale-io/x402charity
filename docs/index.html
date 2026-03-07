@@ -783,6 +783,34 @@
       font-family: 'Inconsolata', monospace; color: var(--accent);
     }
 
+    .dash-history-day {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; margin-bottom: 8px; overflow: hidden;
+    }
+    .dash-history-day-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 16px; cursor: pointer;
+    }
+    .dash-history-day-header:hover { background: rgba(255,255,255,0.02); }
+    .dash-history-day-date { font-size: 13px; font-weight: 600; }
+    .dash-history-day-summary {
+      font-size: 12px; color: var(--text-muted);
+      font-family: 'Inconsolata', monospace;
+    }
+    .dash-history-day-summary .amt { color: var(--accent); font-weight: 700; }
+    .dash-history-rows { display: none; border-top: 1px solid var(--border); }
+    .dash-history-rows.open { display: block; }
+    .dash-history-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 16px; font-size: 12px; border-bottom: 1px solid var(--border);
+    }
+    .dash-history-row:last-child { border-bottom: none; }
+    .dash-history-row .h-time { color: var(--text-muted); width: 60px; }
+    .dash-history-row .h-from { font-family: 'Inconsolata', monospace; color: var(--text-muted); font-size: 11px; }
+    .dash-history-row .h-amount { font-family: 'Inconsolata', monospace; font-weight: 700; color: var(--accent); }
+    .dash-history-row .h-tx a { color: var(--text-muted); text-decoration: none; font-size: 11px; font-family: 'Inconsolata', monospace; }
+    .dash-history-row .h-tx a:hover { color: var(--accent); text-decoration: underline; }
+
     /* ---- Footer ---- */
     footer {
       padding: 40px 0;
@@ -1173,6 +1201,14 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       <div id="dash-donations">
         <div class="dash-empty">Loading donations...</div>
       </div>
+
+      <div class="dash-header" style="margin-top:24px;">
+        <span class="dash-header-title">Donation History</span>
+      </div>
+
+      <div id="dash-history">
+        <div class="dash-empty">Loading history...</div>
+      </div>
     </div>
   </section>
 
@@ -1251,22 +1287,60 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
           dashExplorerUrl = data.explorerUrl || '';
 
           var container = document.getElementById('dash-donations');
-          if (data.donations.length === 0) {
+          var histContainer = document.getElementById('dash-history');
+          var okDonations = data.donations.filter(function(d) { return d.status === 'ok'; });
+
+          if (okDonations.length === 0) {
             container.innerHTML = '<div class="dash-empty">No donations yet.<div class="hint">POST /donate to trigger a donation</div></div>';
+            histContainer.innerHTML = '<div class="dash-empty">No history yet.</div>';
           } else {
-            var html = '<table class="dash-table"><thead><tr><th>Time</th><th>Charity</th><th>Amount</th><th>Tx Hash</th><th>Status</th></tr></thead><tbody>';
-            for (var i = 0; i < data.donations.length; i++) {
-              var d = data.donations[i];
+            // Recent: last 5
+            var recent = okDonations.slice(0, 5);
+            var html = '<table class="dash-table"><thead><tr><th>Time</th><th>Amount</th><th>From</th><th>Tx Hash</th></tr></thead><tbody>';
+            for (var i = 0; i < recent.length; i++) {
+              var d = recent[i];
               var txLink = d.txHash && dashExplorerUrl
                 ? '<a href="' + dashExplorerUrl + '/tx/' + d.txHash + '" target="_blank">' + dashShortHash(d.txHash) + '</a>'
                 : (d.txHash ? dashShortHash(d.txHash) : '-');
-              var badge = d.status === 'ok'
-                ? '<span class="dash-badge ok">OK</span>'
-                : '<span class="dash-badge failed">FAILED</span>';
-              html += '<tr><td class="dash-time">' + dashTimeAgo(d.timestamp) + '</td><td>' + dashEscape(d.charityName) + '</td><td class="amount">' + dashEscape(d.amount) + ' ' + d.currency + '</td><td class="tx-hash">' + txLink + '</td><td>' + badge + '</td></tr>';
+              var fromShort = d.from ? d.from.slice(0, 6) + '...' + d.from.slice(-4) : '-';
+              html += '<tr><td class="dash-time">' + dashTimeAgo(d.timestamp) + '</td><td class="amount">' + dashEscape(d.amount) + ' ' + d.currency + '</td><td class="tx-hash">' + fromShort + '</td><td class="tx-hash">' + txLink + '</td></tr>';
             }
             html += '</tbody></table>';
             container.innerHTML = html;
+
+            // History: group by day
+            var days = {};
+            for (var i = 0; i < okDonations.length; i++) {
+              var d = okDonations[i];
+              var dateKey = new Date(d.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+              if (!days[dateKey]) days[dateKey] = { donations: [], total: 0 };
+              days[dateKey].donations.push(d);
+              days[dateKey].total += parseFloat(d.amount.replace('$', ''));
+            }
+            var hHtml = '';
+            var dayKeys = Object.keys(days);
+            for (var di = 0; di < dayKeys.length; di++) {
+              var dayKey = dayKeys[di];
+              var dayData = days[dayKey];
+              var dayId = 'hist-day-' + di;
+              hHtml += '<div class="dash-history-day">';
+              hHtml += '<div class="dash-history-day-header" onclick="document.getElementById(\'' + dayId + '\').classList.toggle(\'open\')">';
+              hHtml += '<span class="dash-history-day-date">' + dashEscape(dayKey) + '</span>';
+              hHtml += '<span class="dash-history-day-summary">' + dayData.donations.length + ' donation' + (dayData.donations.length !== 1 ? 's' : '') + ' · <span class="amt">$' + dayData.total.toFixed(3) + '</span> USDC</span>';
+              hHtml += '</div>';
+              hHtml += '<div class="dash-history-rows" id="' + dayId + '">';
+              for (var j = 0; j < dayData.donations.length; j++) {
+                var dd = dayData.donations[j];
+                var time = new Date(dd.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                var fromShort = dd.from ? dd.from.slice(0, 6) + '...' + dd.from.slice(-4) : '-';
+                var txLink = dd.txHash && dashExplorerUrl
+                  ? '<a href="' + dashExplorerUrl + '/tx/' + dd.txHash + '" target="_blank">' + dashShortHash(dd.txHash) + '</a>'
+                  : '-';
+                hHtml += '<div class="dash-history-row"><span class="h-time">' + time + '</span><span class="h-from">' + fromShort + '</span><span class="h-amount">' + dashEscape(dd.amount) + '</span><span class="h-tx">' + txLink + '</span></div>';
+              }
+              hHtml += '</div></div>';
+            }
+            histContainer.innerHTML = hHtml;
           }
 
           // Load wallets
