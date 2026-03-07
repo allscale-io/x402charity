@@ -1270,6 +1270,11 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       return h.slice(0, 8) + '...' + h.slice(-6);
     }
 
+    function dashExplorerForChain(chain) {
+      if (chain === 'base') return 'https://basescan.org';
+      return 'https://sepolia.basescan.org';
+    }
+
     function dashEscape(str) {
       var d = document.createElement('div');
       d.textContent = str;
@@ -1296,14 +1301,16 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
           } else {
             // Recent: last 5
             var recent = okDonations.slice(0, 5);
-            var html = '<table class="dash-table"><thead><tr><th>Time</th><th>Amount</th><th>From</th><th>Tx Hash</th></tr></thead><tbody>';
+            var html = '<table class="dash-table"><thead><tr><th>Time</th><th>Amount</th><th>From</th><th>Chain</th><th>Tx Hash</th></tr></thead><tbody>';
             for (var i = 0; i < recent.length; i++) {
               var d = recent[i];
-              var txLink = d.txHash && dashExplorerUrl
-                ? '<a href="' + dashExplorerUrl + '/tx/' + d.txHash + '" target="_blank">' + dashShortHash(d.txHash) + '</a>'
-                : (d.txHash ? dashShortHash(d.txHash) : '-');
+              var dExplorer = dashExplorerForChain(d.chain);
+              var txLink = d.txHash
+                ? '<a href="' + dExplorer + '/tx/' + d.txHash + '" target="_blank">' + dashShortHash(d.txHash) + '</a>'
+                : '-';
               var fromShort = d.from ? d.from.slice(0, 6) + '...' + d.from.slice(-4) : '-';
-              html += '<tr><td class="dash-time">' + dashTimeAgo(d.timestamp) + '</td><td class="amount">' + dashEscape(d.amount) + ' ' + d.currency + '</td><td class="tx-hash">' + fromShort + '</td><td class="tx-hash">' + txLink + '</td></tr>';
+              var chainLabel = d.chain === 'base' ? 'Base' : 'Sepolia';
+              html += '<tr><td class="dash-time">' + dashTimeAgo(d.timestamp) + '</td><td class="amount">' + dashEscape(d.amount) + ' ' + d.currency + '</td><td class="tx-hash">' + fromShort + '</td><td class="dash-time">' + chainLabel + '</td><td class="tx-hash">' + txLink + '</td></tr>';
             }
             html += '</tbody></table>';
             container.innerHTML = html;
@@ -1333,8 +1340,9 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
                 var dd = dayData.donations[j];
                 var time = new Date(dd.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                 var fromShort = dd.from ? dd.from.slice(0, 6) + '...' + dd.from.slice(-4) : '-';
-                var txLink = dd.txHash && dashExplorerUrl
-                  ? '<a href="' + dashExplorerUrl + '/tx/' + dd.txHash + '" target="_blank">' + dashShortHash(dd.txHash) + '</a>'
+                var ddExplorer = dashExplorerForChain(dd.chain);
+                var txLink = dd.txHash
+                  ? '<a href="' + ddExplorer + '/tx/' + dd.txHash + '" target="_blank">' + dashShortHash(dd.txHash) + '</a>'
                   : '-';
                 hHtml += '<div class="dash-history-row"><span class="h-time">' + time + '</span><span class="h-from">' + fromShort + '</span><span class="h-amount">' + dashEscape(dd.amount) + '</span><span class="h-tx">' + txLink + '</span></div>';
               }

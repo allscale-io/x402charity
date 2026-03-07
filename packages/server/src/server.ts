@@ -65,7 +65,8 @@ export interface ServerOptions {
 function resolveCharity(options: ServerOptions, network: string): Charity {
   const charityWallet = options.charityWallet || process.env.CHARITY_WALLET;
   const charityName = options.charityName || process.env.CHARITY_NAME || 'My Charity';
-  const baseUrl = process.env.BASE_URL || 'http://localhost:3402';
+  const baseUrl = process.env.BASE_URL
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3402');
 
   if (charityWallet) {
     const charity: Charity = {
@@ -262,68 +263,82 @@ export function createCharityServer(options: ServerOptions = {}): {
     });
   });
 
-  // Donation history API — fetches on-chain USDC transfers
+  // Donation history API — fetches on-chain USDC transfers from both networks
   app.get('/donations', async (_req, res) => {
     const charityAddr = charity.walletAddress as `0x${string}`;
-    const senderAddr = account?.address;
 
     const transferEvent = parseAbiItem(
       'event Transfer(address indexed from, address indexed to, uint256 value)',
     );
 
-    // Query on-chain transfers on the active network
-    const chainConfig = network === 'base'
-      ? { chain: base, rpc: 'https://mainnet.base.org' }
-      : { chain: baseSepolia, rpc: 'https://sepolia.base.org' };
+    const chains = [
+      { name: 'base' as const, chain: base, rpc: 'https://mainnet.base.org', explorer: 'https://basescan.org' },
+      { name: 'base-sepolia' as const, chain: baseSepolia, rpc: 'https://sepolia.base.org', explorer: 'https://sepolia.basescan.org' },
+    ];
+
+    const CHUNK_SIZE = 9999n;
+    const LOOKBACK = 50000n;
 
     const onChainDonations: DonationLog[] = [];
 
-    try {
-      const client = createPublicClient({ chain: chainConfig.chain, transport: http(chainConfig.rpc) });
-      const currentBlock = await client.getBlockNumber();
-      // Look back ~50k blocks (~1-2 days on Base)
-      const fromBlock = currentBlock > 50000n ? currentBlock - 50000n : 0n;
+    await Promise.all(chains.map(async ({ name, chain, rpc }) => {
+      try {
+        const client = createPublicClient({ chain, transport: http(rpc) });
+        const currentBlock = await client.getBlockNumber();
+        const startBlock = currentBlock > LOOKBACK ? currentBlock - LOOKBACK : 0n;
 
-      const logs = await client.getLogs({
-        address: USDC_ADDRESSES[network],
-        event: transferEvent,
-        args: senderAddr ? { from: senderAddr, to: charityAddr } : { to: charityAddr },
-        fromBlock,
-        toBlock: 'latest',
-      });
+        // Fetch logs in chunks to respect RPC range limits
+        const allLogs: any[] = [];
+        for (let from = startBlock; from <= currentBlock; from += CHUNK_SIZE + 1n) {
+          const to = from + CHUNK_SIZE > currentBlock ? currentBlock : from + CHUNK_SIZE;
+          try {
+            const logs = await client.getLogs({
+              address: USDC_ADDRESSES[name],
+              event: transferEvent,
+              args: { to: charityAddr },
+              fromBlock: from,
+              toBlock: to,
+            });
+            allLogs.push(...logs);
+          } catch {
+            // Skip chunk on error
+          }
+        }
 
-      // Take the most recent 50 logs
-      const recentLogs = logs.slice(-50);
+        const recentLogs = allLogs.slice(-50);
 
-      // Fetch block timestamps in parallel (dedup by block number)
-      const blockNumbers = [...new Set(recentLogs.map((l) => l.blockNumber!))];
-      const blockMap = new Map<bigint, bigint>();
-      await Promise.all(
-        blockNumbers.map(async (bn) => {
-          const block = await client.getBlock({ blockNumber: bn });
-          blockMap.set(bn, block.timestamp);
-        }),
-      );
+        // Fetch block timestamps in parallel
+        const blockNumbers = [...new Set(recentLogs.map((l) => l.blockNumber!))];
+        const blockMap = new Map<bigint, bigint>();
+        await Promise.all(
+          blockNumbers.map(async (bn) => {
+            try {
+              const block = await client.getBlock({ blockNumber: bn });
+              blockMap.set(bn, block.timestamp);
+            } catch { /* skip */ }
+          }),
+        );
 
-      for (const log of recentLogs) {
-        const amount = formatUnits(log.args.value ?? 0n, 6);
-        const ts = blockMap.get(log.blockNumber!) ?? 0n;
-        onChainDonations.push({
-          txHash: log.transactionHash ?? '',
-          from: (log.args.from as string) ?? '',
-          to: (log.args.to as string) ?? '',
-          charityId: charity.id,
-          charityName: charity.name,
-          amount: `$${amount}`,
-          currency: 'USDC',
-          chain: network,
-          timestamp: Number(ts) * 1000,
-          status: 'ok',
-        });
+        for (const log of recentLogs) {
+          const amount = formatUnits(log.args.value ?? 0n, 6);
+          const ts = blockMap.get(log.blockNumber!) ?? 0n;
+          onChainDonations.push({
+            txHash: log.transactionHash ?? '',
+            from: (log.args.from as string) ?? '',
+            to: (log.args.to as string) ?? '',
+            charityId: charity.id,
+            charityName: charity.name,
+            amount: `$${amount}`,
+            currency: 'USDC',
+            chain: name,
+            timestamp: Number(ts) * 1000,
+            status: 'ok',
+          });
+        }
+      } catch (err) {
+        console.error(`Failed to fetch on-chain donations (${name}):`, err instanceof Error ? err.message : err);
       }
-    } catch (err) {
-      console.error('Failed to fetch on-chain donations:', err instanceof Error ? err.message : err);
-    }
+    }));
 
     // Merge: on-chain + in-memory (dedup by txHash)
     const seenTxHashes = new Set(onChainDonations.map((d) => d.txHash).filter(Boolean));
