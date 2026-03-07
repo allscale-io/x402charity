@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { timingSafeEqual } from 'node:crypto';
 import express, { type Express } from 'express';
 import {
   createPublicClient,
@@ -159,7 +160,7 @@ export function createCharityServer(options: ServerOptions = {}): {
     } else {
       res.setHeader('Access-Control-Allow-Origin', '*');
     }
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Payment, Payment-Signature');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Payment, Payment-Signature');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     if (req.method === 'OPTIONS') {
       res.status(204).end();
@@ -406,7 +407,15 @@ export function createCharityServer(options: ServerOptions = {}): {
     // API key auth — if DONATE_API_KEY is set, require Authorization: Bearer <key>
     if (donateApiKey) {
       const authHeader = req.headers.authorization || '';
-      if (!authHeader.startsWith('Bearer ') || authHeader.slice(7) !== donateApiKey) {
+      if (!authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ error: 'Unauthorized. Provide a valid Authorization: Bearer <DONATE_API_KEY> header.' });
+        return;
+      }
+      const provided = authHeader.slice(7);
+      // Constant-time comparison to prevent timing attacks
+      const a = Buffer.from(provided);
+      const b = Buffer.from(donateApiKey);
+      if (a.length !== b.length || !timingSafeEqual(a, b)) {
         res.status(401).json({ error: 'Unauthorized. Provide a valid Authorization: Bearer <DONATE_API_KEY> header.' });
         return;
       }
