@@ -1593,12 +1593,12 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     const GROUND_Y = H - 40;
     const PLAYER_W = 28;
     const PLAYER_H = 44;
-    const GRAVITY = 1.1;
-    const JUMP_VEL = -16;
-    const BASE_SPEED = 12;
-    const SPEED_INC = 0.0006;
-    const MIN_GAP = 220;
-    const MAX_GAP = 400;
+    const GRAVITY = 1.6;
+    const JUMP_VEL = -20;
+    const BASE_SPEED = 18;
+    const SPEED_INC = 0.001;
+    const MIN_GAP = 160;
+    const MAX_GAP = 300;
 
     let state = 'idle';
     let score = 0;
@@ -1864,9 +1864,6 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         if (e.status === 'ok' && e.txHash) {
           var href = explorerUrl + '/tx/' + escapeHtml(e.txHash);
           detailHtml = '<a href="' + href + '" target="_blank" rel="noopener" title="View transaction on blockchain explorer">' + escapeHtml(e.detail) + '</a>';
-        } else if (e.status === 'ok' && charityWallet) {
-          var href = explorerUrl + '/address/' + escapeHtml(charityWallet);
-          detailHtml = '<a href="' + href + '" target="_blank" rel="noopener" title="View all donations on blockchain explorer">' + escapeHtml(e.detail) + '</a>';
         } else {
           detailHtml = escapeHtml(e.detail);
         }
