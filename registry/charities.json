@@ -9,6 +9,17 @@
       "verified": false,
       "category": "testing",
       "x402Endpoint": "https://x402charity.com/donate"
+    },
+    {
+      "id": "protocol-guild",
+      "name": "Protocol Guild",
+      "description": "Collective funding mechanism for Ethereum's layer 1 R&D maintainers",
+      "walletAddress": "0xd4ad8daba9ee5ef16bb931d1cbe63fb9e102ec10",
+      "chain": "base",
+      "verified": true,
+      "category": "public-goods",
+      "x402Endpoint": "https://x402charity.com/donate",
+      "source": "https://protocol-guild.readthedocs.io/"
     }
   ]
 }
