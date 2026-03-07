@@ -150,7 +150,6 @@ export function createCharityServer(options: ServerOptions = {}): {
   const docsDir = options.docsDir || resolve(process.cwd(), 'docs');
 
   app.get('/', (_req, res) => res.sendFile(resolve(docsDir, 'index.html')));
-  app.get('/dashboard', (_req, res) => res.sendFile(resolve(docsDir, 'dashboard.html')));
 
   // --- x402 payment middleware ---
   const caip2 = CAIP2[network];
@@ -334,7 +333,7 @@ export function startCharityServer(options: ServerOptions = {}): void {
     console.log(`  GET  /address             — donation wallet address & balances`);
     console.log(`  GET  /charity             — charity info`);
     console.log(`  GET  /donations           — donation history (JSON)`);
-    console.log(`  GET  /dashboard           — public donation dashboard`);
+    console.log(`  GET  /                    — landing page with dashboard`);
     console.log(`  POST /donate              — trigger a donation\n`);
   });
 }

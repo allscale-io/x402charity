@@ -6,7 +6,6 @@
     { "source": "/address", "destination": "/api" },
     { "source": "/charity", "destination": "/api" },
     { "source": "/donations", "destination": "/api" },
-    { "source": "/dashboard", "destination": "/api" },
     { "source": "/donate", "destination": "/api" }
   ]
 }

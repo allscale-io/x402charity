@@ -657,63 +657,121 @@
       font-weight: 600;
     }
 
-    /* ---- Wallet ---- */
-    .wallet-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      max-width: 600px;
-      margin: 0 auto;
+    /* ---- Dashboard ---- */
+    .dash-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border); border-radius: 12px;
+      overflow: hidden; margin-bottom: 24px;
     }
-
-    .wallet-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
+    .dash-stat {
+      background: var(--surface); padding: 20px; text-align: center;
     }
-
-    .wallet-card h4 {
-      font-size: 13px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-      font-weight: 600;
+    .dash-stat-label {
+      font-size: 11px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      font-weight: 600; margin-bottom: 6px;
     }
-
-    .wallet-bal {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      font-size: 15px;
-    }
-
-    .wallet-bal .label { color: var(--text-muted); }
-    .wallet-bal .val { font-family: 'Inconsolata', monospace; font-weight: 700; }
-    .wallet-bal .val.green { color: var(--accent); }
-
-    .wallet-address {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .wallet-address .addr {
+    .dash-stat-value {
       font-family: 'Inconsolata', monospace;
-      font-size: 14px;
-      color: var(--text-muted);
-      word-break: break-all;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 20px;
-      display: inline-block;
+      font-size: 24px; font-weight: 700;
     }
 
-    .wallet-address .addr-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
+    .dash-wallets {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 24px;
+    }
+    .dash-wallet {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 20px;
+    }
+    .dash-wallet-role {
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .dash-wallet.sender .dash-wallet-role { color: var(--accent); }
+    .dash-wallet.receiver .dash-wallet-role { color: #88c0d0; }
+    .dash-wallet-sub {
+      font-size: 11px; color: var(--text-muted); margin-bottom: 8px;
+    }
+    .dash-wallet .dash-addr {
+      font-family: 'Inconsolata', monospace; font-size: 12px;
+      word-break: break-all; color: var(--text-muted);
+      background: rgba(255,255,255,0.03); border-radius: 6px;
+      padding: 6px 8px; margin-bottom: 8px;
+    }
+    .dash-bal-row {
+      display: flex; justify-content: space-between;
+      padding: 3px 0; font-size: 13px;
+    }
+    .dash-bal-row .label { color: var(--text-muted); font-size: 12px; }
+    .dash-bal-row .val {
+      font-family: 'Inconsolata', monospace; font-weight: 700;
+    }
+    .dash-bal-row .val.green { color: var(--accent); }
+    .dash-explorer {
+      font-size: 11px; color: var(--text-muted); text-decoration: none;
+    }
+    .dash-explorer:hover { color: var(--accent); }
+
+    .dash-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
+    }
+    .dash-header-title {
+      font-size: 14px; font-weight: 700;
+    }
+    .dash-header-count {
+      font-size: 12px; color: var(--text-muted); font-weight: 400;
+    }
+    .dash-refresh {
+      background: none; border: 1px solid var(--border);
+      color: var(--text-muted); padding: 4px 12px;
+      border-radius: 6px; font-size: 11px; cursor: pointer;
+      font-family: 'Manrope', sans-serif; font-weight: 600;
+    }
+    .dash-refresh:hover { border-color: var(--accent); color: var(--accent); }
+
+    .dash-table {
+      width: 100%; border-collapse: collapse;
+      background: var(--surface); border-radius: 12px;
+      overflow: hidden; border: 1px solid var(--border);
+    }
+    .dash-table thead th {
+      text-align: left; padding: 10px 14px;
+      font-size: 10px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      font-weight: 600; border-bottom: 1px solid var(--border);
+    }
+    .dash-table tbody td {
+      padding: 10px 14px; font-size: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+    .dash-table tbody tr:last-child td { border-bottom: none; }
+    .dash-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .dash-table .tx-hash {
+      font-family: 'Inconsolata', monospace; font-size: 12px;
+    }
+    .dash-table .tx-hash a { color: var(--accent); text-decoration: none; }
+    .dash-table .tx-hash a:hover { text-decoration: underline; }
+    .dash-table .amount { font-family: 'Inconsolata', monospace; font-weight: 700; }
+    .dash-badge {
+      display: inline-block; padding: 2px 6px;
+      border-radius: 4px; font-size: 10px; font-weight: 700;
+    }
+    .dash-badge.ok { background: var(--accent-dim); color: var(--accent); }
+    .dash-badge.failed { background: rgba(255,77,77,0.12); color: var(--red); }
+    .dash-time { color: var(--text-muted); font-size: 12px; }
+
+    .dash-empty {
+      text-align: center; padding: 32px 20px;
+      color: var(--text-muted); font-size: 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .dash-empty .hint {
+      font-size: 12px; margin-top: 6px;
+      font-family: 'Inconsolata', monospace; color: var(--accent);
     }
 
     /* ---- Footer ---- */
@@ -741,7 +799,10 @@
       .hero .section-sub { font-size: 16px; }
       .seq-diagram { padding: 20px 12px 16px; }
       .cases-grid { grid-template-columns: 1fr; }
-      .wallet-grid { grid-template-columns: 1fr; }
+      .dash-wallets { grid-template-columns: 1fr; }
+      .dash-stats { grid-template-columns: 1fr; }
+      .dash-stat-value { font-size: 20px; }
+      .dash-table thead th, .dash-table tbody td { padding: 8px 10px; }
       header nav { gap: 14px; }
       header nav a { font-size: 12px; }
       .footer-content { flex-direction: column; gap: 12px; text-align: center; }
@@ -763,7 +824,7 @@
         <a href="#demo">Demo</a>
         <a href="#integrate">Integrate</a>
         <a href="#use-cases">Use Cases</a>
-        <a href="/dashboard">Dashboard</a>
+        <a href="#dashboard">Dashboard</a>
         <a href="https://github.com/allscale-io/x402charity">GitHub</a>
       </nav>
     </div>
@@ -944,7 +1005,7 @@ $ docker run -p 3402:3402 \
   x402charity
 
 <span class="code-comment"># Your server is live at http://localhost:3402</span>
-<span class="code-comment"># Dashboard: http://localhost:3402/dashboard</span></code></pre>
+<span class="code-comment"># Dashboard is built into the landing page</span></code></pre>
       </div>
 
       <div class="code-panel" id="panel-trigger">
@@ -960,9 +1021,7 @@ $ docker run -p 3402:3402 \
 <span class="code-keyword">const</span> receipt = <span class="code-keyword">await</span> res.<span class="code-func">json</span>();
 console.<span class="code-func">log</span>(receipt.txHash); <span class="code-comment">// on-chain tx proof</span>
 
-<span class="code-comment">// Optional: show donation history to users</span>
-<span class="code-comment">// GET /donations  → JSON list of all donations</span>
-<span class="code-comment">// GET /dashboard  → public dashboard page</span></code></pre>
+<span class="code-comment">// GET /donations returns JSON history of all donations</span></code></pre>
       </div>
     </div>
   </section>
@@ -1015,41 +1074,62 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     </div>
   </section>
 
-  <!-- 6. Wallet Status -->
-  <section id="wallet">
-    <div class="container" style="text-align:center;">
-      <div class="section-label">Live Wallet</div>
-      <h2 class="section-title">Donation wallet <span>status</span></h2>
-      <p class="section-sub" style="margin:0 auto 32px;">The server wallet that funds all demo donations. Balances update live from the blockchain.</p>
+  <!-- 6. Dashboard -->
+  <section id="dashboard">
+    <div class="container">
+      <div class="section-label">Live Dashboard</div>
+      <h2 class="section-title">Donation <span>dashboard</span></h2>
+      <p class="section-sub">All donations are on-chain and publicly verifiable on Base.</p>
 
-      <div class="wallet-address">
-        <div class="addr-label">Donation Wallet Address</div>
-        <div class="addr" id="wallet-addr">Loading...</div>
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat-label">Total Donated</div>
+          <div class="dash-stat-value green" id="dash-total">-</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-label">Donations</div>
+          <div class="dash-stat-value" id="dash-count">-</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-label">Network</div>
+          <div class="dash-stat-value" id="dash-network">-</div>
+        </div>
       </div>
 
-      <div class="wallet-grid">
-        <div class="wallet-card">
-          <h4>Base Sepolia (testnet)</h4>
-          <div class="wallet-bal">
-            <span class="label">ETH</span>
-            <span class="val" id="bal-sepolia-eth">-</span>
-          </div>
-          <div class="wallet-bal">
+      <div class="dash-wallets" id="dash-wallets" style="display:none;">
+        <div class="dash-wallet sender">
+          <div class="dash-wallet-role">Donation Wallet</div>
+          <div class="dash-wallet-sub">Funds donations</div>
+          <div class="dash-addr" id="dash-sender-addr">-</div>
+          <div class="dash-bal-row">
             <span class="label">USDC</span>
-            <span class="val green" id="bal-sepolia-usdc">-</span>
+            <span class="val green" id="dash-sender-usdc">-</span>
           </div>
+          <div class="dash-bal-row">
+            <span class="label">ETH (gas)</span>
+            <span class="val" id="dash-sender-eth">-</span>
+          </div>
+          <a class="dash-explorer" id="dash-sender-explorer" href="#" target="_blank">View on BaseScan</a>
         </div>
-        <div class="wallet-card">
-          <h4>Base (mainnet)</h4>
-          <div class="wallet-bal">
-            <span class="label">ETH</span>
-            <span class="val" id="bal-base-eth">-</span>
+        <div class="dash-wallet receiver">
+          <div class="dash-wallet-role">Charity Wallet</div>
+          <div class="dash-wallet-sub" id="dash-charity-name">Receives donations</div>
+          <div class="dash-addr" id="dash-receiver-addr">-</div>
+          <div class="dash-bal-row">
+            <span class="label">Chain</span>
+            <span class="val" id="dash-receiver-chain">-</span>
           </div>
-          <div class="wallet-bal">
-            <span class="label">USDC</span>
-            <span class="val green" id="bal-base-usdc">-</span>
-          </div>
+          <a class="dash-explorer" id="dash-receiver-explorer" href="#" target="_blank">View on BaseScan</a>
         </div>
+      </div>
+
+      <div class="dash-header">
+        <span class="dash-header-title">Recent Donations <span class="dash-header-count" id="dash-donation-count"></span></span>
+        <button class="dash-refresh" onclick="loadDashboard()">Refresh</button>
+      </div>
+
+      <div id="dash-donations">
+        <div class="dash-empty">Loading donations...</div>
       </div>
     </div>
   </section>
@@ -1096,21 +1176,92 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       });
     });
 
-    // ===== Wallet status =====
-    fetch('/address')
-      .then(r => r.json())
-      .then(data => {
-        document.getElementById('wallet-addr').textContent = data.address;
-        const s = data.balances['base-sepolia'];
-        const b = data.balances['base'];
-        document.getElementById('bal-sepolia-eth').textContent = parseFloat(s.eth).toFixed(4);
-        document.getElementById('bal-sepolia-usdc').textContent = parseFloat(s.usdc).toFixed(2);
-        document.getElementById('bal-base-eth').textContent = parseFloat(b.eth).toFixed(4);
-        document.getElementById('bal-base-usdc').textContent = parseFloat(b.usdc).toFixed(2);
-      })
-      .catch(() => {
-        document.getElementById('wallet-addr').textContent = 'Could not load';
-      });
+    // ===== Dashboard =====
+    var dashExplorerUrl = '';
+
+    function dashTimeAgo(ts) {
+      var s = Math.floor((Date.now() - ts) / 1000);
+      if (s < 60) return s + 's ago';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+      return new Date(ts).toLocaleDateString();
+    }
+
+    function dashShortHash(h) {
+      if (!h) return '-';
+      return h.slice(0, 8) + '...' + h.slice(-6);
+    }
+
+    function dashEscape(str) {
+      var d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function loadDashboard() {
+      fetch('/donations')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          document.getElementById('dash-total').textContent = data.total;
+          document.getElementById('dash-count').textContent = data.count;
+          document.getElementById('dash-network').textContent = data.network === 'base' ? 'Base' : 'Base Sepolia';
+          document.getElementById('dash-donation-count').textContent = '(' + data.donations.length + ')';
+          dashExplorerUrl = data.explorerUrl || '';
+
+          var container = document.getElementById('dash-donations');
+          if (data.donations.length === 0) {
+            container.innerHTML = '<div class="dash-empty">No donations yet.<div class="hint">POST /donate to trigger a donation</div></div>';
+          } else {
+            var html = '<table class="dash-table"><thead><tr><th>Time</th><th>Charity</th><th>Amount</th><th>Tx Hash</th><th>Status</th></tr></thead><tbody>';
+            for (var i = 0; i < data.donations.length; i++) {
+              var d = data.donations[i];
+              var txLink = d.txHash && dashExplorerUrl
+                ? '<a href="' + dashExplorerUrl + '/tx/' + d.txHash + '" target="_blank">' + dashShortHash(d.txHash) + '</a>'
+                : (d.txHash ? dashShortHash(d.txHash) : '-');
+              var badge = d.status === 'ok'
+                ? '<span class="dash-badge ok">OK</span>'
+                : '<span class="dash-badge failed">FAILED</span>';
+              html += '<tr><td class="dash-time">' + dashTimeAgo(d.timestamp) + '</td><td>' + dashEscape(d.charityName) + '</td><td class="amount">' + dashEscape(d.amount) + ' ' + d.currency + '</td><td class="tx-hash">' + txLink + '</td><td>' + badge + '</td></tr>';
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+          }
+
+          // Load wallets
+          Promise.all([
+            fetch('/address').then(function(r) { return r.json(); }).catch(function() { return null; }),
+            fetch('/charity').then(function(r) { return r.json(); }).catch(function() { return null; }),
+          ]).then(function(results) {
+            var addr = results[0];
+            var charity = results[1];
+            document.getElementById('dash-wallets').style.display = '';
+
+            if (addr) {
+              document.getElementById('dash-sender-addr').textContent = addr.address;
+              var net = document.getElementById('dash-network').textContent;
+              var key = net === 'Base' ? 'base' : 'base-sepolia';
+              var bal = addr.balances[key];
+              if (bal) {
+                document.getElementById('dash-sender-usdc').textContent = parseFloat(bal.usdc).toFixed(2);
+                document.getElementById('dash-sender-eth').textContent = parseFloat(bal.eth).toFixed(4);
+              }
+              document.getElementById('dash-sender-explorer').href = dashExplorerUrl + '/address/' + addr.address;
+            }
+
+            if (charity) {
+              document.getElementById('dash-receiver-addr').textContent = charity.walletAddress;
+              document.getElementById('dash-charity-name').textContent = charity.name;
+              document.getElementById('dash-receiver-chain').textContent = charity.chain === 'base' ? 'Base' : 'Base Sepolia';
+              document.getElementById('dash-receiver-explorer').href = dashExplorerUrl + '/address/' + charity.walletAddress;
+            }
+          });
+        })
+        .catch(function() {
+          document.getElementById('dash-donations').innerHTML = '<div class="dash-empty">Failed to load donations.</div>';
+        });
+    }
+
+    loadDashboard();
 
     // ===== Game =====
     const X402_SERVER = '';
@@ -1400,7 +1551,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
           label: '200 OK + txHash',
           sublabel: 'On-chain receipt',
           title: '6. Receipt returned with on-chain proof',
-          desc: 'Your x402 server returns a JSON receipt with the on-chain transaction hash. View it on the public /dashboard page. The user never needed a wallet or even knew a donation happened.',
+          desc: 'Your x402 server returns a JSON receipt with the on-chain transaction hash. All donations are shown on the live dashboard. The user never needed a wallet or even knew a donation happened.',
           activeActors: ['x402', 'product'],
         },
       ];
