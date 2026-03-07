@@ -180,7 +180,8 @@ To add a charity to the public registry, submit a PR editing `registry/charities
   "walletAddress": "0x...",
   "chain": "base",
   "verified": false,
-  "category": "education"
+  "category": "education",
+  "x402Endpoint": "https://your-charity-server.com/donate"
 }
 ```
 
