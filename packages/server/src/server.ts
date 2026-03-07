@@ -219,13 +219,45 @@ export function createCharityServer(options: ServerOptions = {}): {
     res.json({ address, balances });
   });
 
-  // Charity info
-  app.get('/charity', (_req, res) => {
+  // Charity info with balances
+  app.get('/charity', async (_req, res) => {
+    const charityAddr = charity.walletAddress as `0x${string}`;
+    const chains = {
+      base: { chain: base, rpc: 'https://mainnet.base.org' },
+      'base-sepolia': { chain: baseSepolia, rpc: 'https://sepolia.base.org' },
+    };
+
+    const balances: Record<string, { eth: string; usdc: string }> = {};
+
+    await Promise.all(
+      Object.entries(chains).map(async ([name, { chain: c, rpc }]) => {
+        try {
+          const client = createPublicClient({ chain: c, transport: http(rpc) });
+          const [ethBal, usdcBal] = await Promise.all([
+            client.getBalance({ address: charityAddr }),
+            client.readContract({
+              address: USDC_ADDRESSES[name],
+              abi: erc20Abi,
+              functionName: 'balanceOf',
+              args: [charityAddr],
+            }),
+          ]);
+          balances[name] = {
+            eth: formatEther(ethBal),
+            usdc: formatUnits(usdcBal, 6),
+          };
+        } catch {
+          balances[name] = { eth: '0', usdc: '0' };
+        }
+      }),
+    );
+
     res.json({
       name: charity.name,
       description: charity.description,
       walletAddress: charity.walletAddress,
       chain: charity.chain,
+      balances,
     });
   });
 

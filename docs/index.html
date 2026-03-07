@@ -709,6 +709,12 @@
       font-family: 'Inconsolata', monospace; font-weight: 700;
     }
     .dash-bal-row .val.green { color: var(--accent); }
+    .dash-chain-label {
+      font-size: 11px; color: var(--text-muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.3px;
+      margin-bottom: 4px; padding-top: 4px;
+      border-top: 1px solid var(--border);
+    }
     .dash-explorer {
       font-size: 11px; color: var(--text-muted); text-decoration: none;
     }
@@ -1096,30 +1102,62 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         </div>
       </div>
 
-      <div class="dash-wallets" id="dash-wallets" style="display:none;">
+      <div class="dash-wallets" id="dash-wallets">
         <div class="dash-wallet sender">
           <div class="dash-wallet-role">Donation Wallet</div>
           <div class="dash-wallet-sub">Funds donations</div>
-          <div class="dash-addr" id="dash-sender-addr">-</div>
+          <div class="dash-addr" id="dash-sender-addr">Loading...</div>
+          <div class="dash-chain-label">Base Sepolia (testnet)</div>
           <div class="dash-bal-row">
             <span class="label">USDC</span>
-            <span class="val green" id="dash-sender-usdc">-</span>
+            <span class="val green" id="dash-sender-sepolia-usdc">-</span>
           </div>
           <div class="dash-bal-row">
-            <span class="label">ETH (gas)</span>
-            <span class="val" id="dash-sender-eth">-</span>
+            <span class="label">ETH</span>
+            <span class="val" id="dash-sender-sepolia-eth">-</span>
           </div>
-          <a class="dash-explorer" id="dash-sender-explorer" href="#" target="_blank">View on BaseScan</a>
+          <div class="dash-chain-label" style="margin-top:8px;">Base (mainnet)</div>
+          <div class="dash-bal-row">
+            <span class="label">USDC</span>
+            <span class="val green" id="dash-sender-base-usdc">-</span>
+          </div>
+          <div class="dash-bal-row">
+            <span class="label">ETH</span>
+            <span class="val" id="dash-sender-base-eth">-</span>
+          </div>
+          <div style="margin-top:8px;">
+            <a class="dash-explorer" id="dash-sender-explorer-sepolia" href="#" target="_blank">Sepolia BaseScan</a>
+            <span style="color:var(--border);margin:0 6px;">|</span>
+            <a class="dash-explorer" id="dash-sender-explorer-base" href="#" target="_blank">Base BaseScan</a>
+          </div>
         </div>
         <div class="dash-wallet receiver">
           <div class="dash-wallet-role">Charity Wallet</div>
-          <div class="dash-wallet-sub" id="dash-charity-name">Receives donations</div>
-          <div class="dash-addr" id="dash-receiver-addr">-</div>
+          <div class="dash-wallet-sub" id="dash-charity-name">Loading...</div>
+          <div class="dash-addr" id="dash-receiver-addr">Loading...</div>
+          <div class="dash-chain-label">Base Sepolia (testnet)</div>
           <div class="dash-bal-row">
-            <span class="label">Chain</span>
-            <span class="val" id="dash-receiver-chain">-</span>
+            <span class="label">USDC</span>
+            <span class="val green" id="dash-receiver-sepolia-usdc">-</span>
           </div>
-          <a class="dash-explorer" id="dash-receiver-explorer" href="#" target="_blank">View on BaseScan</a>
+          <div class="dash-bal-row">
+            <span class="label">ETH</span>
+            <span class="val" id="dash-receiver-sepolia-eth">-</span>
+          </div>
+          <div class="dash-chain-label" style="margin-top:8px;">Base (mainnet)</div>
+          <div class="dash-bal-row">
+            <span class="label">USDC</span>
+            <span class="val green" id="dash-receiver-base-usdc">-</span>
+          </div>
+          <div class="dash-bal-row">
+            <span class="label">ETH</span>
+            <span class="val" id="dash-receiver-base-eth">-</span>
+          </div>
+          <div style="margin-top:8px;">
+            <a class="dash-explorer" id="dash-receiver-explorer-sepolia" href="#" target="_blank">Sepolia BaseScan</a>
+            <span style="color:var(--border);margin:0 6px;">|</span>
+            <a class="dash-explorer" id="dash-receiver-explorer-base" href="#" target="_blank">Base BaseScan</a>
+          </div>
         </div>
       </div>
 
@@ -1234,25 +1272,42 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
           ]).then(function(results) {
             var addr = results[0];
             var charity = results[1];
-            document.getElementById('dash-wallets').style.display = '';
 
             if (addr) {
               document.getElementById('dash-sender-addr').textContent = addr.address;
-              var net = document.getElementById('dash-network').textContent;
-              var key = net === 'Base' ? 'base' : 'base-sepolia';
-              var bal = addr.balances[key];
-              if (bal) {
-                document.getElementById('dash-sender-usdc').textContent = parseFloat(bal.usdc).toFixed(2);
-                document.getElementById('dash-sender-eth').textContent = parseFloat(bal.eth).toFixed(4);
+              var sep = addr.balances['base-sepolia'];
+              var bas = addr.balances['base'];
+              if (sep) {
+                document.getElementById('dash-sender-sepolia-usdc').textContent = parseFloat(sep.usdc).toFixed(2);
+                document.getElementById('dash-sender-sepolia-eth').textContent = parseFloat(sep.eth).toFixed(4);
               }
-              document.getElementById('dash-sender-explorer').href = dashExplorerUrl + '/address/' + addr.address;
+              if (bas) {
+                document.getElementById('dash-sender-base-usdc').textContent = parseFloat(bas.usdc).toFixed(2);
+                document.getElementById('dash-sender-base-eth').textContent = parseFloat(bas.eth).toFixed(4);
+              }
+              document.getElementById('dash-sender-explorer-sepolia').href = 'https://sepolia.basescan.org/address/' + addr.address;
+              document.getElementById('dash-sender-explorer-base').href = 'https://basescan.org/address/' + addr.address;
+            } else {
+              document.getElementById('dash-sender-addr').textContent = 'Not configured';
             }
 
             if (charity) {
               document.getElementById('dash-receiver-addr').textContent = charity.walletAddress;
               document.getElementById('dash-charity-name').textContent = charity.name;
-              document.getElementById('dash-receiver-chain').textContent = charity.chain === 'base' ? 'Base' : 'Base Sepolia';
-              document.getElementById('dash-receiver-explorer').href = dashExplorerUrl + '/address/' + charity.walletAddress;
+              var csep = charity.balances && charity.balances['base-sepolia'];
+              var cbas = charity.balances && charity.balances['base'];
+              if (csep) {
+                document.getElementById('dash-receiver-sepolia-usdc').textContent = parseFloat(csep.usdc).toFixed(2);
+                document.getElementById('dash-receiver-sepolia-eth').textContent = parseFloat(csep.eth).toFixed(4);
+              }
+              if (cbas) {
+                document.getElementById('dash-receiver-base-usdc').textContent = parseFloat(cbas.usdc).toFixed(2);
+                document.getElementById('dash-receiver-base-eth').textContent = parseFloat(cbas.eth).toFixed(4);
+              }
+              document.getElementById('dash-receiver-explorer-sepolia').href = 'https://sepolia.basescan.org/address/' + charity.walletAddress;
+              document.getElementById('dash-receiver-explorer-base').href = 'https://basescan.org/address/' + charity.walletAddress;
+            } else {
+              document.getElementById('dash-receiver-addr').textContent = 'Not configured';
             }
           });
         })
