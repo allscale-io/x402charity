@@ -11,7 +11,7 @@ import { base, baseSepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 import { paymentMiddlewareFromConfig } from '@x402/express';
 import { ExactEvmScheme } from '@x402/evm/exact/server';
-import { X402CharityClient, listCharities, findCharity, setCharities } from '@x402charity/core';
+import { X402CharityClient, listCharities, setCharities } from '@x402charity/core';
 import type { Charity } from '@x402charity/core';
 
 const USDC_ADDRESSES: Record<string, `0x${string}`> = {
@@ -50,43 +50,42 @@ export interface ServerOptions {
   privateKey?: string;
   /** Network to use. Default: base-sepolia */
   network?: 'base' | 'base-sepolia';
-  /** Only serve charities matching these IDs. Default: all charities. */
-  charityIds?: string[];
   /** Path to the docs directory for serving static pages. */
   docsDir?: string;
-  /** Charity wallet address (overrides registry). */
+  /** Charity wallet address. */
   charityWallet?: string;
-  /** Charity name (used with charityWallet). */
+  /** Charity name. */
   charityName?: string;
 }
 
 /**
- * Build charity list from env vars or registry.
+ * Resolve the single charity from env vars or registry.
  */
-function resolveCharities(options: ServerOptions, network: string): Charity[] {
+function resolveCharity(options: ServerOptions, network: string): Charity {
   const charityWallet = options.charityWallet || process.env.CHARITY_WALLET;
   const charityName = options.charityName || process.env.CHARITY_NAME || 'My Charity';
-  const charityId = process.env.CHARITY_ID || charityName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3402';
 
   if (charityWallet) {
     const charity: Charity = {
-      id: charityId,
+      id: charityName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       name: charityName,
       description: process.env.CHARITY_DESCRIPTION || `Donations to ${charityName}`,
       walletAddress: charityWallet,
       chain: network as 'base' | 'base-sepolia',
       verified: false,
-      x402Endpoint: `${process.env.BASE_URL || 'http://localhost:3402'}/donate/${charityId}`,
+      x402Endpoint: `${baseUrl}/donate`,
     };
     setCharities([charity]);
-    return [charity];
+    return charity;
   }
 
-  let charities = listCharities();
-  if (options.charityIds) {
-    charities = charities.filter((c) => options.charityIds!.includes(c.id));
+  // Fall back to first charity in registry
+  const charities = listCharities();
+  if (charities.length === 0) {
+    throw new Error('No charity configured. Set CHARITY_WALLET env var.');
   }
-  return charities;
+  return charities[0];
 }
 
 /**
@@ -100,11 +99,7 @@ export function createCharityServer(options: ServerOptions = {}): {
     network = (process.env.DONATION_NETWORK as 'base' | 'base-sepolia') || 'base-sepolia',
   } = options;
 
-  const charities = resolveCharities(options, network);
-
-  if (charities.length === 0) {
-    throw new Error('No charities found. Set CHARITY_WALLET env var or add charities to the registry.');
-  }
+  const charity = resolveCharity(options, network);
 
   // Donation history (in-memory)
   const donationLog: DonationLog[] = [];
@@ -117,7 +112,12 @@ export function createCharityServer(options: ServerOptions = {}): {
     try {
       const pk = (privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`) as `0x${string}`;
       account = privateKeyToAccount(pk);
-      donationClient = new X402CharityClient({ privateKey, network });
+      donationClient = new X402CharityClient({
+        privateKey,
+        network,
+        donateEndpoint: charity.x402Endpoint,
+        charity,
+      });
       console.log('\n=== Donation Wallet ===');
       console.log(`  Address: ${account.address}`);
       console.log(`  Network: ${network}`);
@@ -128,11 +128,8 @@ export function createCharityServer(options: ServerOptions = {}): {
     }
   }
 
-  console.log('=== Charities ===');
-  for (const c of charities) {
-    console.log(`  ${c.name} (${c.id}) → ${c.walletAddress}`);
-  }
-  console.log('');
+  console.log(`=== Charity: ${charity.name} ===`);
+  console.log(`  Wallet: ${charity.walletAddress}\n`);
 
   const app = express();
   app.use(express.json());
@@ -157,17 +154,16 @@ export function createCharityServer(options: ServerOptions = {}): {
 
   // --- x402 payment middleware ---
   const caip2 = CAIP2[network];
-  const routes: Record<string, object> = {};
-  for (const charity of charities) {
-    routes[`GET /donate/${charity.id}`] = {
+  const routes = {
+    'GET /donate': {
       accepts: {
         scheme: 'exact',
         network: caip2,
         payTo: charity.walletAddress,
         price: '$0.001',
       },
-    };
-  }
+    },
+  };
 
   app.use(
     paymentMiddlewareFromConfig(
@@ -181,7 +177,7 @@ export function createCharityServer(options: ServerOptions = {}): {
   app.get('/health', (_req, res) => {
     res.json({
       status: 'ok',
-      charities: charities.length,
+      charity: { name: charity.name, wallet: charity.walletAddress },
       walletConfigured: !!account,
       donationWallet: account?.address ?? null,
     });
@@ -224,18 +220,14 @@ export function createCharityServer(options: ServerOptions = {}): {
     res.json({ address, balances });
   });
 
-  // List available charities
-  app.get('/charities', (_req, res) => {
-    res.json(
-      charities.map((c) => ({
-        id: c.id,
-        name: c.name,
-        description: c.description,
-        walletAddress: c.walletAddress,
-        chain: c.chain,
-        verified: c.verified,
-      })),
-    );
+  // Charity info
+  app.get('/charity', (_req, res) => {
+    res.json({
+      name: charity.name,
+      description: charity.description,
+      walletAddress: charity.walletAddress,
+      chain: charity.chain,
+    });
   });
 
   // Donation history API
@@ -253,13 +245,12 @@ export function createCharityServer(options: ServerOptions = {}): {
   });
 
   // x402-gated donation endpoint — runs after payment is verified by middleware
-  app.get('/donate/:charityId', (req, res) => {
-    const charity = findCharity(req.params.charityId);
+  app.get('/donate', (_req, res) => {
     res.json({
       status: 'ok',
-      message: `Donated to ${charity?.name}`,
+      message: `Donated to ${charity.name}`,
       receipt: {
-        to: charity?.walletAddress,
+        to: charity.walletAddress,
         amount: '$0.001',
         currency: 'USDC',
         chain: network,
@@ -269,9 +260,7 @@ export function createCharityServer(options: ServerOptions = {}): {
   });
 
   // Trigger endpoint — server pays from its own wallet via x402 protocol
-  app.post('/donate/:charityId', async (req, res) => {
-    const { charityId } = req.params;
-
+  app.post('/donate', async (req, res) => {
     if (!donationClient) {
       res.status(503).json({
         error: 'Donation wallet not configured. Set DONATION_PRIVATE_KEY env var.',
@@ -279,15 +268,9 @@ export function createCharityServer(options: ServerOptions = {}): {
       return;
     }
 
-    const charity = findCharity(charityId);
-    if (!charity) {
-      res.status(404).json({ error: `Charity not found: ${charityId}` });
-      return;
-    }
-
     try {
       const amount = req.body?.amount || '$0.001';
-      const receipt = await donationClient.donate(charityId, amount);
+      const receipt = await donationClient.donate(amount);
       const log: DonationLog = {
         txHash: receipt.txHash,
         from: receipt.from,
@@ -316,7 +299,7 @@ export function createCharityServer(options: ServerOptions = {}): {
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
-      console.error(`Donation to ${charityId} failed:`, message);
+      console.error(`Donation failed:`, message);
       donationLog.push({
         txHash: '',
         from: account?.address ?? '',
@@ -349,10 +332,9 @@ export function startCharityServer(options: ServerOptions = {}): void {
     console.log('Endpoints:');
     console.log(`  GET  /health              — health check`);
     console.log(`  GET  /address             — donation wallet address & balances`);
-    console.log(`  GET  /charities           — list available charities`);
+    console.log(`  GET  /charity             — charity info`);
     console.log(`  GET  /donations           — donation history (JSON)`);
     console.log(`  GET  /dashboard           — public donation dashboard`);
-    console.log(`  GET  /donate/:id          — x402-gated donation endpoint`);
-    console.log(`  POST /donate/:id          — trigger donation (server pays via x402)\n`);
+    console.log(`  POST /donate              — trigger a donation\n`);
   });
 }

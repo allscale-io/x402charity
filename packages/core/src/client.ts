@@ -10,8 +10,7 @@ import { x402Client } from '@x402/core/client';
 import { ExactEvmScheme, toClientEvmSigner } from '@x402/evm';
 import { wrapFetchWithPayment } from '@x402/fetch';
 import { RPC_URLS, CAIP2_CHAIN_IDS } from './config.js';
-import { findCharity } from './registry.js';
-import type { DonationReceipt } from './types.js';
+import type { Charity, DonationReceipt } from './types.js';
 
 const CHAINS: Record<string, Chain> = {
   base,
@@ -21,12 +20,18 @@ const CHAINS: Record<string, Chain> = {
 export interface ClientOptions {
   privateKey: string;
   network?: 'base' | 'base-sepolia';
+  /** The x402-gated donation endpoint URL. */
+  donateEndpoint: string;
+  /** The charity receiving donations. */
+  charity: Charity;
 }
 
 export class X402CharityClient {
   private network: 'base' | 'base-sepolia';
   readonly account: PrivateKeyAccount;
   private paymentFetch: typeof globalThis.fetch;
+  private donateEndpoint: string;
+  private charity: Charity;
 
   constructor(options: ClientOptions) {
     const privateKey = (
@@ -35,6 +40,8 @@ export class X402CharityClient {
         : `0x${options.privateKey}`
     ) as `0x${string}`;
     this.network = options.network || 'base-sepolia';
+    this.donateEndpoint = options.donateEndpoint;
+    this.charity = options.charity;
     const chain = CHAINS[this.network];
     const transport = http(RPC_URLS[this.network]);
 
@@ -57,15 +64,8 @@ export class X402CharityClient {
     this.paymentFetch = wrapFetchWithPayment(globalThis.fetch, client);
   }
 
-  async donate(causeId: string, amount: string): Promise<DonationReceipt> {
-    const charity = findCharity(causeId);
-    if (!charity) {
-      throw new Error(
-        `Charity not found: ${causeId}. Use listCharities() to see available causes.`,
-      );
-    }
-
-    const url = new URL(charity.x402Endpoint);
+  async donate(amount: string = '$0.001'): Promise<DonationReceipt> {
+    const url = new URL(this.donateEndpoint);
     url.searchParams.set('amount', amount);
 
     const response = await this.paymentFetch(url.toString());
@@ -87,11 +87,11 @@ export class X402CharityClient {
     return {
       txHash: responseData.txHash || responseData.transaction || '',
       from: this.account.address,
-      to: charity.walletAddress,
+      to: this.charity.walletAddress,
       amount,
       currency: 'USDC',
       chain: this.network,
-      charity,
+      charity: this.charity,
       timestamp: Date.now(),
     };
   }

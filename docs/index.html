@@ -927,7 +927,7 @@
 
 app.<span class="code-func">use</span>(<span class="code-func">x402charity</span>({
   <span class="code-keyword">privateKey</span>: process.env.DONATION_PRIVATE_KEY,
-  <span class="code-keyword">charityId</span>: <span class="code-string">'testing-charity'</span>,
+  <span class="code-keyword">charityWallet</span>: <span class="code-string">'0x...'</span>,  <span class="code-comment">// charity's wallet address</span>
 }));
 
 <span class="code-comment">// Every request now triggers a $0.001 USDC donation</span>
@@ -940,7 +940,7 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
 
 <span class="code-keyword">export const</span> middleware = <span class="code-func">x402charity</span>({
   <span class="code-keyword">privateKey</span>: process.env.DONATION_PRIVATE_KEY,
-  <span class="code-keyword">charityId</span>: <span class="code-string">'testing-charity'</span>,
+  <span class="code-keyword">charityWallet</span>: <span class="code-string">'0x...'</span>,
 });
 
 <span class="code-keyword">export const</span> config = {
@@ -959,8 +959,8 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
 
 <span class="code-comment">// Endpoints:</span>
 <span class="code-comment">// GET  /charities     — list charities</span>
-<span class="code-comment">// GET  /donate/:id    — x402 paywall</span>
-<span class="code-comment">// POST /donate/:id    — trigger donation</span></code></pre>
+<span class="code-comment">// POST /donate        — trigger donation</span>
+<span class="code-comment">// GET  /dashboard     — public donation dashboard</span></code></pre>
       </div>
     </div>
   </section>
@@ -1101,7 +1101,7 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
 
     // ===== Game =====
     const X402_SERVER = '';
-    const CHARITY_ID = 'testing-charity';
+    const DONATE_PATH = '/donate';
     const DONATION_PER_OBSTACLE = 0.001;
 
     const canvas = document.getElementById('game');
@@ -1289,7 +1289,7 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
       totalDonated += DONATION_PER_OBSTACLE;
       donatedEl.textContent = '$' + totalDonated.toFixed(3);
 
-      fetch(X402_SERVER + '/donate/' + CHARITY_ID, {
+      fetch(X402_SERVER + DONATE_PATH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: '$' + DONATION_PER_OBSTACLE }),
@@ -1360,10 +1360,10 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
         },
         {
           from: 'product', to: 'x402', dir: 'ltr',
-          label: 'POST /donate/charity-id',
+          label: 'POST /donate',
           sublabel: 'Simple HTTP call',
           title: '3. Your product server triggers a donation',
-          desc: 'Your product server sends a simple POST request to your x402 charity server. No SDK needed, no crypto logic — just a fetch() call. The x402 server handles everything from here.',
+          desc: 'Your product server sends a simple POST request to your x402 charity server. No SDK needed, no crypto logic, no charity ID — just fetch(\'/donate\', { method: \'POST\' }). The x402 server handles everything from here.',
           activeActors: ['product', 'x402'],
         },
         {
