@@ -905,62 +905,43 @@
   <section id="integrate">
     <div class="container">
       <div class="section-label">Integrate</div>
-      <h2 class="section-title">Add to your app in <span>3 lines</span></h2>
-      <p class="section-sub">Works with Express, Next.js, or any Node.js server. Install and wrap your routes.</p>
-
-      <div class="install-cmd">
-        <span class="prompt">$</span>
-        <span>npm install @x402charity/express</span>
-      </div>
+      <h2 class="section-title">Deploy in <span>2 steps</span></h2>
+      <p class="section-sub">Deploy your own donation server, then trigger donations with a single HTTP call from your product.</p>
 
       <div class="code-tabs">
-        <button class="code-tab active" data-tab="express">Express</button>
-        <button class="code-tab" data-tab="nextjs">Next.js</button>
-        <button class="code-tab" data-tab="server">Standalone Server</button>
+        <button class="code-tab active" data-tab="deploy">1. Deploy</button>
+        <button class="code-tab" data-tab="trigger">2. Trigger Donations</button>
       </div>
 
-      <div class="code-panel active" id="panel-express">
-<pre><code><span class="code-keyword">import</span> express <span class="code-keyword">from</span> <span class="code-string">'express'</span>;
-<span class="code-keyword">import</span> { <span class="code-func">x402charity</span> } <span class="code-keyword">from</span> <span class="code-string">'@x402charity/express'</span>;
+      <div class="code-panel active" id="panel-deploy">
+<pre><code><span class="code-comment"># Clone and deploy with Docker</span>
+$ git clone https://github.com/xspangpang/x402charity.git
+$ cd x402charity
 
-<span class="code-keyword">const</span> app = <span class="code-func">express</span>();
+<span class="code-comment"># Set your env vars</span>
+<span class="code-keyword">DONATION_PRIVATE_KEY</span>=<span class="code-string">"your-wallet-private-key"</span>
+<span class="code-keyword">CHARITY_WALLET</span>=<span class="code-string">"0x..."</span>        <span class="code-comment"># charity's wallet address</span>
+<span class="code-keyword">CHARITY_NAME</span>=<span class="code-string">"My Charity"</span>
 
-app.<span class="code-func">use</span>(<span class="code-func">x402charity</span>({
-  <span class="code-keyword">privateKey</span>: process.env.DONATION_PRIVATE_KEY,
-  <span class="code-keyword">charityWallet</span>: <span class="code-string">'0x...'</span>,  <span class="code-comment">// charity's wallet address</span>
-}));
+$ docker build -t x402charity .
+$ docker run -p 3402:3402 x402charity
 
-<span class="code-comment">// Every request now triggers a $0.001 USDC donation</span>
-app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (req, res) => res.<span class="code-func">send</span>(<span class="code-string">'Hello!'</span>));</code></pre>
+<span class="code-comment"># Endpoints:</span>
+<span class="code-comment"># POST /donate     — trigger a donation</span>
+<span class="code-comment"># GET  /donations  — list all donations</span>
+<span class="code-comment"># GET  /dashboard  — public donation dashboard</span></code></pre>
       </div>
 
-      <div class="code-panel" id="panel-nextjs">
-<pre><code><span class="code-comment">// middleware.ts</span>
-<span class="code-keyword">import</span> { <span class="code-func">x402charity</span> } <span class="code-keyword">from</span> <span class="code-string">'@x402charity/next'</span>;
-
-<span class="code-keyword">export const</span> middleware = <span class="code-func">x402charity</span>({
-  <span class="code-keyword">privateKey</span>: process.env.DONATION_PRIVATE_KEY,
-  <span class="code-keyword">charityWallet</span>: <span class="code-string">'0x...'</span>,
+      <div class="code-panel" id="panel-trigger">
+<pre><code><span class="code-comment">// From your product server — any language, any framework</span>
+<span class="code-keyword">const</span> res = <span class="code-keyword">await</span> <span class="code-func">fetch</span>(<span class="code-string">'https://your-charity-server.com/donate'</span>, {
+  <span class="code-keyword">method</span>: <span class="code-string">'POST'</span>,
+  <span class="code-keyword">headers</span>: { <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span> },
+  <span class="code-keyword">body</span>: JSON.<span class="code-func">stringify</span>({ <span class="code-keyword">amount</span>: <span class="code-string">'$0.001'</span> }),
 });
 
-<span class="code-keyword">export const</span> config = {
-  <span class="code-keyword">matcher</span>: [<span class="code-string">'/api/:path*'</span>],
-};</code></pre>
-      </div>
-
-      <div class="code-panel" id="panel-server">
-<pre><code><span class="code-comment">// Run a standalone donation server</span>
-<span class="code-keyword">import</span> { <span class="code-func">startCharityServer</span> } <span class="code-keyword">from</span> <span class="code-string">'@x402charity/server'</span>;
-
-<span class="code-func">startCharityServer</span>({
-  <span class="code-keyword">privateKey</span>: process.env.DONATION_PRIVATE_KEY,
-  <span class="code-keyword">network</span>: <span class="code-string">'base-sepolia'</span>,
-});
-
-<span class="code-comment">// Endpoints:</span>
-<span class="code-comment">// GET  /charities     — list charities</span>
-<span class="code-comment">// POST /donate        — trigger donation</span>
-<span class="code-comment">// GET  /dashboard     — public donation dashboard</span></code></pre>
+<span class="code-keyword">const</span> receipt = <span class="code-keyword">await</span> res.<span class="code-func">json</span>();
+console.<span class="code-func">log</span>(receipt.txHash); <span class="code-comment">// on-chain proof</span></code></pre>
       </div>
     </div>
   </section>
