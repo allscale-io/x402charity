@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import express, { type Express } from 'express';
 import {
   createPublicClient,
@@ -31,6 +32,8 @@ export interface ServerOptions {
   network?: 'base' | 'base-sepolia';
   /** Only serve charities matching these IDs. Default: all charities. */
   charityIds?: string[];
+  /** Path to the docs directory for serving static pages. */
+  docsDir?: string;
 }
 
 /**
@@ -81,6 +84,13 @@ export function createCharityServer(options: ServerOptions = {}): {
     }
     next();
   });
+
+  // --- Static pages ---
+  const docsDir = options.docsDir || resolve(process.cwd(), 'docs');
+
+  app.get('/', (_req, res) => res.sendFile(resolve(docsDir, 'index.html')));
+  app.get('/demo', (_req, res) => res.sendFile(resolve(docsDir, 'demo.html')));
+  app.get('/use-cases', (_req, res) => res.sendFile(resolve(docsDir, 'use-cases.html')));
 
   // --- x402 payment middleware ---
   // Gate GET /donate/<charityId> behind x402 paywall.
