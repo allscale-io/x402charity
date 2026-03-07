@@ -1454,7 +1454,11 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       } else {
         gameoverTitle.textContent = 'Game Over';
       }
-      gameoverSub.textContent = 'You cleared ' + score + ' obstacle' + (score !== 1 ? 's' : '');
+      var msg = 'You cleared ' + score + ' obstacle' + (score !== 1 ? 's' : '');
+      if (totalDonated > 0) {
+        msg += ' and donated $' + totalDonated.toFixed(3) + ' USDC';
+      }
+      gameoverSub.textContent = msg;
       gameoverOverlay.classList.remove('hidden');
     }
 
