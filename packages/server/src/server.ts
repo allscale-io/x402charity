@@ -134,6 +134,14 @@ export function createCharityServer(options: ServerOptions = {}): {
   console.log(`=== Charity: ${charity.name} ===`);
   console.log(`  Wallet: ${charity.walletAddress}\n`);
 
+  const donateApiKey = process.env.DONATE_API_KEY || '';
+  if (donateApiKey) {
+    console.log('=== API Key ===');
+    console.log(`  POST /donate is protected by DONATE_API_KEY\n`);
+  } else {
+    console.warn('WARNING: DONATE_API_KEY not set — POST /donate is open to anyone. Set it in production.\n');
+  }
+
   const app = express();
   app.use(express.json());
 
@@ -395,6 +403,15 @@ export function createCharityServer(options: ServerOptions = {}): {
 
   // Trigger endpoint — server pays from its own wallet via x402 protocol
   app.post('/donate', async (req, res) => {
+    // API key auth — if DONATE_API_KEY is set, require Authorization: Bearer <key>
+    if (donateApiKey) {
+      const authHeader = req.headers.authorization || '';
+      if (!authHeader.startsWith('Bearer ') || authHeader.slice(7) !== donateApiKey) {
+        res.status(401).json({ error: 'Unauthorized. Provide a valid Authorization: Bearer <DONATE_API_KEY> header.' });
+        return;
+      }
+    }
+
     if (!donationClient) {
       res.status(503).json({
         error: 'Donation wallet not configured. Set DONATION_PRIVATE_KEY env var.',

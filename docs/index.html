@@ -1782,6 +1782,10 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       ctx.fillText('Speed: ' + speed.toFixed(1), W - 90, 20);
     }
 
+    // Note: This demo calls POST /donate without an API key.
+    // It works because the live demo (x402charity.com) does not set DONATE_API_KEY.
+    // When you deploy your own server with DONATE_API_KEY set, this game demo
+    // won't trigger real donations — which is the intended production behavior.
     function triggerDonation(obstacleNum) {
       const logIdx = addLog('Obstacle #' + obstacleNum + ' cleared', 'donating...');
       runDonated += DONATION_PER_OBSTACLE;
