@@ -9,6 +9,18 @@
       "verified": false,
       "category": "testing",
       "x402Endpoint": "https://x402charity.com/donate"
+    },
+    {
+      "id": "give-directly",
+      "name": "GiveDirectly",
+      "description": "Direct cash transfers to people living in extreme poverty. GiveDirectly has delivered $750M+ to families in 15 countries.",
+      "walletAddress": "0x21d0d88ca063544f8C010F2090F8e3546ba1647b",
+      "chain": "base",
+      "verified": false,
+      "category": "poverty",
+      "x402Endpoint": "",
+      "website": "https://givedirectly.org",
+      "source": "https://etherscan.io/address/0x21d0d88ca063544f8C010F2090F8e3546ba1647b (Endaoment fund for GiveDirectly)"
     }
   ]
 }
