@@ -545,6 +545,45 @@
     .log-entry.error .text { color: var(--text-muted); }
     .log-entry.error .detail { color: var(--text-muted); }
 
+    .log-entry .detail a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .log-entry .detail a:hover { text-decoration: underline; }
+
+    .log-entry.error {
+      position: relative;
+      cursor: pointer;
+    }
+    .log-entry.error .error-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      right: 0;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text);
+      width: 300px;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .log-entry.error .error-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      right: 16px;
+      border: 6px solid transparent;
+      border-top-color: #333;
+    }
+    .log-entry.error:hover .error-tooltip,
+    .log-entry.error:focus .error-tooltip {
+      display: block;
+    }
+
     .log-empty {
       padding: 20px;
       text-align: center;
@@ -666,6 +705,20 @@
       margin-top: 10px;
       font-size: 12px;
       color: var(--accent);
+      font-weight: 600;
+    }
+
+    .case-card .case-benefit {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .case-card .case-benefit strong {
+      color: var(--text);
       font-weight: 600;
     }
 
@@ -1094,7 +1147,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     <div class="container">
       <div class="section-label">Use Cases</div>
       <h2 class="section-title">Works for <span>every product</span></h2>
-      <p class="section-sub">Any user action can become a micro-donation. Here are a few examples.</p>
+      <p class="section-sub">Any user action can become a micro-donation. Here are a few examples &mdash; and why it's good for your business.</p>
 
       <div class="cases-grid">
         <div class="case-card">
@@ -1102,18 +1155,21 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
           <h3>DEX & Trading</h3>
           <p>Donate a fraction of a cent on every swap or trade. 50K daily trades = $50/day to charity.</p>
           <div class="case-example">$0.001 per trade</div>
+          <div class="case-benefit"><strong>Why it helps:</strong> Differentiate from competing DEXs. Traders prefer platforms that give back &mdash; boosting retention and word-of-mouth.</div>
         </div>
         <div class="case-card">
           <div class="case-icon">&#x1F916;</div>
           <h3>AI Products & APIs</h3>
           <p>Attach a micro-donation to every API call or prompt. High-volume APIs add up fast.</p>
           <div class="case-example">$0.001 per API call</div>
+          <div class="case-benefit"><strong>Why it helps:</strong> Improve brand image in a crowded AI market. "Every prompt helps someone" is a story users want to share.</div>
         </div>
         <div class="case-card">
           <div class="case-icon">&#x1F3AE;</div>
           <h3>Games</h3>
           <p>Every level cleared, match played, or in-game action triggers a small donation.</p>
           <div class="case-example">$0.001 per action</div>
+          <div class="case-benefit"><strong>Why it helps:</strong> Increase player engagement and session time. Players feel good about playing &mdash; and tell their friends.</div>
         </div>
         <div class="case-card">
           <div class="case-icon">&#x1F6D2;</div>
@@ -1515,6 +1571,11 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     const X402_SERVER = '';
     const DONATE_PATH = '/donate';
     const DONATION_PER_OBSTACLE = 0.001;
+    const EXPLORER_URLS = { 'base': 'https://basescan.org', 'base-sepolia': 'https://sepolia.basescan.org' };
+    let explorerUrl = EXPLORER_URLS['base-sepolia'];
+    fetch(X402_SERVER + '/charity').then(r => r.json()).then(d => {
+      if (d.chain && EXPLORER_URLS[d.chain]) explorerUrl = EXPLORER_URLS[d.chain];
+    }).catch(() => {});
 
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
@@ -1723,44 +1784,81 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: '$' + DONATION_PER_OBSTACLE }),
       })
-        .then(r => r.json().then(data => ({ ok: r.ok, data })))
-        .then(({ ok, data }) => {
+        .then(r => r.json().then(data => ({ ok: r.ok, status: r.status, data })))
+        .then(({ ok, status, data }) => {
           if (ok) {
             runConfirmed += DONATION_PER_OBSTACLE;
             totalDonated += DONATION_PER_OBSTACLE;
             if (state === 'dead') updateGameoverMsg();
             const tx = data.receipt?.txHash;
             const short = tx ? tx.slice(0, 10) + '...' : 'confirmed';
-            updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — $0.001', short, 'ok');
+            updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — $0.001', short, 'ok', tx);
           } else {
-            updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — failed', data.error || 'error', 'error');
+            var errDetail = data.details || data.error || 'error';
+            var errReason = getErrorExplanation(status, errDetail);
+            updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — failed', data.error || 'error', 'error', null, errReason);
           }
         })
         .catch(() => {
-          updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — failed', 'network error', 'error');
+          updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — failed', 'network error', 'error', null,
+            'Could not reach the donation server. This may be a temporary network issue — try again in a moment.');
         });
+    }
+
+    function getErrorExplanation(status, details) {
+      var d = (details || '').toLowerCase();
+      if (d.indexOf('insufficient') !== -1 || d.indexOf('balance') !== -1 || d.indexOf('fund') !== -1) {
+        return 'The demo donation wallet has run out of testnet USDC. This is expected in a demo environment with limited funds. To fix: visit faucet.circle.com to get free testnet USDC and send it to the donation wallet.';
+      }
+      if (status === 503) {
+        return 'The donation wallet is not configured on the server. The server admin needs to set the DONATION_PRIVATE_KEY environment variable.';
+      }
+      if (d.indexOf('nonce') !== -1) {
+        return 'A previous donation is still being processed (nonce conflict). This happens when donations are triggered faster than the blockchain can settle. Wait a moment and it should resolve.';
+      }
+      if (d.indexOf('rate') !== -1 || d.indexOf('limit') !== -1 || d.indexOf('429') !== -1) {
+        return 'The demo server has hit a rate limit. This is a temporary restriction in the demo environment. Wait a few seconds and try again.';
+      }
+      return 'The donation failed — this can happen in the demo environment due to limited testnet funds or rate limits. In production with a funded wallet, donations are reliable.';
     }
 
     function addLog(text, detail) {
       if (logEmpty) logEmpty.style.display = 'none';
       const idx = logEntries.length;
-      logEntries.unshift({ text, detail, status: 'pending' });
+      logEntries.unshift({ text, detail, status: 'pending', txHash: null, errorReason: null });
       renderLog();
       return idx;
     }
 
-    function updateLog(idx, text, detail, status) {
+    function updateLog(idx, text, detail, status, txHash, errorReason) {
       const entry = logEntries[logEntries.length - 1 - idx];
-      if (entry) { entry.text = text; entry.detail = detail; entry.status = status; renderLog(); }
+      if (entry) {
+        entry.text = text; entry.detail = detail; entry.status = status;
+        if (txHash) entry.txHash = txHash;
+        if (errorReason) entry.errorReason = errorReason;
+        renderLog();
+      }
     }
 
     function renderLog() {
-      logList.innerHTML = logEntries.slice(0, 30).map(e =>
-        '<div class="log-entry ' + e.status + '">' +
+      logList.innerHTML = logEntries.slice(0, 30).map(function(e) {
+        var detailHtml;
+        if (e.status === 'ok' && e.txHash) {
+          var href = explorerUrl + '/tx/' + escapeHtml(e.txHash);
+          detailHtml = '<a href="' + href + '" target="_blank" rel="noopener" title="View on blockchain explorer">' + escapeHtml(e.detail) + '</a>';
+        } else {
+          detailHtml = escapeHtml(e.detail);
+        }
+        var tooltipHtml = '';
+        if (e.status === 'error' && e.errorReason) {
+          tooltipHtml = '<div class="error-tooltip">' + escapeHtml(e.errorReason) + '</div>';
+        }
+        return '<div class="log-entry ' + e.status + '" tabindex="' + (e.status === 'error' ? '0' : '-1') + '">' +
           '<span class="text">' + escapeHtml(e.text) + '</span>' +
-          '<span class="detail">' + escapeHtml(e.detail) + '</span>' +
-        '</div>'
-      ).join('');
+          '<span class="detail">' + detailHtml + '</span>' +
+          tooltipHtml +
+        '</div>';
+      }).join('');
     }
 
     function escapeHtml(str) {
