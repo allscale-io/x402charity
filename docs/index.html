@@ -956,6 +956,7 @@
           <div class="overlay hidden" id="gameover-overlay">
             <h3 id="gameover-title">Game Over</h3>
             <p id="gameover-sub">You cleared 0 obstacles</p>
+            <p id="gameover-total" style="font-size:12px;color:var(--text-muted);margin:4px 0 12px"></p>
             <button class="play-btn" id="restart-btn">Play Again</button>
             <span class="hint">Space / Tap to restart</span>
           </div>
@@ -1363,6 +1364,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     const gameoverOverlay = document.getElementById('gameover-overlay');
     const gameoverTitle = document.getElementById('gameover-title');
     const gameoverSub = document.getElementById('gameover-sub');
+    const gameoverTotal = document.getElementById('gameover-total');
     const logList = document.getElementById('log-list');
     const logEmpty = document.getElementById('log-empty');
 
@@ -1453,12 +1455,13 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
 
     function updateGameoverMsg() {
       var msg = 'You cleared ' + score + ' obstacle' + (score !== 1 ? 's' : '');
-      if (runConfirmed > 0) {
-        msg += ' and donated $' + runConfirmed.toFixed(3) + ' USDC';
-      } else if (runDonated > 0) {
-        msg += ' — donations confirming...';
+      if (runDonated > 0) {
+        msg += ' and donated $' + runDonated.toFixed(3) + ' USDC';
       }
       gameoverSub.textContent = msg;
+      if (totalDonated > 0) {
+        gameoverTotal.textContent = 'Total donated: $' + totalDonated.toFixed(3) + ' USDC';
+      }
     }
 
     function die() {
@@ -1535,6 +1538,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         .then(({ ok, data }) => {
           if (ok) {
             runConfirmed += DONATION_PER_OBSTACLE;
+            totalDonated += DONATION_PER_OBSTACLE;
             if (state === 'dead') updateGameoverMsg();
             const tx = data.receipt?.txHash;
             const short = tx ? tx.slice(0, 10) + '...' : 'confirmed';
