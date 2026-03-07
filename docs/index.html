@@ -1461,9 +1461,11 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
         const headDir = step.dir === 'ltr' ? 'right' : 'left';
         const labelDir = step.dir;
 
+        var headHtml = '<div class="seq-arrow-head ' + headDir + '"></div>';
+        var lineHtml = '<div class="seq-arrow-line ' + lineClass + '"></div>';
+
         arrow.innerHTML =
-          '<div class="seq-arrow-line ' + lineClass + '"></div>' +
-          '<div class="seq-arrow-head ' + headDir + '" style="' + (headDir === 'right' ? 'right:-4px' : 'left:-4px') + '"></div>' +
+          (headDir === 'left' ? headHtml + lineHtml : lineHtml + headHtml) +
           '<div class="seq-arrow-label ' + labelDir + '">' + step.label + '</div>' +
           '<div class="seq-arrow-sublabel ' + labelDir + '">' + step.sublabel + '</div>';
 
