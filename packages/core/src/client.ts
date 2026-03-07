@@ -8,7 +8,7 @@ import { base, baseSepolia } from 'viem/chains';
 import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts';
 import { x402Client } from '@x402/core/client';
 import { ExactEvmScheme, toClientEvmSigner } from '@x402/evm';
-import { wrapFetchWithPayment } from '@x402/fetch';
+import { wrapFetchWithPayment, decodePaymentResponseHeader } from '@x402/fetch';
 import { RPC_URLS, CAIP2_CHAIN_IDS } from './config.js';
 import type { Charity, DonationReceipt } from './types.js';
 
@@ -80,6 +80,19 @@ export class X402CharityClient {
       );
     }
 
+    // Extract tx hash from the x402 PAYMENT-RESPONSE header
+    let txHash = '';
+    const paymentResponseHeader = response.headers.get('PAYMENT-RESPONSE')
+      || response.headers.get('X-PAYMENT-RESPONSE');
+    if (paymentResponseHeader) {
+      try {
+        const settled = decodePaymentResponseHeader(paymentResponseHeader) as { transaction?: string };
+        txHash = settled.transaction || '';
+      } catch {
+        // Header decode failed — fall through
+      }
+    }
+
     let responseData: Record<string, string> = {};
     try {
       responseData = await response.json() as Record<string, string>;
@@ -88,7 +101,7 @@ export class X402CharityClient {
     }
 
     return {
-      txHash: responseData.txHash || responseData.transaction || '',
+      txHash: txHash || responseData.txHash || responseData.transaction || '',
       from: this.account.address,
       to: this.charity.walletAddress,
       amount,
