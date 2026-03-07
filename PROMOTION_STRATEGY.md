@@ -3,14 +3,14 @@
 ## TODO Checklist
 
 ### 1. Ecosystem Listings (Do First -- quick PRs, high impact)
-- [ ] Submit PR to awesome-x402 (xpaysh): https://github.com/xpaysh/awesome-x402
-- [ ] Submit PR to awesome-x402 (Merit-Systems): https://github.com/Merit-Systems/awesome-x402
-- [ ] Submit PR to awesome-x402-servers (a6b8): https://github.com/a6b8/awesome-x402-servers -- specifically lists x402 servers, x402charity is a perfect fit
-- [ ] Submit PR to awesome-base (wbnns): https://github.com/wbnns/awesome-base -- Base ecosystem list, add under a "Social Impact" or "Tools" section
+- [x] ~~Submit PR to awesome-x402 (xpaysh)~~: https://github.com/xpaysh/awesome-x402/pull/90
+- [x] ~~Submit PR to awesome-x402 (Merit-Systems)~~: https://github.com/Merit-Systems/awesome-x402/pull/80
+- [x] ~~Submit PR to awesome-x402-servers~~: https://github.com/fffilimonov/awesome-x402-servers/pull/9
+- [x] ~~Submit PR to awesome-base (wbnns)~~: https://github.com/wbnns/awesome-base/pull/32
 - [ ] Submit to x402.org/ecosystem directory (official x402 ecosystem page)
 - [ ] Submit to x402dev.com/awesome-projects
-- [ ] Open a discussion/issue on coinbase/x402 GitHub showcasing x402charity as a community project: https://github.com/coinbase/x402
-- [ ] Submit to Electric Capital open-dev-data (gets tracked in developer reports): https://github.com/electric-capital/crypto-ecosystems -- fork, add a .toml file under data/ecosystems/, open PR
+- [x] ~~Open a showcase issue on coinbase/x402 GitHub~~: https://github.com/coinbase/x402/issues/1507
+- [x] ~~Submit to Electric Capital open-dev-data~~: https://github.com/electric-capital/open-dev-data/pull/2739
 - [ ] Submit to RootData (crypto project database, has x402 tag): https://www.rootdata.com/Projects/submit
 - [ ] Submit to Base Ecosystem Page: https://www.base.org/ecosystem
 - [ ] Submit to Alchemy Dapp Store: https://www.alchemy.com/dapps
@@ -58,7 +58,7 @@
 - [ ] ETHGlobal Cannes (Apr 3-5, 2026) -- attend or submit bounty
 - [ ] ETHGlobal New York (Jun 12-14, 2026)
 - [ ] Create hackathon starter template repo
-- [ ] Create "good first issue" GitHub bounties ($25-$100)
+- [x] ~~Create "good first issue" GitHub bounties ($25-$100)~~: issues #1, #2, #3
 
 ### 8. Media & PR (Weeks 6-12)
 - [ ] Pitch Crypto Altruists (cryptoaltruists.com) -- crypto + social impact
