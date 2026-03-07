@@ -1,23 +1,34 @@
 import { Command } from 'commander';
-import { X402CharityClient } from '@x402charity/core';
+import { X402CharityClient, findCharity } from '@x402charity/core';
 import { getPrivateKey, getNetwork } from '../config.js';
 
 export const donateCommand = new Command('donate')
   .description('Donate USDC to a charity')
   .argument('<cause>', 'Charity ID or name')
-  .argument('[amount]', 'Amount in USDC (default: 0.0001)')
+  .argument('[amount]', 'Amount in USDC (default: $0.001)')
   .option('-n, --network <network>', 'Network: base or base-sepolia')
   .action(async (cause: string, amount: string | undefined, options: { network?: string }) => {
-    amount = amount || '0.0001';
+    amount = amount || '$0.001';
     try {
       const privateKey = getPrivateKey();
       const network = (options.network || getNetwork()) as 'base' | 'base-sepolia';
 
-      const client = new X402CharityClient({ privateKey, network });
+      const charity = findCharity(cause);
+      if (!charity) {
+        console.error(`\nCharity "${cause}" not found. Run "x402charity list" to see available charities.\n`);
+        process.exit(1);
+      }
 
-      console.log(`\nDonating ${amount} USDC to "${cause}" on ${network}...\n`);
+      const client = new X402CharityClient({
+        privateKey,
+        network,
+        donateEndpoint: charity.x402Endpoint,
+        charity,
+      });
 
-      const receipt = await client.donate(cause, amount);
+      console.log(`\nDonating ${amount} USDC to "${charity.name}" on ${network}...\n`);
+
+      const receipt = await client.donate(amount);
 
       console.log('Donation successful!\n');
       console.log(`  Charity:  ${receipt.charity.name}`);

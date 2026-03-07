@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server.js';
 import { X402CharityClient, type ClientOptions } from '@x402charity/core';
 
 export interface X402CharityMiddlewareOptions extends ClientOptions {
-  cause: string;
   amount?: string;
   silent?: boolean;
   matcher?: string | string[];
@@ -10,8 +9,7 @@ export interface X402CharityMiddlewareOptions extends ClientOptions {
 
 export function x402charity(options: X402CharityMiddlewareOptions) {
   const {
-    cause,
-    amount = '0.0001',
+    amount = '$0.001',
     silent = true,
     matcher,
     ...clientOptions
@@ -37,7 +35,7 @@ export function x402charity(options: X402CharityMiddlewareOptions) {
       }
     }
 
-    client.donate(cause, amount).catch((err) => {
+    client.donate(amount).catch((err) => {
       if (!silent) {
         console.error('[x402charity] donation failed:', err.message);
       }

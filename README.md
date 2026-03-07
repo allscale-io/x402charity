@@ -116,6 +116,61 @@ console.log(receipt.txHash); // on-chain proof
 | `GET` | `/address` | Donation wallet address and balances |
 | `GET` | `/health` | Health check |
 
+## Integrate with Your Product
+
+### Option A: Simple HTTP Call (any language)
+
+The simplest way — just call your deployed server's `POST /donate` endpoint:
+
+```js
+await fetch('https://your-charity-server.com/donate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ amount: '$0.001' }),
+});
+```
+
+### Option B: Express Middleware
+
+Add automatic donations to any Express route:
+
+```js
+import { x402charity } from '@x402charity/express';
+
+app.use('/api', x402charity({
+  privateKey: process.env.DONATION_PRIVATE_KEY,
+  donateEndpoint: 'https://your-charity-server.com/donate',
+  charity: { id: 'my-charity', name: 'My Charity', walletAddress: '0x...', chain: 'base-sepolia', x402Endpoint: 'https://your-charity-server.com/donate', description: '', verified: false },
+  amount: '$0.001',
+  shouldDonate: (req) => req.method === 'POST', // only donate on POST requests
+}));
+```
+
+### Option C: Next.js Middleware
+
+Add donations to Next.js API routes:
+
+```js
+// middleware.ts
+import { x402charity } from '@x402charity/next';
+
+export default x402charity({
+  privateKey: process.env.DONATION_PRIVATE_KEY,
+  donateEndpoint: 'https://your-charity-server.com/donate',
+  charity: { id: 'my-charity', name: 'My Charity', walletAddress: '0x...', chain: 'base-sepolia', x402Endpoint: 'https://your-charity-server.com/donate', description: '', verified: false },
+  amount: '$0.001',
+  matcher: '/api/*',
+});
+```
+
+### Option D: CLI
+
+Donate from the command line:
+
+```bash
+npx x402charity donate testing-charity '$0.001' --network base-sepolia
+```
+
 ## Example Use Cases
 
 - **DEX / Trading** — $0.001 per swap. 50K daily trades = $50/day to charity
@@ -153,7 +208,10 @@ Before donations can work, your donation wallet needs funds on the correct netwo
 x402charity/
 ├── packages/
 │   ├── core/            # x402 charity client + registry
-│   └── server/          # Express server with x402 middleware
+│   ├── server/          # Express server with x402 middleware
+│   ├── cli/             # CLI tool for donations
+│   ├── express/         # Express middleware for auto-donations
+│   └── next/            # Next.js middleware for auto-donations
 ├── registry/
 │   └── charities.json   # Charity directory
 ├── docs/

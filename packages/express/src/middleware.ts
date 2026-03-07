@@ -2,7 +2,6 @@ import type { Request, Response, NextFunction } from 'express';
 import { X402CharityClient, type ClientOptions } from '@x402charity/core';
 
 export interface X402CharityMiddlewareOptions extends ClientOptions {
-  cause: string;
   amount?: string;
   silent?: boolean;
   shouldDonate?: (req: Request) => boolean;
@@ -10,8 +9,7 @@ export interface X402CharityMiddlewareOptions extends ClientOptions {
 
 export function x402charity(options: X402CharityMiddlewareOptions) {
   const {
-    cause,
-    amount = '0.0001',
+    amount = '$0.001',
     silent = true,
     shouldDonate,
     ...clientOptions
@@ -25,7 +23,7 @@ export function x402charity(options: X402CharityMiddlewareOptions) {
       return;
     }
 
-    client.donate(cause, amount).catch((err) => {
+    client.donate(amount).catch((err) => {
       if (!silent) {
         console.error('[x402charity] donation failed:', err.message);
       }
