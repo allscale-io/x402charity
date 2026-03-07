@@ -183,7 +183,7 @@ export function createCharityServer(options: ServerOptions = {}): {
       message: `Donated to ${charity?.name}`,
       receipt: {
         to: charity?.walletAddress,
-        amount: '$0.01',
+        amount: '$0.001',
         currency: 'USDC',
         chain: network,
         timestamp: Date.now(),

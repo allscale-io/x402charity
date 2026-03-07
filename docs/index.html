@@ -786,21 +786,21 @@
     <div class="container">
       <div class="section-label">How It Works</div>
       <h2 class="section-title">The x402 <span>payment flow</span></h2>
-      <p class="section-sub">See exactly how a micro-donation travels from your app to a charity wallet — step by step.</p>
+      <p class="section-sub">See exactly how a micro-donation travels from your server to a charity wallet — the user never needs a wallet.</p>
 
       <div class="seq-diagram" id="seq-diagram">
         <!-- Actors -->
         <div class="seq-actors">
           <div class="seq-actor" data-actor="app">
             <div class="seq-actor-box" id="actor-app">
-              <div class="seq-actor-icon">&#x1F4F1;</div>
-              Your App
+              <div class="seq-actor-icon">&#x1F464;</div>
+              User Action
             </div>
           </div>
           <div class="seq-actor" data-actor="server">
             <div class="seq-actor-box" id="actor-server">
               <div class="seq-actor-icon">&#x1F5A5;</div>
-              x402 Server
+              Your Server
             </div>
           </div>
           <div class="seq-actor" data-actor="facilitator">
@@ -831,7 +831,7 @@
         <!-- Description panel -->
         <div class="seq-desc" id="seq-desc">
           <h4 id="seq-desc-title">Click "Next" to walk through the x402 flow</h4>
-          <p id="seq-desc-text">Each step shows how a $0.001 USDC micro-donation moves from your app to a charity wallet using the HTTP 402 payment protocol.</p>
+          <p id="seq-desc-text">Your server pays $0.001 USDC to charity every time a user takes an action. The user never needs a wallet — your server handles the entire x402 payment flow.</p>
         </div>
 
         <!-- Controls -->
@@ -1336,58 +1336,50 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
       const steps = [
         {
           from: 'app', to: 'server', dir: 'ltr',
-          label: 'GET /donate/charity-id',
-          sublabel: 'No payment header',
-          title: '1. Your app requests the donation endpoint',
-          desc: 'Your app (or the server acting as an x402 client) sends a regular HTTP GET request to the x402-gated donation endpoint. No special headers needed yet.',
+          label: 'User triggers action',
+          sublabel: 'Page load, API call, game event...',
+          title: '1. A user action triggers a donation',
+          desc: 'A user does something in your app — loads a page, makes an API call, clears a game obstacle. Your server decides to donate and calls the x402-gated donation endpoint.',
           activeActors: ['app', 'server'],
         },
         {
-          from: 'server', to: 'app', dir: 'rtl', style: 'dashed',
-          label: '402 Payment Required',
-          sublabel: 'PaymentRequirements in body',
-          title: '2. Server responds with 402 + payment details',
-          desc: 'The x402 middleware detects no payment header and returns HTTP 402 with a JSON body specifying: price ($0.001), currency (USDC), network (Base), payTo address, and the facilitator URL.',
-          activeActors: ['server', 'app'],
+          from: 'server', to: 'server', dir: 'self',
+          label: 'GET /donate/charity-id',
+          sublabel: 'x402 client \u2192 x402 paywall',
+          title: '2. Server calls the x402 donation endpoint',
+          desc: 'Your server acts as an x402 client, using @x402/fetch to call the x402-gated GET /donate endpoint. The x402 middleware on that endpoint detects no payment and returns HTTP 402 with payment requirements (price, USDC, network, payTo address).',
+          activeActors: ['server'],
         },
         {
-          from: 'app', to: 'app', dir: 'self',
+          from: 'server', to: 'server', dir: 'self',
           label: 'Sign USDC authorization',
           sublabel: 'EIP-3009 / EIP-712',
-          title: '3. Client signs a USDC transfer authorization',
-          desc: 'The x402 client library reads the 402 response, then uses the server wallet\'s private key to sign a USDC transferWithAuthorization (EIP-3009). No on-chain transaction yet — just a cryptographic signature.',
-          activeActors: ['app'],
-        },
-        {
-          from: 'app', to: 'server', dir: 'ltr',
-          label: 'GET /donate/charity-id',
-          sublabel: 'X-PAYMENT: {signed payload}',
-          title: '4. Retry with signed payment header',
-          desc: 'The client retries the same GET request, this time including the signed payment payload in the X-PAYMENT header. The server\'s x402 middleware intercepts it before reaching the route handler.',
-          activeActors: ['app', 'server'],
+          title: '3. Server signs a USDC transfer authorization',
+          desc: 'The @x402/fetch library automatically handles the 402 response. It uses your server\'s private key to sign a USDC transferWithAuthorization (EIP-3009). No on-chain transaction yet — just a cryptographic signature authorizing the $0.001 payment.',
+          activeActors: ['server'],
         },
         {
           from: 'server', to: 'facilitator', dir: 'ltr',
-          label: 'Verify & settle payment',
-          sublabel: 'POST to facilitator',
-          title: '5. Server forwards payment to facilitator',
-          desc: 'The x402 middleware sends the signed payment to the facilitator service, which verifies the signature, checks the USDC allowance, and submits the on-chain transaction to Base.',
+          label: 'Retry with X-PAYMENT header',
+          sublabel: 'Signed payload attached',
+          title: '4. Signed payment sent to facilitator for settlement',
+          desc: 'The x402 client retries the GET request with the signed payment in the X-PAYMENT header. The x402 middleware on the server verifies the payment and forwards it to the facilitator service for on-chain settlement.',
           activeActors: ['server', 'facilitator'],
         },
         {
           from: 'facilitator', to: 'wallet', dir: 'ltr',
           label: 'USDC transfer on Base',
           sublabel: '$0.001 settled on-chain',
-          title: '6. USDC lands in the charity wallet',
-          desc: 'The facilitator executes the USDC transferWithAuthorization on Base. The charity receives $0.001 USDC directly in their wallet. Fully on-chain, transparent, and verifiable.',
+          title: '5. Facilitator settles USDC to charity wallet',
+          desc: 'The facilitator executes the USDC transferWithAuthorization on Base. The charity receives $0.001 USDC directly in their wallet. Fully on-chain, transparent, and verifiable by anyone.',
           activeActors: ['facilitator', 'wallet'],
         },
         {
           from: 'server', to: 'app', dir: 'rtl',
           label: '200 OK',
           sublabel: '{ receipt, txHash }',
-          title: '7. Success! Receipt returned',
-          desc: 'The server returns a 200 response with a donation receipt including the on-chain transaction hash. The entire flow takes ~2 seconds. Your user never needed a wallet.',
+          title: '6. Done! Receipt returned to your app',
+          desc: 'Your server returns a success response with the on-chain transaction hash. The user never needed a wallet or even knew a donation happened. The entire flow takes ~2 seconds.',
           activeActors: ['server', 'app'],
         },
       ];

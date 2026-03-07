@@ -8,7 +8,7 @@
       "chain": "base-sepolia",
       "verified": false,
       "category": "testing",
-      "x402Endpoint": "https://x402charity.vercel.app/donate/testing-charity"
+      "x402Endpoint": "https://x402charity.com/donate/testing-charity"
     }
   ]
 }
