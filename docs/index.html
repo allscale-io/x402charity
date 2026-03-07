@@ -202,7 +202,7 @@
 
     .seq-actor {
       text-align: center;
-      width: 110px;
+      width: 90px;
       flex-shrink: 0;
     }
 
@@ -236,7 +236,7 @@
     }
 
     .seq-lifeline {
-      width: 110px;
+      width: 90px;
       flex-shrink: 0;
       display: flex;
       justify-content: center;
@@ -394,12 +394,12 @@
     }
 
     @media (max-width: 700px) {
-      .seq-actor { width: 70px; }
-      .seq-actor-box { font-size: 10px; padding: 8px 4px; }
-      .seq-actor-icon { font-size: 16px; }
-      .seq-lifeline { width: 70px; }
-      .seq-arrow-label { font-size: 9px; }
-      .seq-arrow-sublabel { font-size: 9px; }
+      .seq-actor { width: 56px; }
+      .seq-actor-box { font-size: 9px; padding: 6px 2px; }
+      .seq-actor-icon { font-size: 14px; }
+      .seq-lifeline { width: 56px; }
+      .seq-arrow-label { font-size: 8px; }
+      .seq-arrow-sublabel { font-size: 8px; }
       .seq-lifelines { height: 280px; }
     }
 
@@ -782,48 +782,55 @@
     </div>
   </section>
 
-  <!-- 2. How it works — interactive x402 sequence diagram -->
+  <!-- 2. How it works — interactive sequence diagram -->
   <section id="how-it-works">
     <div class="container">
       <div class="section-label">How It Works</div>
-      <h2 class="section-title">The x402 <span>payment flow</span></h2>
-      <p class="section-sub">See exactly how a micro-donation travels from your server to a charity wallet — the user never needs a wallet.</p>
+      <h2 class="section-title">Set up in <span>5 minutes</span></h2>
+      <p class="section-sub">Deploy your own x402 charity server. Your users never need a wallet — your company funds the donations.</p>
 
       <div class="seq-diagram" id="seq-diagram">
         <!-- Actors -->
         <div class="seq-actors">
-          <div class="seq-actor" data-actor="app">
-            <div class="seq-actor-box" id="actor-app">
+          <div class="seq-actor" data-actor="user">
+            <div class="seq-actor-box" id="actor-user">
               <div class="seq-actor-icon">&#x1F464;</div>
-              User Action
+              User
             </div>
           </div>
-          <div class="seq-actor" data-actor="server">
-            <div class="seq-actor-box" id="actor-server">
+          <div class="seq-actor" data-actor="product">
+            <div class="seq-actor-box" id="actor-product">
+              <div class="seq-actor-icon">&#x1F4BB;</div>
+              Your Product
+            </div>
+          </div>
+          <div class="seq-actor" data-actor="x402">
+            <div class="seq-actor-box" id="actor-x402">
               <div class="seq-actor-icon">&#x1F5A5;</div>
-              Your Server
+              x402 Charity Server
             </div>
           </div>
           <div class="seq-actor" data-actor="facilitator">
             <div class="seq-actor-box" id="actor-facilitator">
               <div class="seq-actor-icon">&#x1F3E6;</div>
-              Facilitator
+              x402.org
             </div>
           </div>
-          <div class="seq-actor" data-actor="wallet">
-            <div class="seq-actor-box" id="actor-wallet">
+          <div class="seq-actor" data-actor="charity">
+            <div class="seq-actor-box" id="actor-charity">
               <div class="seq-actor-icon">&#x1F4B0;</div>
-              Charity Wallet
+              Charity
             </div>
           </div>
         </div>
 
         <!-- Lifelines -->
         <div class="seq-lifelines" id="seq-lifelines">
-          <div class="seq-lifeline" data-actor="app"><div class="seq-lifeline-bar"></div></div>
-          <div class="seq-lifeline" data-actor="server"><div class="seq-lifeline-bar"></div></div>
+          <div class="seq-lifeline" data-actor="user"><div class="seq-lifeline-bar"></div></div>
+          <div class="seq-lifeline" data-actor="product"><div class="seq-lifeline-bar"></div></div>
+          <div class="seq-lifeline" data-actor="x402"><div class="seq-lifeline-bar"></div></div>
           <div class="seq-lifeline" data-actor="facilitator"><div class="seq-lifeline-bar"></div></div>
-          <div class="seq-lifeline" data-actor="wallet"><div class="seq-lifeline-bar"></div></div>
+          <div class="seq-lifeline" data-actor="charity"><div class="seq-lifeline-bar"></div></div>
 
           <!-- Arrows container — populated by JS -->
           <div class="seq-arrows" id="seq-arrows"></div>
@@ -831,8 +838,8 @@
 
         <!-- Description panel -->
         <div class="seq-desc" id="seq-desc">
-          <h4 id="seq-desc-title">Click "Next" to walk through the x402 flow</h4>
-          <p id="seq-desc-text">Your server pays $0.001 USDC to charity every time a user takes an action. The user never needs a wallet — your server handles the entire x402 payment flow.</p>
+          <h4 id="seq-desc-title">Click "Next" to see how companies integrate x402 Charity</h4>
+          <p id="seq-desc-text">You deploy an x402 charity server, fund it with USDC, and point it at your chosen charity. Your product server triggers donations with a simple POST request.</p>
         </div>
 
         <!-- Controls -->
@@ -1336,56 +1343,56 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
     (function() {
       const steps = [
         {
-          from: 'app', to: 'server', dir: 'ltr',
-          label: 'User triggers action',
-          sublabel: 'Page load, API call, game event...',
-          title: '1. A user action triggers a donation',
-          desc: 'A user does something in your app — loads a page, makes an API call, clears a game obstacle. Your server decides to donate and calls the x402-gated donation endpoint.',
-          activeActors: ['app', 'server'],
+          from: 'x402', to: 'x402', dir: 'self',
+          label: 'Deploy x402 charity server',
+          sublabel: 'Docker / Vercel / any host',
+          title: '1. Deploy your x402 charity server',
+          desc: 'Deploy the x402 charity server with two env vars: DONATION_PRIVATE_KEY (your funded wallet) and CHARITY_WALLET (the charity\'s address). That\'s it — Docker, Vercel, Railway, or any Node.js host.',
+          activeActors: ['x402'],
         },
         {
-          from: 'server', to: 'server', dir: 'self',
-          label: 'GET /donate/charity-id',
-          sublabel: 'x402 client \u2192 x402 paywall',
-          title: '2. Server calls the x402 donation endpoint',
-          desc: 'Your server acts as an x402 client, using @x402/fetch to call the x402-gated GET /donate endpoint. The x402 middleware on that endpoint detects no payment and returns HTTP 402 with payment requirements (price, USDC, network, payTo address).',
-          activeActors: ['server'],
+          from: 'user', to: 'product', dir: 'ltr',
+          label: 'User action',
+          sublabel: 'Trade, page load, API call...',
+          title: '2. A user takes an action in your product',
+          desc: 'A user does something on your platform — places a trade, loads a page, clears a game level, makes an API call. Your product server decides this action should trigger a micro-donation.',
+          activeActors: ['user', 'product'],
         },
         {
-          from: 'server', to: 'server', dir: 'self',
-          label: 'Sign USDC authorization',
-          sublabel: 'EIP-3009 / EIP-712',
-          title: '3. Server signs a USDC transfer authorization',
-          desc: 'The @x402/fetch library automatically handles the 402 response. It uses your server\'s private key to sign a USDC transferWithAuthorization (EIP-3009). No on-chain transaction yet — just a cryptographic signature authorizing the $0.001 payment.',
-          activeActors: ['server'],
+          from: 'product', to: 'x402', dir: 'ltr',
+          label: 'POST /donate/charity-id',
+          sublabel: 'Simple HTTP call',
+          title: '3. Your product server triggers a donation',
+          desc: 'Your product server sends a simple POST request to your x402 charity server. No SDK needed, no crypto logic — just a fetch() call. The x402 server handles everything from here.',
+          activeActors: ['product', 'x402'],
         },
         {
-          from: 'server', to: 'facilitator', dir: 'ltr',
-          label: 'Retry with X-PAYMENT header',
-          sublabel: 'Signed payload attached',
-          title: '4. Signed payment sent to facilitator for settlement',
-          desc: 'The x402 client retries the GET request with the signed payment in the X-PAYMENT header. The x402 middleware on the server verifies the payment and forwards it to the facilitator service for on-chain settlement.',
-          activeActors: ['server', 'facilitator'],
+          from: 'x402', to: 'facilitator', dir: 'ltr',
+          label: 'Sign + send payment',
+          sublabel: 'x402 protocol (automatic)',
+          title: '4. x402 server signs and sends the payment',
+          desc: 'The x402 charity server uses its private key to sign a USDC transferWithAuthorization (EIP-3009) and sends it to the x402.org facilitator via the x402 payment protocol. All automatic — no code needed.',
+          activeActors: ['x402', 'facilitator'],
         },
         {
-          from: 'facilitator', to: 'wallet', dir: 'ltr',
+          from: 'facilitator', to: 'charity', dir: 'ltr',
           label: 'USDC transfer on Base',
           sublabel: '$0.001 settled on-chain',
-          title: '5. Facilitator settles USDC to charity wallet',
-          desc: 'The facilitator executes the USDC transferWithAuthorization on Base. The charity receives $0.001 USDC directly in their wallet. Fully on-chain, transparent, and verifiable by anyone.',
-          activeActors: ['facilitator', 'wallet'],
+          title: '5. USDC lands in the charity wallet',
+          desc: 'The facilitator (x402.org, run by Coinbase) executes the on-chain USDC transfer on Base. The charity receives $0.001 directly in their wallet. Fully transparent and verifiable by anyone.',
+          activeActors: ['facilitator', 'charity'],
         },
         {
-          from: 'server', to: 'app', dir: 'rtl',
-          label: '200 OK',
-          sublabel: '{ receipt, txHash }',
-          title: '6. Done! Receipt returned to your app',
-          desc: 'Your server returns a success response with the on-chain transaction hash. The user never needed a wallet or even knew a donation happened. The entire flow takes ~2 seconds.',
-          activeActors: ['server', 'app'],
+          from: 'x402', to: 'product', dir: 'rtl',
+          label: '200 OK + txHash',
+          sublabel: 'On-chain receipt',
+          title: '6. Receipt returned with on-chain proof',
+          desc: 'Your x402 server returns a JSON receipt with the on-chain transaction hash. View it on the public /dashboard page. The user never needed a wallet or even knew a donation happened.',
+          activeActors: ['x402', 'product'],
         },
       ];
 
-      const actors = ['app', 'server', 'facilitator', 'wallet'];
+      const actors = ['user', 'product', 'x402', 'facilitator', 'charity'];
       const arrowsEl = document.getElementById('seq-arrows');
       const descTitle = document.getElementById('seq-desc-title');
       const descText = document.getElementById('seq-desc-text');
@@ -1476,8 +1483,8 @@ app.<span class="code-func">get</span>(<span class="code-string">'/'</span>, (re
 
         // Update description
         if (currentStep < 0) {
-          descTitle.textContent = 'Click "Next" to walk through the x402 flow';
-          descText.textContent = 'Each step shows how a $0.001 USDC micro-donation moves from your app to a charity wallet using the HTTP 402 payment protocol.';
+          descTitle.textContent = 'Click "Next" to see how companies integrate x402 Charity';
+          descText.textContent = 'You deploy an x402 charity server, fund it with USDC, and point it at your chosen charity. Your product server triggers donations with a simple POST request.';
           descPanel.classList.remove('active');
         } else {
           const s = steps[currentStep];
