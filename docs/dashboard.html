@@ -59,28 +59,44 @@
     }
     .stat-value.green { color: var(--accent); }
 
+    .wallets-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 32px;
+    }
     .wallet-banner {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 12px; padding: 20px 24px;
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 32px; flex-wrap: wrap; gap: 12px;
     }
-    .wallet-banner .label {
-      font-size: 12px; color: var(--text-muted);
+    .wallet-banner-header { margin-bottom: 12px; }
+    .wallet-role {
+      font-size: 13px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.5px;
-      font-weight: 600; margin-bottom: 4px;
+    }
+    .wallet-banner.sender .wallet-role { color: var(--accent); }
+    .wallet-banner.receiver .wallet-role { color: #88c0d0; }
+    .wallet-role-sub {
+      font-size: 12px; color: var(--text-muted); margin-top: 2px;
     }
     .wallet-banner .addr {
-      font-family: 'Inconsolata', monospace; font-size: 14px;
-      word-break: break-all;
+      font-family: 'Inconsolata', monospace; font-size: 13px;
+      word-break: break-all; color: var(--text-muted);
+      background: rgba(255,255,255,0.03); border-radius: 6px;
+      padding: 8px 10px; margin-bottom: 12px;
     }
-    .wallet-banner .balance {
-      text-align: right;
+    .wallet-balances { margin-bottom: 12px; }
+    .wallet-bal-row {
+      display: flex; justify-content: space-between;
+      padding: 4px 0; font-size: 14px;
     }
-    .wallet-banner .balance .val {
-      font-family: 'Inconsolata', monospace;
-      font-size: 18px; font-weight: 700; color: var(--accent);
+    .wallet-bal-row .label { color: var(--text-muted); font-size: 13px; }
+    .wallet-bal-row .val {
+      font-family: 'Inconsolata', monospace; font-weight: 700;
     }
+    .wallet-bal-row .val.green { color: var(--accent); }
+    .explorer-link {
+      font-size: 12px; color: var(--text-muted); text-decoration: none;
+    }
+    .explorer-link:hover { color: var(--accent); }
 
     .section-title {
       font-size: 16px; font-weight: 700; margin-bottom: 16px;
@@ -156,8 +172,7 @@
     @media (max-width: 600px) {
       .stats { grid-template-columns: 1fr; }
       .stat-value { font-size: 22px; }
-      .wallet-banner { flex-direction: column; align-items: flex-start; }
-      .wallet-banner .balance { text-align: left; }
+      .wallets-grid { grid-template-columns: 1fr; }
       table { font-size: 13px; }
       thead th, tbody td { padding: 10px 12px; }
     }
@@ -190,14 +205,38 @@
       </div>
     </div>
 
-    <div class="wallet-banner" id="wallet-banner" style="display:none;">
-      <div>
-        <div class="label">Donation Wallet</div>
-        <div class="addr" id="wallet-addr"></div>
+    <div class="wallets-grid" id="wallets-grid" style="display:none;">
+      <div class="wallet-banner sender">
+        <div class="wallet-banner-header">
+          <div class="wallet-role">Donation Wallet</div>
+          <div class="wallet-role-sub">Funds donations</div>
+        </div>
+        <div class="addr" id="sender-addr">-</div>
+        <div class="wallet-balances">
+          <div class="wallet-bal-row">
+            <span class="label">USDC</span>
+            <span class="val green" id="sender-usdc">-</span>
+          </div>
+          <div class="wallet-bal-row">
+            <span class="label">ETH (gas)</span>
+            <span class="val" id="sender-eth">-</span>
+          </div>
+        </div>
+        <a class="explorer-link" id="sender-explorer" href="#" target="_blank">View on BaseScan</a>
       </div>
-      <div class="balance">
-        <div class="label">USDC Balance</div>
-        <div class="val" id="wallet-usdc">-</div>
+      <div class="wallet-banner receiver">
+        <div class="wallet-banner-header">
+          <div class="wallet-role">Charity Wallet</div>
+          <div class="wallet-role-sub" id="charity-name">Receives donations</div>
+        </div>
+        <div class="addr" id="receiver-addr">-</div>
+        <div class="wallet-balances">
+          <div class="wallet-bal-row">
+            <span class="label">Chain</span>
+            <span class="val" id="receiver-chain">-</span>
+          </div>
+        </div>
+        <a class="explorer-link" id="receiver-explorer" href="#" target="_blank">View on BaseScan</a>
       </div>
     </div>
 
@@ -276,25 +315,45 @@
       container.innerHTML = html;
     }
 
-    function loadWallet() {
-      fetch('/address')
-        .then(r => r.json())
-        .then(data => {
-          const banner = document.getElementById('wallet-banner');
-          banner.style.display = '';
-          document.getElementById('wallet-addr').textContent = data.address;
-          const net = document.getElementById('stat-network').textContent;
-          const key = net === 'Base' ? 'base' : 'base-sepolia';
-          const usdc = data.balances[key]?.usdc;
-          document.getElementById('wallet-usdc').textContent = usdc ? parseFloat(usdc).toFixed(2) + ' USDC' : '-';
-        })
-        .catch(() => {});
+    function loadWallets() {
+      var grid = document.getElementById('wallets-grid');
+
+      Promise.all([
+        fetch('/address').then(r => r.json()).catch(() => null),
+        fetch('/charity').then(r => r.json()).catch(() => null),
+      ]).then(function(results) {
+        var addr = results[0];
+        var charity = results[1];
+        grid.style.display = '';
+
+        if (addr) {
+          document.getElementById('sender-addr').textContent = addr.address;
+          var net = document.getElementById('stat-network').textContent;
+          var key = net === 'Base' ? 'base' : 'base-sepolia';
+          var bal = addr.balances[key];
+          if (bal) {
+            document.getElementById('sender-usdc').textContent = parseFloat(bal.usdc).toFixed(2);
+            document.getElementById('sender-eth').textContent = parseFloat(bal.eth).toFixed(4);
+          }
+          document.getElementById('sender-explorer').href = explorerUrl + '/address/' + addr.address;
+        }
+
+        if (charity) {
+          document.getElementById('receiver-addr').textContent = charity.walletAddress;
+          document.getElementById('charity-name').textContent = charity.name;
+          document.getElementById('receiver-chain').textContent = charity.chain === 'base' ? 'Base' : 'Base Sepolia';
+          document.getElementById('receiver-explorer').href = explorerUrl + '/address/' + charity.walletAddress;
+        }
+      });
     }
 
     function loadDonations() {
       fetch('/donations')
         .then(r => r.json())
-        .then(renderDonations)
+        .then(function(data) {
+          renderDonations(data);
+          loadWallets();
+        })
         .catch(() => {
           document.getElementById('donations-container').innerHTML =
             '<div class="empty">Failed to load donations.</div>';
@@ -303,7 +362,6 @@
 
     function loadAll() {
       loadDonations();
-      loadWallet();
     }
 
     function escapeHtml(str) {
