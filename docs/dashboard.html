@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donation Dashboard — x402 Charity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000; --surface: #111; --border: #222;
+      --text: #fff; --text-muted: #888;
+      --accent: #20F58E; --accent-dim: rgba(32,245,142,0.12);
+      --red: #ff4d4d;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Manrope', -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.6; -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    header {
+      padding: 20px 0; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: center;
+    }
+    header a {
+      color: var(--text); text-decoration: none;
+      font-weight: 700; font-size: 18px;
+    }
+    header span { color: var(--text-muted); font-weight: 400; font-size: 14px; margin-left: 12px; }
+
+    h1 {
+      text-align: center; font-size: 28px; font-weight: 800;
+      margin: 40px 0 8px; letter-spacing: -0.5px;
+    }
+    .subtitle {
+      text-align: center; color: var(--text-muted);
+      font-size: 15px; margin-bottom: 32px;
+    }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border); border-radius: 12px;
+      overflow: hidden; margin-bottom: 32px;
+    }
+    .stat {
+      background: var(--surface); padding: 24px; text-align: center;
+    }
+    .stat-label {
+      font-size: 12px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      font-weight: 600; margin-bottom: 8px;
+    }
+    .stat-value {
+      font-family: 'Inconsolata', monospace;
+      font-size: 28px; font-weight: 700;
+    }
+    .stat-value.green { color: var(--accent); }
+
+    .wallet-banner {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 32px; flex-wrap: wrap; gap: 12px;
+    }
+    .wallet-banner .label {
+      font-size: 12px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      font-weight: 600; margin-bottom: 4px;
+    }
+    .wallet-banner .addr {
+      font-family: 'Inconsolata', monospace; font-size: 14px;
+      word-break: break-all;
+    }
+    .wallet-banner .balance {
+      text-align: right;
+    }
+    .wallet-banner .balance .val {
+      font-family: 'Inconsolata', monospace;
+      font-size: 18px; font-weight: 700; color: var(--accent);
+    }
+
+    .section-title {
+      font-size: 16px; font-weight: 700; margin-bottom: 16px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .section-title .count {
+      font-size: 13px; color: var(--text-muted); font-weight: 400;
+    }
+    .refresh-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--text-muted); padding: 6px 14px;
+      border-radius: 8px; font-size: 12px; cursor: pointer;
+      font-family: 'Manrope', sans-serif; font-weight: 600;
+    }
+    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    table {
+      width: 100%; border-collapse: collapse;
+      background: var(--surface); border-radius: 12px;
+      overflow: hidden; border: 1px solid var(--border);
+    }
+    thead th {
+      text-align: left; padding: 12px 16px;
+      font-size: 11px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      font-weight: 600; border-bottom: 1px solid var(--border);
+    }
+    tbody td {
+      padding: 12px 16px; font-size: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+    .tx-hash {
+      font-family: 'Inconsolata', monospace; font-size: 13px;
+    }
+    .tx-hash a { color: var(--accent); text-decoration: none; }
+    .tx-hash a:hover { text-decoration: underline; }
+
+    .amount { font-family: 'Inconsolata', monospace; font-weight: 700; }
+
+    .badge {
+      display: inline-block; padding: 2px 8px;
+      border-radius: 4px; font-size: 11px; font-weight: 700;
+    }
+    .badge.ok { background: var(--accent-dim); color: var(--accent); }
+    .badge.failed { background: rgba(255,77,77,0.12); color: var(--red); }
+
+    .time { color: var(--text-muted); font-size: 13px; }
+
+    .empty {
+      text-align: center; padding: 48px 24px;
+      color: var(--text-muted); font-size: 15px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .empty .hint {
+      font-size: 13px; margin-top: 8px;
+      font-family: 'Inconsolata', monospace; color: var(--accent);
+    }
+
+    .loading { text-align: center; padding: 48px; color: var(--text-muted); }
+
+    footer {
+      padding: 32px 0; margin-top: 40px;
+      border-top: 1px solid var(--border);
+      text-align: center; font-size: 13px; color: var(--text-muted);
+    }
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .stats { grid-template-columns: 1fr; }
+      .stat-value { font-size: 22px; }
+      .wallet-banner { flex-direction: column; align-items: flex-start; }
+      .wallet-banner .balance { text-align: left; }
+      table { font-size: 13px; }
+      thead th, tbody td { padding: 10px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center;">
+      <a href="/">x402 Charity</a>
+      <span>Donation Dashboard</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1>Donation Dashboard</h1>
+    <p class="subtitle">All donations are on-chain and publicly verifiable on Base.</p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Donated</div>
+        <div class="stat-value green" id="stat-total">-</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Donations</div>
+        <div class="stat-value" id="stat-count">-</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Network</div>
+        <div class="stat-value" id="stat-network">-</div>
+      </div>
+    </div>
+
+    <div class="wallet-banner" id="wallet-banner" style="display:none;">
+      <div>
+        <div class="label">Donation Wallet</div>
+        <div class="addr" id="wallet-addr"></div>
+      </div>
+      <div class="balance">
+        <div class="label">USDC Balance</div>
+        <div class="val" id="wallet-usdc">-</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <span>Recent Donations <span class="count" id="donation-count"></span></span>
+      <button class="refresh-btn" onclick="loadAll()">Refresh</button>
+    </div>
+
+    <div id="donations-container">
+      <div class="loading">Loading donations...</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      Powered by <a href="https://x402charity.com">x402 Charity</a> &middot; All transactions verifiable on <a href="" id="explorer-link" target="_blank">BaseScan</a>
+    </div>
+  </footer>
+
+  <script>
+    let explorerUrl = '';
+
+    function timeAgo(ts) {
+      const s = Math.floor((Date.now() - ts) / 1000);
+      if (s < 60) return s + 's ago';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+      return new Date(ts).toLocaleDateString();
+    }
+
+    function shortHash(h) {
+      if (!h) return '-';
+      return h.slice(0, 8) + '...' + h.slice(-6);
+    }
+
+    function renderDonations(data) {
+      const container = document.getElementById('donations-container');
+      document.getElementById('stat-total').textContent = data.total;
+      document.getElementById('stat-count').textContent = data.count;
+      document.getElementById('stat-network').textContent = data.network === 'base' ? 'Base' : 'Base Sepolia';
+      document.getElementById('donation-count').textContent = '(' + data.donations.length + ')';
+
+      explorerUrl = data.explorerUrl || '';
+      document.getElementById('explorer-link').href = explorerUrl;
+
+      if (data.donations.length === 0) {
+        container.innerHTML =
+          '<div class="empty">' +
+            'No donations yet.' +
+            '<div class="hint">POST /donate/:charityId to trigger a donation</div>' +
+          '</div>';
+        return;
+      }
+
+      let html = '<table><thead><tr>' +
+        '<th>Time</th><th>Charity</th><th>Amount</th><th>Tx Hash</th><th>Status</th>' +
+        '</tr></thead><tbody>';
+
+      for (const d of data.donations) {
+        const txLink = d.txHash && explorerUrl
+          ? '<a href="' + explorerUrl + '/tx/' + d.txHash + '" target="_blank">' + shortHash(d.txHash) + '</a>'
+          : (d.txHash ? shortHash(d.txHash) : '-');
+        const badge = d.status === 'ok'
+          ? '<span class="badge ok">OK</span>'
+          : '<span class="badge failed">FAILED</span>';
+
+        html += '<tr>' +
+          '<td class="time">' + timeAgo(d.timestamp) + '</td>' +
+          '<td>' + escapeHtml(d.charityName) + '</td>' +
+          '<td class="amount">' + escapeHtml(d.amount) + ' ' + d.currency + '</td>' +
+          '<td class="tx-hash">' + txLink + '</td>' +
+          '<td>' + badge + '</td>' +
+          '</tr>';
+      }
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function loadWallet() {
+      fetch('/address')
+        .then(r => r.json())
+        .then(data => {
+          const banner = document.getElementById('wallet-banner');
+          banner.style.display = '';
+          document.getElementById('wallet-addr').textContent = data.address;
+          const net = document.getElementById('stat-network').textContent;
+          const key = net === 'Base' ? 'base' : 'base-sepolia';
+          const usdc = data.balances[key]?.usdc;
+          document.getElementById('wallet-usdc').textContent = usdc ? parseFloat(usdc).toFixed(2) + ' USDC' : '-';
+        })
+        .catch(() => {});
+    }
+
+    function loadDonations() {
+      fetch('/donations')
+        .then(r => r.json())
+        .then(renderDonations)
+        .catch(() => {
+          document.getElementById('donations-container').innerHTML =
+            '<div class="empty">Failed to load donations.</div>';
+        });
+    }
+
+    function loadAll() {
+      loadDonations();
+      loadWallet();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    loadAll();
+  </script>
+</body>
+</html>

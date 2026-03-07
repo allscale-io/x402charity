@@ -5,6 +5,8 @@
     { "source": "/health", "destination": "/api" },
     { "source": "/address", "destination": "/api" },
     { "source": "/charities", "destination": "/api" },
+    { "source": "/donations", "destination": "/api" },
+    { "source": "/dashboard", "destination": "/api" },
     { "source": "/donate/:path*", "destination": "/api" }
   ]
 }
