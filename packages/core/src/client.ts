@@ -84,8 +84,22 @@ export class X402CharityClient {
       // Endpoint may not return JSON
     }
 
+    // Extract tx hash from x402 PAYMENT-RESPONSE header if available
+    let txHash = responseData.txHash || responseData.transaction || '';
+    if (!txHash) {
+      const paymentResponseHeader = response.headers.get('PAYMENT-RESPONSE') || response.headers.get('X-PAYMENT-RESPONSE');
+      if (paymentResponseHeader) {
+        try {
+          const decoded = JSON.parse(atob(paymentResponseHeader));
+          txHash = decoded.transaction || '';
+        } catch {
+          // ignore decode errors
+        }
+      }
+    }
+
     return {
-      txHash: responseData.txHash || responseData.transaction || '',
+      txHash,
       from: this.account.address,
       to: this.charity.walletAddress,
       amount,
