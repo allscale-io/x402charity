@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r build",
+    "start": "pnpm --filter @x402charity/server start",
+    "dev": "pnpm -r build && node --env-file=.env packages/server/bin/server.js",
     "clean": "pnpm -r clean"
   },
   "devDependencies": {

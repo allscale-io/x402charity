@@ -4,3 +4,4 @@ dist/
 *.tgz
 .x402charity/
 .vercel
+public/index.html

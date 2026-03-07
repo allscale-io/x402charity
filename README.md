@@ -66,6 +66,18 @@ Create a new wallet (MetaMask, Coinbase Wallet, etc.) and export the private key
 
 ### 2. Deploy the Server
 
+**Option A: Run locally**
+
+```bash
+git clone https://github.com/allscale-io/x402charity.git
+cd x402charity
+cp .env.example .env   # edit .env with your keys
+pnpm install
+pnpm dev
+```
+
+**Option B: Docker**
+
 ```bash
 git clone https://github.com/allscale-io/x402charity.git
 cd x402charity
