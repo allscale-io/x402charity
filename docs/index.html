@@ -552,11 +552,15 @@
     .log-entry.error .text { color: var(--text-muted); }
     .log-entry.error .detail { color: var(--text-muted); }
 
-    .log-entry .detail a {
-      color: var(--accent);
+    .log-entry .tx-link {
+      font-family: 'Inconsolata', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
       text-decoration: none;
+      margin-left: 12px;
+      flex-shrink: 0;
     }
-    .log-entry .detail a:hover { text-decoration: underline; }
+    .log-entry .tx-link:hover { text-decoration: underline; color: var(--accent); }
 
     .log-entry.error {
       position: relative;
@@ -952,7 +956,7 @@
   <!-- 1. Hero -->
   <section class="hero">
     <div class="container">
-      <div class="section-label">Open Source</div>
+      <div class="section-label"><img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale" style="height:18px;width:auto;vertical-align:middle;margin-right:6px;filter:brightness(0) invert(1) brightness(0.7);">AllScale</div>
       <h2 class="section-title">Turn every user action into a <span>micro-donation</span></h2>
       <p class="section-sub">Drop-in middleware that donates a fraction of a cent in USDC to charity every time a user takes an action — powered by the x402 payment protocol.</p>
       <div class="hero-buttons">
@@ -1589,10 +1593,10 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     const GROUND_Y = H - 40;
     const PLAYER_W = 28;
     const PLAYER_H = 44;
-    const GRAVITY = 1.8;
-    const JUMP_VEL = -22;
-    const BASE_SPEED = 24;
-    const SPEED_INC = 0.003;
+    const GRAVITY = 1.4;
+    const JUMP_VEL = -18;
+    const BASE_SPEED = 8;
+    const SPEED_INC = 0.001;
     const MIN_GAP = 160;
     const MAX_GAP = 300;
 
@@ -1802,8 +1806,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
             if (chain && EXPLORER_URLS[chain]) explorerUrl = EXPLORER_URLS[chain];
             if (data.receipt?.to) charityWallet = data.receipt.to;
             const tx = data.receipt?.txHash;
-            const short = tx ? tx.slice(0, 10) + '...' : 'confirmed';
-            updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — $0.001', short, 'ok', tx);
+            updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — $0.001', 'confirmed', 'ok', tx);
           } else {
             var errDetail = data.details || data.error || 'error';
             var errReason = getErrorExplanation(status, errDetail);
@@ -1857,6 +1860,11 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     function renderLog() {
       logList.innerHTML = logEntries.slice(0, 30).map(function(e) {
         var detailHtml = escapeHtml(e.detail);
+        var txLinkHtml = '';
+        if (e.status === 'ok' && e.txHash) {
+          var href = explorerUrl + '/tx/' + escapeHtml(e.txHash);
+          txLinkHtml = '<a class="tx-link" href="' + href + '" target="_blank" rel="noopener" title="View on explorer">' + escapeHtml(e.txHash.slice(0, 10) + '...') + '</a>';
+        }
         var tooltipHtml = '';
         if (e.status === 'error' && e.errorReason) {
           tooltipHtml = '<div class="error-tooltip">' + escapeHtml(e.errorReason) + '</div>';
@@ -1864,6 +1872,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         return '<div class="log-entry ' + e.status + '" tabindex="' + (e.status === 'error' ? '0' : '-1') + '">' +
           '<span class="text">' + escapeHtml(e.text) + '</span>' +
           '<span class="detail">' + detailHtml + '</span>' +
+          txLinkHtml +
           tooltipHtml +
         '</div>';
       }).join('');
