@@ -19,8 +19,12 @@
     "start": "node bin/server.js"
   },
   "dependencies": {
+    "@x402/evm": "^2.5.0",
+    "@x402/express": "^2.6.0",
     "@x402charity/core": "workspace:*",
-    "express": "^4.21.0"
+    "ethers": "^6.16.0",
+    "express": "^4.21.0",
+    "viem": "^2.21.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.0",
@@ -28,7 +32,16 @@
     "typescript": "^5.4.0"
   },
   "description": "x402-gated charity donation server — host payment endpoints for registered charities",
-  "keywords": ["x402", "charity", "donation", "server", "express", "usdc", "base", "web3"],
+  "keywords": [
+    "x402",
+    "charity",
+    "donation",
+    "server",
+    "express",
+    "usdc",
+    "base",
+    "web3"
+  ],
   "homepage": "https://x402charity.com",
   "repository": {
     "type": "git",
