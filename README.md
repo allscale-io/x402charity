@@ -212,6 +212,27 @@ export default x402charity({
 npx x402charity donate testing-charity '$0.001' --network base-sepolia
 ```
 
+<details>
+<summary>📺 CLI Demo Output</summary>
+
+```
+$ npx x402charity donate testing-charity '$0.001' --network base-sepolia
+
+🔗 Connecting to base-sepolia...
+📋 Charity: Testing Charity (testing-charity)
+💸 Donating $0.001 USDC...
+
+✅ Donation successful!
+
+   Transaction: 0x7a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f8f2e
+   Amount:      $0.001 USDC
+   Charity:     Testing Charity
+   Network:     base-sepolia
+   BaseScan:    https://sepolia.basescan.org/tx/0x7a3b...8f2e
+```
+
+</details>
+
 ## Example Use Cases
 
 - **DEX / Trading** — $0.001 per swap. 50K daily trades = $50/day to charity
