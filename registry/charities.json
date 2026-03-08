@@ -9,6 +9,17 @@
       "verified": false,
       "category": "testing",
       "x402Endpoint": "https://x402charity.com/donate"
+    },
+    {
+      "id": "unicef-cryptofund",
+      "name": "UNICEF CryptoFund",
+      "description": "UNICEF CryptoFund is the first UN financial vehicle to receive, hold and disburse cryptocurrency, investing in open-source technology solutions for children worldwide",
+      "walletAddress": "0xA59B29d7dbC9794d1e7f45123C48b2b8d0a34636",
+      "chain": "base",
+      "verified": true,
+      "category": "humanitarian",
+      "website": "https://juniper.unicef.org",
+      "x402Endpoint": ""
     }
   ]
 }
