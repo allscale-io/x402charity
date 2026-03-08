@@ -1,0 +1,13 @@
+{
+  "name": "x402charity-express-example",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^5.0.0",
+    "@x402/express": "^2.6.0",
+    "x402charity": "*"
+  }
+}
