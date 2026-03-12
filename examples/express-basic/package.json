@@ -1,0 +1,24 @@
+{
+  "name": "x402charity-express-basic",
+  "version": "1.0.0",
+  "description": "Express app with automatic x402charity donations",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "x402charity",
+    "express",
+    "donations",
+    "charity",
+    "usdc"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "x402charity": "^0.1.0",
+    "dotenv": "^16.3.1"
+  }
+}
