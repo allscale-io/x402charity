@@ -1,2062 +1,752 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>x402 Charity — Micro-Donations Powered by x402</title>
-  <meta name="description" content="Open-source middleware that triggers a small charitable USDC donation whenever a user takes an action. Add giving to any product in under 5 minutes.">
-  <meta property="og:title" content="x402 Charity — Micro-Donations Powered by x402">
-  <meta property="og:description" content="Open-source middleware that triggers a small charitable USDC donation whenever a user takes an action. Add giving to any product in under 5 minutes.">
-  <meta property="og:url" content="https://x402charity.com">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="x402 Charity — Micro-Donations Powered by x402">
-  <meta name="twitter:description" content="Open-source middleware that triggers a small charitable USDC donation whenever a user takes an action. Add giving to any product in under 5 minutes.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #000000;
-      --surface: #111111;
-      --surface-hover: #1a1a1a;
-      --border: #222222;
-      --text: #ffffff;
-      --text-muted: #888888;
-      --accent: #20F58E;
-      --accent-hover: #1ad97d;
-      --accent-dim: rgba(32, 245, 142, 0.12);
-      --red: #ff4d4d;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    h1, h2, h3, h4, h5, h6 {
-      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* ---- Header ---- */
-    header {
-      padding: 20px 0;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(12px);
-      z-index: 100;
-    }
-
-    header .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: var(--text);
-    }
-
-    .header-brand img { height: 22px; width: auto; }
-
-    .header-brand span {
-      font-family: 'Manrope', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-    }
-
-    header nav {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-
-    header nav a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
-    header nav a:hover { color: var(--text); }
-
-    /* ---- Section shared ---- */
-    section {
-      padding: 80px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    section:last-of-type { border-bottom: none; }
-
-    .section-label {
-      font-family: 'Manrope', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--accent);
-      margin-bottom: 12px;
-    }
-
-    .section-title {
-      font-size: 36px;
-      font-weight: 800;
-      letter-spacing: -1px;
-      margin-bottom: 12px;
-    }
-
-    .section-title span { color: var(--accent); }
-
-    .section-sub {
-      font-size: 16px;
-      color: var(--text-muted);
-      max-width: 560px;
-      margin-bottom: 40px;
-    }
-
-    /* ---- Hero ---- */
-    .hero {
-      padding: 100px 0 80px;
-      text-align: center;
-    }
-
-    .hero .section-title {
-      font-size: 52px;
-      letter-spacing: -1.5px;
-      max-width: 700px;
-      margin: 0 auto 20px;
-    }
-
-    .hero .section-sub {
-      font-size: 18px;
-      margin: 0 auto 36px;
-      max-width: 540px;
-    }
-
-    .hero-buttons {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 12px 28px;
-      border-radius: 24px;
-      font-family: 'Manrope', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      text-decoration: none;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
-    }
-
-    .btn-primary:hover { background: var(--accent-hover); }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover { border-color: #444; }
-
-    /* ---- How it works — sequence diagram ---- */
-    .seq-diagram {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px 24px 24px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .seq-actors {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0;
-      position: relative;
-      z-index: 2;
-    }
-
-    .seq-actor {
-      text-align: center;
-      width: 90px;
-      flex-shrink: 0;
-    }
-
-    .seq-actor-box {
-      background: var(--bg);
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 8px;
-      font-family: 'Manrope', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-
-    .seq-actor-box.active {
-      border-color: var(--accent);
-      box-shadow: 0 0 16px rgba(32, 245, 142, 0.15);
-    }
-
-    .seq-actor-icon {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-
-    .seq-lifelines {
-      display: flex;
-      justify-content: space-between;
-      position: relative;
-      height: 340px;
-      margin-bottom: 20px;
-    }
-
-    .seq-lifeline {
-      width: 90px;
-      flex-shrink: 0;
-      display: flex;
-      justify-content: center;
-    }
-
-    .seq-lifeline-bar {
-      width: 2px;
-      height: 100%;
-      background: repeating-linear-gradient(to bottom, var(--border) 0, var(--border) 6px, transparent 6px, transparent 12px);
-    }
-
-    /* Arrows */
-    .seq-arrows {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    .seq-arrow {
-      position: absolute;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.4s;
-    }
-
-    .seq-arrow.visible { opacity: 1; }
-
-    .seq-arrow-line {
-      height: 2px;
-      flex: 1;
-      position: relative;
-    }
-
-    .seq-arrow-line.solid { background: var(--accent); }
-    .seq-arrow-line.dashed {
-      background: repeating-linear-gradient(to right, var(--accent) 0, var(--accent) 6px, transparent 6px, transparent 12px);
-    }
-
-    .seq-arrow-head {
-      width: 0; height: 0;
-      border-top: 6px solid transparent;
-      border-bottom: 6px solid transparent;
-      flex-shrink: 0;
-    }
-
-    .seq-arrow-head.right { border-left: 8px solid var(--accent); }
-    .seq-arrow-head.left { border-right: 8px solid var(--accent); }
-
-    .seq-arrow-label {
-      position: absolute;
-      top: -18px;
-      font-family: 'Inconsolata', monospace;
-      font-size: 11px;
-      white-space: nowrap;
-      color: var(--accent);
-      font-weight: 700;
-    }
-
-    .seq-arrow-label.ltr { left: 8px; }
-    .seq-arrow-label.rtl { right: 8px; }
-
-    .seq-arrow-sublabel {
-      position: absolute;
-      bottom: -16px;
-      font-family: 'Lato', sans-serif;
-      font-size: 10px;
-      white-space: nowrap;
-      color: var(--text-muted);
-    }
-
-    .seq-arrow-sublabel.ltr { left: 8px; }
-    .seq-arrow-sublabel.rtl { right: 8px; }
-
-    /* Controls & description */
-    .seq-controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .seq-btn {
-      padding: 8px 20px;
-      border-radius: 8px;
-      font-family: 'Manrope', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      transition: all 0.2s;
-    }
-
-    .seq-btn:hover { border-color: var(--accent); }
-    .seq-btn:disabled { opacity: 0.3; cursor: default; }
-    .seq-btn:disabled:hover { border-color: var(--border); }
-
-    .seq-btn.primary {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-    }
-
-    .seq-btn.primary:hover { background: var(--accent-hover); }
-
-    .seq-progress {
-      flex: 1;
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .seq-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      transition: background 0.3s;
-    }
-
-    .seq-dot.active { background: var(--accent); }
-    .seq-dot.done { background: rgba(32, 245, 142, 0.4); }
-
-    .seq-desc {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 20px;
-      min-height: 76px;
-      transition: border-color 0.3s;
-    }
-
-    .seq-desc.active { border-color: rgba(32, 245, 142, 0.3); }
-
-    .seq-desc h4 {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .seq-desc p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    .seq-desc code {
-      font-size: 12px;
-      color: var(--accent);
-      background: var(--accent-dim);
-      padding: 1px 6px;
-      border-radius: 4px;
-    }
-
-    @media (max-width: 700px) {
-      .seq-actor { width: 56px; }
-      .seq-actor-box { font-size: 9px; padding: 6px 2px; }
-      .seq-actor-icon { font-size: 14px; }
-      .seq-lifeline { width: 56px; }
-      .seq-arrow-label { font-size: 8px; }
-      .seq-arrow-sublabel { font-size: 8px; }
-      .seq-lifelines { height: 280px; }
-    }
-
-    /* ---- Demo ---- */
-    .demo-section { padding-bottom: 60px; }
-
-    .demo-area {
-      max-width: 660px;
-      margin: 0 auto;
-    }
-
-    .scoreboard {
-      display: flex;
-      gap: 1px;
-      background: var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-
-    .score-item {
-      flex: 1;
-      background: var(--surface);
-      padding: 14px;
-      text-align: center;
-    }
-
-    .score-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-    }
-
-    .score-value {
-      font-family: 'Manrope', sans-serif;
-      font-size: 22px;
-      font-weight: 800;
-    }
-
-    .score-value.green { color: var(--accent); }
-
-    .canvas-wrap {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      margin-bottom: 16px;
-      cursor: pointer;
-    }
-
-    canvas {
-      display: block;
-      width: 100%;
-      height: auto;
-      background: #0a0a0a;
-    }
-
-    .overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.75);
-      z-index: 10;
-    }
-
-    .overlay.hidden { display: none; }
-
-    .overlay h3 {
-      font-size: 28px;
-      font-weight: 800;
-      margin-bottom: 8px;
-    }
-
-    .overlay p {
-      color: var(--text-muted);
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    .overlay .hint {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .play-btn {
-      padding: 12px 36px;
-      border-radius: 10px;
-      font-family: 'Manrope', sans-serif;
-      font-weight: 700;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      background: var(--accent);
-      color: #000;
-      transition: background 0.2s;
-    }
-
-    .play-btn:hover { background: var(--accent-hover); }
-
-    .donation-log {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-
-    .log-header {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .log-entry {
-      padding: 8px 16px;
-      font-size: 13px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .log-entry:last-child { border-bottom: none; }
-    .log-entry .text { flex: 1; }
-    .log-entry .detail {
-      font-family: 'Inconsolata', monospace;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .log-entry.pending .detail { color: var(--accent); }
-    .log-entry.ok .text { color: var(--accent); }
-    .log-entry.ok .detail { color: var(--accent); }
-    .log-entry.error .text { color: var(--text-muted); }
-    .log-entry.error .detail { color: var(--text-muted); }
-
-    .log-entry .tx-link {
-      font-family: 'Inconsolata', monospace;
-      font-size: 11px;
-      color: var(--text-muted);
-      text-decoration: none;
-      margin-left: 12px;
-      flex-shrink: 0;
-    }
-    .log-entry .tx-link:hover { text-decoration: underline; color: var(--accent); }
-
-    .log-entry.error {
-      position: relative;
-      cursor: pointer;
-    }
-    .log-entry.error .error-tooltip {
-      display: none;
-      position: absolute;
-      bottom: calc(100% + 6px);
-      right: 0;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 12px;
-      line-height: 1.5;
-      color: var(--text);
-      width: 300px;
-      z-index: 10;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-    .log-entry.error .error-tooltip::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      right: 16px;
-      border: 6px solid transparent;
-      border-top-color: #333;
-    }
-    .log-entry.error:hover .error-tooltip,
-    .log-entry.error:focus .error-tooltip {
-      display: block;
-    }
-
-    .log-empty {
-      padding: 20px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-
-    /* ---- Integration ---- */
-    .code-tabs {
-      display: flex;
-      gap: 0;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 0;
-    }
-
-    .code-tab {
-      padding: 10px 20px;
-      font-family: 'Manrope', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .code-tab:hover { color: var(--text); }
-
-    .code-tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-
-    .code-panel { display: none; position: relative; }
-    .code-panel.active { display: block; }
-
-    pre {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 0 0 16px 16px;
-      padding: 20px 24px;
-      overflow-x: auto;
-      font-size: 13px;
-      line-height: 1.7;
-      margin: 0;
-    }
-
-    .copy-btn {
-      position: absolute; top: 10px; right: 10px;
-      background: var(--border); border: none; border-radius: 6px;
-      color: var(--text-muted); font-size: 12px; font-family: 'Manrope', sans-serif;
-      padding: 5px 10px; cursor: pointer; transition: all 0.2s; z-index: 1;
-    }
-    .copy-btn:hover { background: var(--text-muted); color: var(--bg); }
-    .copy-btn.copied { background: var(--accent); color: var(--bg); }
-
-    code { font-family: 'Inconsolata', 'SF Mono', monospace; }
-
-    .code-comment { color: #555; }
-    .code-keyword { color: #b48ead; }
-    .code-string { color: var(--accent); }
-    .code-func { color: #88c0d0; }
-
-    .install-cmd {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px 24px;
-      font-family: 'Inconsolata', monospace;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    .install-cmd .prompt {
-      color: var(--accent);
-      user-select: none;
-    }
-
-    /* ---- Use cases ---- */
-    .cases-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    .case-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      transition: border-color 0.2s;
-    }
-
-    .case-card:hover { border-color: #333; }
-
-    .case-icon {
-      font-size: 28px;
-      margin-bottom: 14px;
-    }
-
-    .case-card h3 {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .case-card p {
-      font-size: 14px;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-
-    .case-card .case-example {
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .case-card .case-benefit {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    .case-card .case-benefit strong {
-      color: var(--text);
-      font-weight: 600;
-    }
-
-    /* ---- Dashboard ---- */
-    .dash-stats {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 1px; background: var(--border); border-radius: 12px;
-      overflow: hidden; margin-bottom: 24px;
-    }
-    .dash-stat {
-      background: var(--surface); padding: 20px; text-align: center;
-    }
-    .dash-stat-label {
-      font-size: 11px; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.5px;
-      font-weight: 600; margin-bottom: 6px;
-    }
-    .dash-stat-value {
-      font-family: 'Inconsolata', monospace;
-      font-size: 24px; font-weight: 700;
-    }
-
-    .dash-wallets {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 16px; margin-bottom: 24px;
-    }
-    .dash-wallet {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; padding: 16px 20px;
-    }
-    .dash-wallet-role {
-      font-size: 12px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
-    .dash-wallet.sender .dash-wallet-role { color: var(--accent); }
-    .dash-wallet.receiver .dash-wallet-role { color: #88c0d0; }
-    .dash-wallet-sub {
-      font-size: 11px; color: var(--text-muted); margin-bottom: 8px;
-    }
-    .dash-wallet .dash-addr {
-      font-family: 'Inconsolata', monospace; font-size: 12px;
-      word-break: break-all; color: var(--text-muted);
-      background: rgba(255,255,255,0.03); border-radius: 6px;
-      padding: 6px 8px; margin-bottom: 8px;
-    }
-    .dash-bal-row {
-      display: flex; justify-content: space-between;
-      padding: 3px 0; font-size: 13px;
-    }
-    .dash-bal-row .label { color: var(--text-muted); font-size: 12px; }
-    .dash-bal-row .val {
-      font-family: 'Inconsolata', monospace; font-weight: 700;
-    }
-    .dash-bal-row .val.green { color: var(--accent); }
-    .dash-chain-label {
-      font-size: 11px; color: var(--text-muted); font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.3px;
-      margin-bottom: 4px; padding-top: 4px;
-      border-top: 1px solid var(--border);
-    }
-    .dash-explorer {
-      font-size: 11px; color: var(--text-muted); text-decoration: none;
-    }
-    .dash-explorer:hover { color: var(--accent); }
-
-    .dash-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 12px;
-    }
-    .dash-header-title {
-      font-size: 14px; font-weight: 700;
-    }
-    .dash-header-count {
-      font-size: 12px; color: var(--text-muted); font-weight: 400;
-    }
-    .dash-refresh {
-      background: none; border: 1px solid var(--border);
-      color: var(--text-muted); padding: 4px 12px;
-      border-radius: 6px; font-size: 11px; cursor: pointer;
-      font-family: 'Manrope', sans-serif; font-weight: 600;
-    }
-    .dash-refresh:hover { border-color: var(--accent); color: var(--accent); }
-
-    .dash-table {
-      width: 100%; border-collapse: collapse;
-      background: var(--surface); border-radius: 12px;
-      overflow: hidden; border: 1px solid var(--border);
-    }
-    .dash-table thead th {
-      text-align: left; padding: 10px 14px;
-      font-size: 10px; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.5px;
-      font-weight: 600; border-bottom: 1px solid var(--border);
-    }
-    .dash-table tbody td {
-      padding: 10px 14px; font-size: 13px;
-      border-bottom: 1px solid var(--border);
-    }
-    .dash-table tbody tr:last-child td { border-bottom: none; }
-    .dash-table tbody tr:hover { background: rgba(255,255,255,0.02); }
-    .dash-table .tx-hash {
-      font-family: 'Inconsolata', monospace; font-size: 12px;
-    }
-    .dash-table .tx-hash a { color: var(--accent); text-decoration: none; }
-    .dash-table .tx-hash a:hover { text-decoration: underline; }
-    .dash-table .amount { font-family: 'Inconsolata', monospace; font-weight: 700; }
-    .dash-badge {
-      display: inline-block; padding: 2px 6px;
-      border-radius: 4px; font-size: 10px; font-weight: 700;
-    }
-    .dash-badge.ok { background: var(--accent-dim); color: var(--accent); }
-    .dash-badge.failed { background: rgba(255,77,77,0.12); color: var(--red); }
-    .dash-time { color: var(--text-muted); font-size: 12px; }
-
-    .dash-empty {
-      text-align: center; padding: 32px 20px;
-      color: var(--text-muted); font-size: 14px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px;
-    }
-    .dash-loading {
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-    }
-    .dash-spinner {
-      width: 18px; height: 18px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: dash-spin 0.8s linear infinite;
-    }
-    @keyframes dash-spin {
-      to { transform: rotate(360deg); }
-    }
-    .dash-empty .hint {
-      font-size: 12px; margin-top: 6px;
-      font-family: 'Inconsolata', monospace; color: var(--accent);
-    }
-
-    .dash-history-day {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; margin-bottom: 8px; overflow: hidden;
-    }
-    .dash-history-day-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 16px; cursor: pointer;
-    }
-    .dash-history-day-header:hover { background: rgba(255,255,255,0.02); }
-    .dash-history-day-date { font-size: 13px; font-weight: 600; }
-    .dash-history-day-summary {
-      font-size: 12px; color: var(--text-muted);
-      font-family: 'Inconsolata', monospace;
-    }
-    .dash-history-day-summary .amt { color: var(--accent); font-weight: 700; }
-    .dash-history-rows { display: none; border-top: 1px solid var(--border); }
-    .dash-history-rows.open { display: block; }
-    .dash-history-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 6px 16px; font-size: 12px; border-bottom: 1px solid var(--border);
-    }
-    .dash-history-row:last-child { border-bottom: none; }
-    .dash-history-row .h-time { color: var(--text-muted); width: 60px; }
-    .dash-history-row .h-from { font-family: 'Inconsolata', monospace; color: var(--text-muted); font-size: 11px; }
-    .dash-history-row .h-amount { font-family: 'Inconsolata', monospace; font-weight: 700; color: var(--accent); }
-    .dash-history-row .h-tx a { color: var(--text-muted); text-decoration: none; font-size: 11px; font-family: 'Inconsolata', monospace; }
-    .dash-history-row .h-tx a:hover { color: var(--accent); text-decoration: underline; }
-
-    /* ---- Footer ---- */
-    footer {
-      padding: 40px 0;
-      border-top: 1px solid var(--border);
-    }
-
-    .footer-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    .footer-links { display: flex; gap: 20px; }
-    .footer-links a { color: var(--text-muted); text-decoration: none; }
-    .footer-links a:hover { color: var(--text); }
-    .footer-brand { display: flex; align-items: center; gap: 8px; }
-
-    /* ---- Responsive ---- */
-    @media (max-width: 700px) {
-      .hero .section-title { font-size: 34px; }
-      .hero .section-sub { font-size: 16px; }
-      .seq-diagram { padding: 20px 12px 16px; }
-      .cases-grid { grid-template-columns: 1fr; }
-      .dash-wallets { grid-template-columns: 1fr; }
-      .dash-stats { grid-template-columns: 1fr; }
-      .dash-stat-value { font-size: 20px; }
-      .dash-table thead th, .dash-table tbody td { padding: 8px 10px; }
-      header nav { gap: 14px; }
-      header nav a { font-size: 12px; }
-      .footer-content { flex-direction: column; gap: 12px; text-align: center; }
-      section { padding: 60px 0; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>x402 Charity — Micro-Donations Powered by x402</title>
+<link rel="stylesheet" href="/colors_and_type.css" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text);font-family:var(--font-sans);scroll-behavior:smooth}
+  body{overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  code,pre{font-family:var(--font-mono)}
+
+  /* ── Shell ── */
+  .wrap{max-width:1205px;margin:0 auto;padding:0 32px}
+  .section{padding:120px 0;border-top:1px solid var(--border)}
+  .section:first-of-type{border-top:none}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;display:inline-flex;align-items:center;gap:8px}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--accent-glow)}
+  .section h2{font-size:48px;font-weight:500;letter-spacing:-0.025em;line-height:1.05;color:var(--text);max-width:740px}
+  .section .sub{font-size:18px;color:var(--text2);max-width:600px;margin-top:18px;line-height:1.55}
+
+  /* ── Nav ── */
+  .nav{position:sticky;top:0;z-index:50;background:rgba(253,255,254,0.9);backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--border)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px;max-width:1205px;margin:0 auto;padding:0 32px}
+  .brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500;letter-spacing:-0.02em;color:var(--text)}
+  .brand img{height:28px}
+  .brand .sep{width:1px;height:18px;background:var(--border2);margin:0 4px}
+  .brand .x402{color:var(--accent);font-weight:600}
+  .nav-links{display:flex;align-items:center;gap:4px}
+  .nav-links a{padding:8px 14px;border-radius:999px;font-size:14px;font-weight:500;color:var(--text2);transition:.15s}
+  .nav-links a:hover{color:var(--text);background:var(--surface2)}
+  .nav-cta{display:flex;align-items:center;gap:10px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;font-size:14px;font-weight:500;letter-spacing:-0.01em;transition:.18s;cursor:pointer;white-space:nowrap}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:var(--accent-hover)}
+  .btn-primary:active{background:var(--accent2)}
+  .btn-ghost{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+  .btn-ghost:hover{background:var(--surface2);border-color:var(--border2)}
+  .btn-lg{height:54px;padding:0 26px;font-size:16px}
+
+  /* ── Hero ── */
+  .hero{padding:110px 0 140px;position:relative;overflow:hidden}
+  .hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+  .hero-pill{display:inline-flex;align-items:center;gap:10px;height:34px;padding:0 14px 0 6px;border-radius:999px;background:#fff;border:1.5px solid var(--border);font-size:13px;color:var(--text2);margin-bottom:24px}
+  .hero-pill .badge{height:22px;padding:0 8px;border-radius:999px;background:var(--accent);color:#fff;font-size:11px;font-weight:600;display:inline-flex;align-items:center}
+  .hero h1{font-size:72px;font-weight:500;letter-spacing:-0.035em;line-height:0.98;color:var(--text)}
+  .hero h1 em{font-style:normal;color:var(--accent);position:relative;white-space:nowrap}
+  .hero h1 em::after{content:"";position:absolute;left:0;right:0;bottom:6px;height:14px;background:var(--accent-light);z-index:-1;border-radius:4px}
+  .hero p.lede{font-size:19px;color:var(--text2);line-height:1.55;margin-top:26px;max-width:520px}
+  .hero-actions{display:flex;gap:12px;margin-top:34px;align-items:center;flex-wrap:wrap}
+  .hero-actions .meta{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);margin-left:8px}
+  .hero-actions .meta b{font-weight:500;color:var(--text)}
+
+  /* Hero side card — live donation feed */
+  .live-card{background:#fff;border:1.5px solid var(--border);border-radius:24px;padding:22px;box-shadow:var(--shadow-md);position:relative;overflow:hidden}
+  .live-card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .live-card-h .lbl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);font-weight:500}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--accent-light);animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 4px var(--accent-light);opacity:1}50%{box-shadow:0 0 0 8px rgba(0,152,89,0.05);opacity:.7}}
+  .live-card-h .net{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:4px 10px;border-radius:999px}
+  .live-hero-num{font-size:54px;font-weight:500;letter-spacing:-0.035em;line-height:1;color:var(--text);font-variant-numeric:tabular-nums}
+  .live-hero-num small{font-size:18px;color:var(--text3);font-weight:500;margin-left:6px;letter-spacing:0}
+  .live-sub{font-size:13px;color:var(--text2);margin-top:6px}
+  .live-feed{margin-top:20px;display:flex;flex-direction:column;gap:2px;max-height:228px;overflow:hidden;position:relative;min-height:90px}
+  .live-feed::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60px;background:linear-gradient(to bottom,transparent,#fff)}
+  .feed-empty{padding:24px 6px;text-align:center;color:var(--text3);font-size:13px}
+  .feed-row{display:flex;align-items:center;gap:12px;padding:10px 6px;border-bottom:1px solid var(--border);animation:feedIn .4s ease}
+  .feed-row:last-child{border-bottom:none}
+  @keyframes feedIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+  .feed-ico{width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent)}
+  .feed-meta{flex:1;min-width:0}
+  .feed-meta .a{font-size:13.5px;font-weight:500;color:var(--text);font-family:var(--font-mono);letter-spacing:-0.02em}
+  .feed-meta .a a{color:inherit}
+  .feed-meta .a a:hover{color:var(--accent)}
+  .feed-meta .b{font-size:11px;color:var(--text3);margin-top:1px}
+  .feed-amt{font-size:14px;font-weight:500;color:var(--accent);font-variant-numeric:tabular-nums}
+
+  /* ── Logos strip ── */
+  .strip{display:flex;align-items:center;gap:36px;padding:36px 0 0;color:var(--text3);font-size:13px;flex-wrap:wrap}
+  .strip-lbl{font-weight:500;color:var(--text3);letter-spacing:-0.01em}
+  .strip-chips{display:flex;gap:10px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:999px;background:#fff;border:1.5px solid var(--border);font-size:13px;font-weight:500;color:var(--text)}
+  .chip img{width:18px;height:18px}
+
+  /* ── How it works ── */
+  .flow{margin-top:60px;background:var(--surface);border:1.5px solid var(--border);border-radius:32px;padding:48px;position:relative;overflow:hidden}
+  .flow-stage{position:relative;height:280px}
+  .flow-track{position:absolute;left:0;right:0;top:50%;height:2px;background:repeating-linear-gradient(90deg,var(--border2) 0 6px,transparent 6px 12px);transform:translateY(-50%)}
+  .flow-nodes{position:relative;display:grid;grid-template-columns:repeat(5,1fr);height:100%;align-items:center;gap:0}
+  .flow-node{display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;z-index:2}
+  .flow-tile{width:96px;height:96px;border-radius:24px;background:#fff;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .35s cubic-bezier(0.34,1.1,0.64,1);position:relative}
+  .flow-node.on .flow-tile{border-color:var(--accent);background:var(--accent-light);box-shadow:0 8px 30px rgba(0,152,89,0.18)}
+  .flow-node.on .flow-tile::before{content:"";position:absolute;inset:-4px;border:1.5px solid var(--accent);border-radius:28px;opacity:.4}
+  .flow-tile svg{width:42px;height:42px;color:var(--text2);transition:.35s}
+  .flow-node.on .flow-tile svg{color:var(--accent)}
+  .flow-lbl{font-size:14px;font-weight:500;color:var(--text2);text-align:center}
+  .flow-node.on .flow-lbl{color:var(--text)}
+  .flow-sub{font-size:11px;color:var(--text3);text-align:center;margin-top:-6px;font-family:var(--font-mono)}
+
+  /* moving dot */
+  .flow-pulse{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 6px var(--accent-light),0 0 20px rgba(0,152,89,0.4);transform:translate(-50%,-50%);transition:left 1s cubic-bezier(0.4,0,0.2,1);z-index:3}
+
+  .flow-caption{margin-top:36px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding-top:28px;border-top:1px solid var(--border)}
+  .flow-caption-text{flex:1}
+  .flow-step-no{font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--accent);text-transform:uppercase;margin-bottom:6px}
+  .flow-caption h4{font-size:22px;font-weight:500;letter-spacing:-0.02em;color:var(--text);margin-bottom:6px}
+  .flow-caption p{font-size:15px;color:var(--text2);line-height:1.55;max-width:680px}
+  .flow-nav{display:flex;gap:8px;align-items:center}
+  .flow-nav button{width:44px;height:44px;border-radius:50%;background:#fff;border:1.5px solid var(--border);color:var(--text);display:flex;align-items:center;justify-content:center;transition:.15s}
+  .flow-nav button:hover:not(:disabled){background:var(--accent);color:#fff;border-color:var(--accent)}
+  .flow-nav button:disabled{opacity:.4;cursor:default}
+  .flow-progress{display:flex;gap:6px;margin:0 6px}
+  .flow-progress span{width:24px;height:4px;border-radius:999px;background:var(--border)}
+  .flow-progress span.on{background:var(--accent)}
+
+  /* ── Demo (Game) ── */
+  .demo-grid{margin-top:50px;display:grid;grid-template-columns:1.4fr 1fr;gap:24px}
+  .demo-stage{background:#fff;border:1.5px solid var(--border);border-radius:24px;overflow:hidden;display:flex;flex-direction:column}
+  .demo-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+  .demo-head h3{font-size:17px;font-weight:500;letter-spacing:-0.02em}
+  .demo-head .micro{font-size:12px;color:var(--text2)}
+  .game-wrap{position:relative;background:linear-gradient(180deg,#FDFFFE 0%,#F2F8F5 100%);height:340px}
+  .game-canvas{display:block;width:100%;height:100%}
+  .game-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(253,255,254,0.7);backdrop-filter:blur(4px);transition:opacity .3s;text-align:center;padding:24px}
+  .game-overlay.hidden{opacity:0;pointer-events:none}
+  .game-overlay h4{font-size:24px;font-weight:500;letter-spacing:-0.02em}
+  .game-overlay p{font-size:14px;color:var(--text2);max-width:300px}
+  .game-overlay .hint{font-size:12px;color:var(--text3);font-family:var(--font-mono)}
+  .game-stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-top:1px solid var(--border)}
+  .game-stat{padding:16px 18px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
+  .game-stat:last-child{border-right:none}
+  .game-stat .lab{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3)}
+  .game-stat .val{font-size:22px;font-weight:500;letter-spacing:-0.02em;color:var(--text);font-variant-numeric:tabular-nums}
+  .game-stat .val.brand{color:var(--accent)}
+
+  /* Donation log card */
+  .log{background:#fff;border:1.5px solid var(--border);border-radius:24px;display:flex;flex-direction:column;overflow:hidden}
+  .log-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .log-head h3{font-size:17px;font-weight:500;letter-spacing:-0.02em}
+  .log-head .dot{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px}
+  .log-body{flex:1;overflow-y:auto;padding:8px 12px;min-height:0;max-height:380px}
+  .log-empty{padding:60px 24px;text-align:center;color:var(--text3);font-size:13px}
+  .log-row{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;animation:feedIn .35s ease;transition:.12s}
+  .log-row:hover{background:var(--surface2)}
+  .log-row.pending .log-ic{background:var(--orange-soft);color:var(--orange)}
+  .log-row.error .log-ic{background:var(--red-soft);color:var(--red)}
+  .log-ic{width:32px;height:32px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .log-meta{flex:1;min-width:0}
+  .log-meta .l1{font-size:13px;font-weight:500;color:var(--text)}
+  .log-meta .l2{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .log-meta .l2 a{color:inherit}
+  .log-meta .l2 a:hover{color:var(--accent)}
+  .log-amt{font-size:13px;font-weight:500;color:var(--accent);font-variant-numeric:tabular-nums}
+
+  /* ── Setup section ── */
+  .setup-grid{margin-top:50px;display:grid;grid-template-columns:340px 1fr;gap:32px;align-items:start}
+  .step-rail{display:flex;flex-direction:column;gap:8px;position:sticky;top:90px}
+  .step-card{display:flex;gap:14px;padding:18px 18px;border-radius:18px;cursor:pointer;background:transparent;border:1.5px solid transparent;transition:.18s;text-align:left;align-items:flex-start;width:100%}
+  .step-card:hover{background:var(--surface)}
+  .step-card.on{background:#fff;border-color:var(--accent);box-shadow:var(--shadow-sm)}
+  .step-num{width:32px;height:32px;border-radius:50%;background:var(--surface2);color:var(--text2);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-variant-numeric:tabular-nums;transition:.18s}
+  .step-card.on .step-num{background:var(--accent);color:#fff}
+  .step-info h4{font-size:17px;font-weight:500;letter-spacing:-0.02em;color:var(--text);margin-bottom:4px}
+  .step-info p{font-size:13px;color:var(--text2);line-height:1.5}
+
+  .code-card{background:#0C3124;border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(12,49,36,0.25)}
+  .code-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .code-head .traffic{display:flex;gap:6px}
+  .code-head .traffic span{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,0.12)}
+  .code-head .traffic span:first-child{background:#ff5f57}
+  .code-head .traffic span:nth-child(2){background:#febc2e}
+  .code-head .traffic span:nth-child(3){background:#28c840}
+  .code-tabs{display:flex;gap:2px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-mono)}
+  .code-tab{padding:6px 12px;border-radius:8px}
+  .code-tab.on{background:rgba(255,255,255,0.06);color:#fff}
+  .code-copy{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.55);padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);font-family:var(--font-sans);font-weight:500;transition:.15s}
+  .code-copy:hover{color:#fff;border-color:rgba(255,255,255,0.3)}
+  .code-copy.ok{color:#12D16B;border-color:rgba(18,209,107,0.3)}
+  .code-body{padding:22px 24px 26px;overflow-x:auto}
+  .code-body pre{font-family:var(--font-mono);font-size:13px;line-height:1.7;color:#E5EEEA;white-space:pre;tab-size:2}
+  .code-body .com{color:#6c8a7c}
+  .code-body .kw{color:#12D16B}
+  .code-body .str{color:#9fd9b6}
+  .code-body .num{color:#fbcb6d}
+  .code-body .fn{color:#9fc6f5}
+  .code-body .var{color:#fff}
+  .code-body .punct{color:#83968F}
+
+  /* ── Use cases ── */
+  .cases{margin-top:60px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .case{background:#fff;border:1.5px solid var(--border);border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:18px;transition:.2s}
+  .case:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow-md)}
+  .case-tile{width:56px;height:56px;border-radius:18px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+  .case-tile svg{width:28px;height:28px}
+  .case h3{font-size:20px;font-weight:500;letter-spacing:-0.02em;line-height:1.2}
+  .case p{font-size:14px;color:var(--text2);line-height:1.55}
+  .case-rate{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:999px;background:var(--surface2);color:var(--accent);font-size:12px;font-weight:600;font-family:var(--font-mono);align-self:flex-start}
+  .case-why{font-size:13px;color:var(--text2);line-height:1.55;padding-top:18px;border-top:1px solid var(--border)}
+  .case-why b{font-weight:500;color:var(--text);display:block;margin-bottom:4px;font-size:12px;text-transform:uppercase;letter-spacing:0.06em}
+
+  /* ── Dashboard ── */
+  .dash{margin-top:50px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .dash-stat{background:#fff;border:1.5px solid var(--border);border-radius:18px;padding:22px;transition:.18s;cursor:default}
+  .dash-stat:hover{background:var(--surface2);box-shadow:var(--shadow-sm)}
+  .dash-stat .lab{font-size:12px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:8px;margin-bottom:14px}
+  .dash-stat .lab svg{width:16px;height:16px}
+  .dash-stat .val{font-size:36px;font-weight:500;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums}
+  .dash-stat .val small{font-size:15px;color:var(--text3);font-weight:500;margin-left:6px}
+  .dash-stat .delta{margin-top:10px;font-size:12px;color:var(--accent);display:inline-flex;align-items:center;gap:4px}
+
+  .wallet-grid{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .wallet{background:#fff;border:1.5px solid var(--border);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:18px}
+  .wallet-head{display:flex;align-items:center;gap:12px}
+  .wallet-ic{width:44px;height:44px;border-radius:14px;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+  .wallet-tt h3{font-size:17px;font-weight:500;letter-spacing:-0.02em}
+  .wallet-tt p{font-size:12px;color:var(--text2);margin-top:2px}
+  .wallet-addr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--surface);border:1.5px solid var(--border);font-family:var(--font-mono);font-size:13px;color:var(--text)}
+  .wallet-addr button{font-family:var(--font-sans);color:var(--text2);font-size:12px;padding:4px 10px;border-radius:999px;background:transparent;transition:.15s}
+  .wallet-addr button:hover{background:var(--surface2);color:var(--text)}
+  .wallet-addr button.ok{color:var(--accent)}
+  .net-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .net{padding:14px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface)}
+  .net-lbl{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:10px}
+  .net-lbl .nd{width:8px;height:8px;border-radius:50%}
+  .net-tag{font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;text-transform:uppercase;letter-spacing:0.04em;margin-left:auto}
+  .net-tag.test{background:var(--orange-soft);color:var(--orange)}
+  .net-tag.live{background:var(--accent-light);color:var(--accent)}
+  .net-bals{display:flex;flex-direction:column;gap:6px}
+  .net-bal{display:flex;align-items:center;justify-content:space-between;font-size:13px}
+  .net-bal .k{display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:500}
+  .net-bal .k img{width:16px;height:16px;border-radius:50%}
+  .net-bal .v{font-family:var(--font-mono);color:var(--text);font-variant-numeric:tabular-nums}
+  .wallet-foot{display:flex;gap:14px;font-size:12px;color:var(--accent);font-weight:500}
+  .wallet-foot a:hover{text-decoration:underline}
+
+  .history{margin-top:22px;background:#fff;border:1.5px solid var(--border);border-radius:24px;overflow:hidden}
+  .history-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
+  .history-head h3{font-size:18px;font-weight:500;letter-spacing:-0.02em}
+  .history-head .actions{display:flex;gap:8px;align-items:center}
+  .history-head .actions .btn{height:34px;padding:0 14px;font-size:13px}
+  .history-table{width:100%;border-collapse:collapse}
+  .history-table th{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--surface)}
+  .history-table th:last-child,.history-table td:last-child{text-align:right}
+  .history-table td{padding:16px 24px;border-bottom:1px solid var(--border);font-size:13.5px}
+  .history-table tr:last-child td{border-bottom:none}
+  .history-table tr:hover td{background:var(--surface)}
+  .history-empty{padding:40px 24px;text-align:center;color:var(--text3);font-size:13px}
+  .h-id{font-family:var(--font-mono);font-size:12.5px;color:var(--text2)}
+  .h-id a{color:var(--accent)}
+  .h-id a:hover{text-decoration:underline}
+  .h-amt{font-family:var(--font-mono);font-weight:500;color:var(--accent);font-variant-numeric:tabular-nums}
+  .h-net{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text)}
+  .h-net img{width:14px;height:14px;border-radius:50%}
+  .h-st{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--accent);padding:4px 10px;border-radius:999px;background:var(--accent-light)}
+  .h-st::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .h-when{color:var(--text2);font-size:12.5px}
+
+  /* ── CTA / Footer ── */
+  .cta{margin-top:60px;background:linear-gradient(140deg,#0C3124 0%,#0a4a32 60%,#087E4C 100%);border-radius:32px;padding:64px 56px;color:#fff;position:relative;overflow:hidden}
+  .cta::before{content:"";position:absolute;top:-200px;right:-200px;width:500px;height:500px;background:radial-gradient(circle,rgba(18,209,107,0.45) 0%,transparent 65%);filter:blur(20px)}
+  .cta-inner{position:relative;z-index:1;display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:center}
+  .cta h2{font-size:44px;font-weight:500;letter-spacing:-0.025em;line-height:1.05;color:#fff}
+  .cta p{font-size:17px;color:rgba(255,255,255,0.7);margin-top:18px;line-height:1.55;max-width:480px}
+  .cta-actions{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap}
+  .btn-on-dark{background:#fff;color:var(--text)}
+  .btn-on-dark:hover{background:#F2F8F5}
+  .btn-ghost-dark{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.2)}
+  .btn-ghost-dark:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.4)}
+  .cta-fact{background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.12);border-radius:20px;padding:24px;backdrop-filter:blur(8px)}
+  .cta-fact .n{font-size:48px;font-weight:500;letter-spacing:-0.03em;line-height:1}
+  .cta-fact .l{font-size:13px;color:rgba(255,255,255,0.7);margin-top:8px;line-height:1.5}
+  .cta-fact-row{display:flex;justify-content:space-between;padding:14px 0;border-top:1px solid rgba(255,255,255,0.1);font-size:13px}
+  .cta-fact-row span:first-child{color:rgba(255,255,255,0.55)}
+  .cta-fact-row span:last-child{color:#fff;font-weight:500;font-family:var(--font-mono)}
+
+  footer{margin-top:60px;padding:36px 0 60px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);color:var(--text2);font-size:13px;flex-wrap:wrap;gap:16px}
+  footer .by{display:flex;align-items:center;gap:8px}
+  footer .by img{height:20px}
+  footer .links{display:flex;gap:8px}
+  footer .links a{padding:6px 12px;border-radius:999px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-weight:500}
+  footer .links a:hover{background:var(--surface2)}
+
+  /* responsive */
+  @media (max-width:980px){
+    .hero-inner,.demo-grid,.setup-grid,.cases,.dash,.wallet-grid,.cta-inner{grid-template-columns:1fr !important}
+    .hero h1{font-size:48px}
+    .section{padding:80px 0}
+    .section h2{font-size:36px}
+    .step-rail{position:static}
+  }
+</style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="container">
-      <a href="#" class="header-brand">
-        <img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale">
-        <span>x402 Charity</span>
+<!-- ── NAV ── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="brand">
+      <img src="/assets/allscale-logo.svg" alt="AllScale" />
+      <span class="sep"></span>
+      <span class="x402">x402 Charity</span>
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works">How it works</a>
+      <a href="#demo">Demo</a>
+      <a href="#integrate">Integrate</a>
+      <a href="#use-cases">Use cases</a>
+      <a href="#dashboard">Dashboard</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="https://github.com/allscale-io/x402charity" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 005.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 014 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Star on GitHub
       </a>
-      <nav>
-        <a href="#how-it-works">How It Works</a>
-        <a href="#demo">Demo</a>
-        <a href="#integrate">Integrate</a>
-        <a href="#use-cases">Use Cases</a>
-        <a href="#dashboard">Dashboard</a>
-        <a href="https://github.com/allscale-io/x402charity">GitHub</a>
-      </nav>
+      <a class="btn btn-primary" href="#integrate">
+        Integrate
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
     </div>
-  </header>
+  </div>
+</nav>
 
-  <!-- 1. Hero -->
-  <section class="hero">
-    <div class="container">
-      <div class="section-label"><img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale" style="height:18px;width:auto;vertical-align:middle;margin-right:6px;filter:brightness(0) invert(1) brightness(0.7);">x402 Charity</div>
-      <h2 class="section-title">Turn every user action into a <span>micro-donation</span></h2>
-      <p class="section-sub">Drop-in middleware that donates a fraction of a cent in USDC to charity every time a user takes an action — powered by the x402 payment protocol.</p>
-      <div class="hero-buttons">
-        <a href="#demo" class="btn btn-primary">Try the Demo</a>
-        <a href="https://github.com/allscale-io/x402charity" class="btn btn-secondary" id="star-btn">&#x2B50; Star on GitHub <span id="star-count"></span></a>
-      </div>
-    </div>
-  </section>
-
-  <!-- 2. How it works — interactive sequence diagram -->
-  <section id="how-it-works">
-    <div class="container">
-      <div class="section-label">How It Works</div>
-      <h2 class="section-title">Set up in <span>5 minutes</span></h2>
-      <p class="section-sub">Deploy your own x402 charity server. Your users never need a wallet — your company funds the donations.</p>
-
-      <div class="seq-diagram" id="seq-diagram">
-        <!-- Actors -->
-        <div class="seq-actors">
-          <div class="seq-actor" data-actor="user">
-            <div class="seq-actor-box" id="actor-user">
-              <div class="seq-actor-icon">&#x1F464;</div>
-              User
-            </div>
-          </div>
-          <div class="seq-actor" data-actor="product">
-            <div class="seq-actor-box" id="actor-product">
-              <div class="seq-actor-icon">&#x1F4BB;</div>
-              Your Product
-            </div>
-          </div>
-          <div class="seq-actor" data-actor="x402">
-            <div class="seq-actor-box" id="actor-x402">
-              <div class="seq-actor-icon">&#x1F5A5;</div>
-              x402 Charity Server
-            </div>
-          </div>
-          <div class="seq-actor" data-actor="facilitator">
-            <div class="seq-actor-box" id="actor-facilitator">
-              <div class="seq-actor-icon">&#x1F3E6;</div>
-              x402.org
-            </div>
-          </div>
-          <div class="seq-actor" data-actor="charity">
-            <div class="seq-actor-box" id="actor-charity">
-              <div class="seq-actor-icon">&#x1F4B0;</div>
-              Charity
-            </div>
-          </div>
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-pill">
+          <span class="badge">NEW</span>
+          Open-source middleware · MIT license
         </div>
-
-        <!-- Lifelines -->
-        <div class="seq-lifelines" id="seq-lifelines">
-          <div class="seq-lifeline" data-actor="user"><div class="seq-lifeline-bar"></div></div>
-          <div class="seq-lifeline" data-actor="product"><div class="seq-lifeline-bar"></div></div>
-          <div class="seq-lifeline" data-actor="x402"><div class="seq-lifeline-bar"></div></div>
-          <div class="seq-lifeline" data-actor="facilitator"><div class="seq-lifeline-bar"></div></div>
-          <div class="seq-lifeline" data-actor="charity"><div class="seq-lifeline-bar"></div></div>
-
-          <!-- Arrows container — populated by JS -->
-          <div class="seq-arrows" id="seq-arrows"></div>
-        </div>
-
-        <!-- Description panel -->
-        <div class="seq-desc" id="seq-desc">
-          <h4 id="seq-desc-title">Click "Next" to see how companies integrate x402 Charity</h4>
-          <p id="seq-desc-text">You deploy an x402 charity server, fund it with USDC, and point it at your chosen charity. Your product server triggers donations with a simple POST request.</p>
-        </div>
-
-        <!-- Controls -->
-        <div class="seq-controls">
-          <button class="seq-btn" id="seq-prev" disabled>&larr; Back</button>
-          <div class="seq-progress" id="seq-progress"></div>
-          <button class="seq-btn primary" id="seq-next">Next &rarr;</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 3. Live Demo -->
-  <section id="demo" class="demo-section">
-    <div class="container">
-      <div class="section-label">Live Demo</div>
-      <h2 class="section-title">Run to <span>Donate</span></h2>
-      <p class="section-sub">Jump over obstacles to donate $0.001 USDC for each one cleared. No wallet needed — the server pays via x402.</p>
-
-      <div class="demo-area">
-        <div class="scoreboard">
-          <div class="score-item">
-            <div class="score-label">Score</div>
-            <div class="score-value green" id="score">0</div>
-          </div>
-          <div class="score-item">
-            <div class="score-label">Best</div>
-            <div class="score-value" id="best">0</div>
-          </div>
-          <div class="score-item">
-            <div class="score-label">Donated</div>
-            <div class="score-value green" id="donated">$0.000</div>
-          </div>
-        </div>
-
-        <div class="canvas-wrap" id="canvas-wrap">
-          <canvas id="game" width="640" height="260"></canvas>
-          <div class="overlay" id="start-overlay">
-            <h3>Charity Runner</h3>
-            <p>Every obstacle cleared = $0.001 USDC donated</p>
-            <button class="play-btn" id="start-btn">Play</button>
-            <span class="hint">Space / Tap to jump</span>
-          </div>
-          <div class="overlay hidden" id="gameover-overlay">
-            <h3 id="gameover-title">Game Over</h3>
-            <p id="gameover-sub">You cleared 0 obstacles</p>
-            <p id="gameover-total" style="font-size:12px;color:var(--text-muted);margin:4px 0 12px"></p>
-            <button class="play-btn" id="restart-btn">Play Again</button>
-            <span class="hint">Space / Tap to restart</span>
-          </div>
-        </div>
-
-        <div>
-          <div class="log-header">Donation log</div>
-          <div class="donation-log" id="log-list">
-            <div class="log-empty" id="log-empty">Start running to trigger donations!</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 4. Integration -->
-  <section id="integrate">
-    <div class="container">
-      <div class="section-label">Setup</div>
-      <h2 class="section-title">Get started in <span>3 steps</span></h2>
-      <p class="section-sub">Create a wallet, deploy the server, and trigger donations from your product.</p>
-
-      <div class="code-tabs">
-        <button class="code-tab active" data-tab="wallet">1. Create Wallet</button>
-        <button class="code-tab" data-tab="deploy">2. Deploy Server</button>
-        <button class="code-tab" data-tab="trigger">3. Trigger Donations</button>
-      </div>
-
-      <div class="code-panel active" id="panel-wallet">
-<button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<pre><code><span class="code-comment"># Create a new Solana wallet to fund donations.</span>
-<span class="code-comment"># Use any wallet provider (Phantom, Solflare, Solana CLI, etc.)</span>
-<span class="code-comment"># and export the secret key (base58 or JSON array).</span>
-
-<span class="code-comment"># You'll need 3 env vars:</span>
-<span class="code-keyword">DONATION_PRIVATE_KEY</span>=<span class="code-string">"[12,34,...]"</span>      <span class="code-comment"># base58 64-byte secret OR JSON array</span>
-<span class="code-keyword">CHARITY_WALLET</span>=<span class="code-string">"So11111111..."</span>     <span class="code-comment"># charity wallet (base58 Solana pubkey)</span>
-<span class="code-keyword">CHARITY_NAME</span>=<span class="code-string">"Give Directly"</span>       <span class="code-comment"># display name for the charity</span>
-
-<span class="code-comment"># Then fund the donation wallet with USDC on Solana.</span>
-<span class="code-comment"># SOL is not required — the x402 facilitator pays gas.</span></code></pre>
-      </div>
-
-      <div class="code-panel" id="panel-deploy">
-<button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<pre><code><span class="code-comment"># Clone and build with Docker</span>
-$ git clone https://github.com/allscale-io/x402charity.git
-$ cd x402charity
-$ docker build -t x402charity .
-
-<span class="code-comment"># Run with your env vars</span>
-$ docker run -p 3402:3402 \
-  -e <span class="code-keyword">DONATION_PRIVATE_KEY</span>=<span class="code-string">"[12,34,...]"</span> \
-  -e <span class="code-keyword">CHARITY_WALLET</span>=<span class="code-string">"So11111111..."</span> \
-  -e <span class="code-keyword">CHARITY_NAME</span>=<span class="code-string">"Give Directly"</span> \
-  -e <span class="code-keyword">DONATION_NETWORK</span>=<span class="code-string">"solana-mainnet"</span> \
-  x402charity
-
-<span class="code-comment"># Your server is live at http://localhost:3402</span>
-<span class="code-comment"># Dashboard is built into the landing page</span></code></pre>
-      </div>
-
-      <div class="code-panel" id="panel-trigger">
-<button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<pre><code><span class="code-comment">// From your product server — any language, any framework.</span>
-<span class="code-comment">// Call POST /donate whenever a user action should trigger a donation.</span>
-
-<span class="code-keyword">const</span> res = <span class="code-keyword">await</span> <span class="code-func">fetch</span>(<span class="code-string">'https://your-charity-server.com/donate'</span>, {
-  <span class="code-keyword">method</span>: <span class="code-string">'POST'</span>,
-  <span class="code-keyword">headers</span>: { <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span> },
-  <span class="code-keyword">body</span>: JSON.<span class="code-func">stringify</span>({ <span class="code-keyword">amount</span>: <span class="code-string">'$0.001'</span> }),
-});
-
-<span class="code-keyword">const</span> receipt = <span class="code-keyword">await</span> res.<span class="code-func">json</span>();
-console.<span class="code-func">log</span>(receipt.txHash); <span class="code-comment">// on-chain tx proof</span>
-
-<span class="code-comment">// GET /donations returns JSON history of all donations</span></code></pre>
-      </div>
-    </div>
-  </section>
-
-  <!-- 5. Use Cases -->
-  <section id="use-cases">
-    <div class="container">
-      <div class="section-label">Use Cases</div>
-      <h2 class="section-title">Works for <span>every product</span></h2>
-      <p class="section-sub">Any user action can become a micro-donation. Here are a few examples &mdash; and why it's good for your business.</p>
-
-      <div class="cases-grid">
-        <div class="case-card">
-          <div class="case-icon">&#x1F4B1;</div>
-          <h3>DEX & Trading</h3>
-          <p>Donate a fraction of a cent on every swap or trade. 50K daily trades = $50/day to charity.</p>
-          <div class="case-example">$0.001 per trade</div>
-          <div class="case-benefit"><strong>Why it helps:</strong> Differentiate from competing DEXs. Traders prefer platforms that give back &mdash; boosting retention and word-of-mouth.</div>
-        </div>
-        <div class="case-card">
-          <div class="case-icon">&#x1F916;</div>
-          <h3>AI Products & APIs</h3>
-          <p>Attach a micro-donation to every API call or prompt. High-volume APIs add up fast.</p>
-          <div class="case-example">$0.001 per API call</div>
-          <div class="case-benefit"><strong>Why it helps:</strong> Improve brand image in a crowded AI market. "Every prompt helps someone" is a story users want to share.</div>
-        </div>
-        <div class="case-card">
-          <div class="case-icon">&#x1F3AE;</div>
-          <h3>Games</h3>
-          <p>Every level cleared, match played, or in-game action triggers a small donation.</p>
-          <div class="case-example">$0.001 per action</div>
-          <div class="case-benefit"><strong>Why it helps:</strong> Increase player engagement and session time. Players feel good about playing &mdash; and tell their friends.</div>
-        </div>
-        <div class="case-card">
-          <div class="case-icon">&#x1F6D2;</div>
-          <h3>E-commerce</h3>
-          <p>Round up every checkout or donate per order. Customers love brands that give back.</p>
-          <div class="case-example">$0.01 per order</div>
-          <div class="case-benefit"><strong>Why it helps:</strong> Attract conscious consumers. Studies show 71% of buyers prefer brands that support social causes &mdash; higher conversion, lower churn.</div>
-        </div>
-        <div class="case-card">
-          <div class="case-icon">&#x1F3B2;</div>
-          <h3>Betting & Predictions</h3>
-          <p>Donate on every bet placed or market resolved. Turn speculation into impact.</p>
-          <div class="case-example">$0.001 per bet</div>
-          <div class="case-benefit"><strong>Why it helps:</strong> Soften public perception of betting platforms. Charitable giving builds trust with regulators and users alike.</div>
-        </div>
-        <div class="case-card">
-          <div class="case-icon">&#x1F3E6;</div>
-          <h3>Payments & Banking</h3>
-          <p>Micro-donate on every transfer, bill payment, or card swipe processed by your platform.</p>
-          <div class="case-example">$0.001 per transaction</div>
-          <div class="case-benefit"><strong>Why it helps:</strong> Stand out in fintech. On-chain donation receipts double as a transparency feature that builds customer loyalty.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 6. Dashboard -->
-  <section id="dashboard">
-    <div class="container">
-      <div class="section-label">Live Dashboard</div>
-      <h2 class="section-title">Donation <span>dashboard</span></h2>
-      <p class="section-sub">All donations are on-chain and publicly verifiable on Solana.</p>
-
-      <div class="dash-stats">
-        <div class="dash-stat">
-          <div class="dash-stat-label">Total Donated</div>
-          <div class="dash-stat-value green" id="dash-total">-</div>
-        </div>
-        <div class="dash-stat">
-          <div class="dash-stat-label">Donations</div>
-          <div class="dash-stat-value" id="dash-count">-</div>
-        </div>
-        <div class="dash-stat">
-          <div class="dash-stat-label">Network</div>
-          <div class="dash-stat-value" id="dash-network">-</div>
-        </div>
-      </div>
-
-      <div class="dash-wallets" id="dash-wallets">
-        <div class="dash-wallet sender">
-          <div class="dash-wallet-role">Donation Wallet</div>
-          <div class="dash-wallet-sub">Funds donations</div>
-          <div class="dash-addr" id="dash-sender-addr">Loading...</div>
-          <div class="dash-chain-label">Solana Devnet (testnet)</div>
-          <div class="dash-bal-row">
-            <span class="label">USDC</span>
-            <span class="val green" id="dash-sender-devnet-usdc">-</span>
-          </div>
-          <div class="dash-bal-row">
-            <span class="label">SOL</span>
-            <span class="val" id="dash-sender-devnet-sol">-</span>
-          </div>
-          <div class="dash-chain-label" style="margin-top:8px;">Solana (mainnet)</div>
-          <div class="dash-bal-row">
-            <span class="label">USDC</span>
-            <span class="val green" id="dash-sender-mainnet-usdc">-</span>
-          </div>
-          <div class="dash-bal-row">
-            <span class="label">SOL</span>
-            <span class="val" id="dash-sender-mainnet-sol">-</span>
-          </div>
-          <div style="margin-top:8px;">
-            <a class="dash-explorer" id="dash-sender-explorer-devnet" href="#" target="_blank">Solscan (devnet)</a>
-            <span style="color:var(--border);margin:0 6px;">|</span>
-            <a class="dash-explorer" id="dash-sender-explorer-mainnet" href="#" target="_blank">Solscan</a>
-          </div>
-        </div>
-        <div class="dash-wallet receiver">
-          <div class="dash-wallet-role">Charity Wallet</div>
-          <div class="dash-wallet-sub" id="dash-charity-name">Loading...</div>
-          <div class="dash-addr" id="dash-receiver-addr">Loading...</div>
-          <div class="dash-chain-label">Solana Devnet (testnet)</div>
-          <div class="dash-bal-row">
-            <span class="label">USDC</span>
-            <span class="val green" id="dash-receiver-devnet-usdc">-</span>
-          </div>
-          <div class="dash-bal-row">
-            <span class="label">SOL</span>
-            <span class="val" id="dash-receiver-devnet-sol">-</span>
-          </div>
-          <div class="dash-chain-label" style="margin-top:8px;">Solana (mainnet)</div>
-          <div class="dash-bal-row">
-            <span class="label">USDC</span>
-            <span class="val green" id="dash-receiver-mainnet-usdc">-</span>
-          </div>
-          <div class="dash-bal-row">
-            <span class="label">SOL</span>
-            <span class="val" id="dash-receiver-mainnet-sol">-</span>
-          </div>
-          <div style="margin-top:8px;">
-            <a class="dash-explorer" id="dash-receiver-explorer-devnet" href="#" target="_blank">Solscan (devnet)</a>
-            <span style="color:var(--border);margin:0 6px;">|</span>
-            <a class="dash-explorer" id="dash-receiver-explorer-mainnet" href="#" target="_blank">Solscan</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="dash-header">
-        <span class="dash-header-title">Recent Donations <span class="dash-header-count" id="dash-donation-count"></span></span>
-        <button class="dash-refresh" onclick="loadDashboard()">Refresh</button>
-      </div>
-
-      <div id="dash-donations">
-        <div class="dash-empty dash-loading"><div class="dash-spinner"></div> Loading donations...</div>
-      </div>
-
-      <div class="dash-header" style="margin-top:24px;">
-        <span class="dash-header-title">Donation History</span>
-      </div>
-
-      <div id="dash-history">
-        <div class="dash-empty dash-loading"><div class="dash-spinner"></div> Loading history...</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-brand">
-          <span>Built by</span>
-          <a href="https://allscale.io" target="_blank" rel="noopener">
-            <img src="https://cdn.prod.website-files.com/6779cec685b83bf2876d67f3/677b485cb08b1a85bdf3100f_AllScale-a4-Transparent.svg" alt="AllScale" style="height: 16px; opacity: 0.6;">
+        <h1>Turn every<br />user action into<br />a <em>micro-donation</em>.</h1>
+        <p class="lede">Drop-in middleware that donates a fraction of a cent in USDC to charity every time a user takes an action — powered by the x402 payment protocol on Solana.</p>
+        <div class="hero-actions">
+          <a href="#demo" class="btn btn-primary btn-lg">
+            Try the demo
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </a>
+          <a href="https://github.com/allscale-io/x402charity" class="btn btn-ghost btn-lg" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 005.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 014 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            Star on GitHub
+          </a>
+          <div class="meta">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+            Live on <b id="heroNetworkName">Solana</b>
+          </div>
         </div>
-        <div class="footer-links">
-          <a href="https://github.com/allscale-io/x402charity">GitHub</a>
-          <a href="https://www.npmjs.com/package/x402charity">npm</a>
-          <a href="https://allscale.io">AllScale</a>
+        <div class="strip">
+          <span class="strip-lbl">Integrates with</span>
+          <div class="strip-chips">
+            <span class="chip"><img src="/assets/chain/solana.svg" alt=""/> Solana</span>
+            <span class="chip"><img src="/assets/tokens/usdc.svg" alt=""/> USDC</span>
+            <span class="chip">x402</span>
+            <span class="chip">Docker</span>
+            <span class="chip">REST</span>
+          </div>
         </div>
-        <div>MIT License</div>
+      </div>
+
+      <div class="live-card" id="heroLive">
+        <div class="live-card-h">
+          <div class="lbl"><span class="live-dot"></span> Live donations · last 24h</div>
+          <span class="net" id="heroNetworkTag">SOLANA</span>
+        </div>
+        <div class="live-hero-num" id="liveTotal">$0.00<small>USDC</small></div>
+        <div class="live-sub" id="liveSub">Loading on-chain donations…</div>
+        <div class="live-feed" id="liveFeed"></div>
       </div>
     </div>
-  </footer>
-
-  <script>
-    // ===== GitHub stars =====
-    fetch('https://api.github.com/repos/allscale-io/x402charity')
-      .then(r => r.json())
-      .then(data => {
-        const count = data.stargazers_count;
-        if (typeof count === 'number') {
-          document.getElementById('star-count').textContent = '(' + count + ')';
-        }
-      })
-      .catch(() => {});
-
-    // ===== Copy code =====
-    function copyCode(btn) {
-      var code = btn.parentElement.querySelector('code');
-      var text = code.textContent || code.innerText;
-      navigator.clipboard.writeText(text).then(function() {
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-      });
-    }
-
-    // ===== Code tabs =====
-    document.querySelectorAll('.code-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-      });
-    });
-
-    // ===== Dashboard =====
-    var dashExplorerUrl = '';
-
-    function dashTimeAgo(ts) {
-      var s = Math.floor((Date.now() - ts) / 1000);
-      if (s < 60) return s + 's ago';
-      if (s < 3600) return Math.floor(s / 60) + 'm ago';
-      if (s < 86400) return Math.floor(s / 3600) + 'h ago';
-      return new Date(ts).toLocaleDateString();
-    }
-
-    function dashShortHash(h) {
-      if (!h) return '-';
-      return h.slice(0, 8) + '...' + h.slice(-6);
-    }
-
-    function dashExplorerForChain(chain) {
-      // Solscan handles both clusters; devnet requires ?cluster=devnet
-      return 'https://solscan.io';
-    }
-
-    function dashExplorerSuffix(chain) {
-      return chain === 'solana-devnet' ? '?cluster=devnet' : '';
-    }
-
-    function dashChainLabel(chain) {
-      if (chain === 'solana-mainnet') return 'Solana';
-      if (chain === 'solana-devnet') return 'Devnet';
-      return chain || '-';
-    }
-
-    function dashEscape(str) {
-      var d = document.createElement('div');
-      d.textContent = str;
-      return d.innerHTML;
-    }
-
-    function loadDashboard() {
-      var MAX_DAYS = 30;
-      var DAY_BATCH = 5;
-      var allDonations = [];
-      var seenTx = {};
-
-      var container = document.getElementById('dash-donations');
-      var histContainer = document.getElementById('dash-history');
-
-      container.innerHTML = '<div class="dash-empty dash-loading"><div class="dash-spinner"></div> Loading recent donations...</div>';
-      histContainer.innerHTML = '<div class="dash-empty dash-loading"><div class="dash-spinner"></div> Loading history...</div>';
-
-      function addDonations(donations) {
-        for (var i = 0; i < donations.length; i++) {
-          var d = donations[i];
-          if (d.status === 'ok' && d.txHash && !seenTx[d.txHash]) {
-            seenTx[d.txHash] = true;
-            allDonations.push(d);
-          }
-        }
-        allDonations.sort(function(a, b) { return b.timestamp - a.timestamp; });
-        var total = 0;
-        for (var i = 0; i < allDonations.length; i++) {
-          total += parseFloat(allDonations[i].amount.replace('$', ''));
-        }
-        document.getElementById('dash-total').textContent = '$' + total.toFixed(4);
-        document.getElementById('dash-count').textContent = allDonations.length;
-        document.getElementById('dash-donation-count').textContent = '(' + allDonations.length + ')';
-      }
-
-      function renderRecent() {
-        if (allDonations.length === 0) {
-          container.innerHTML = '<div class="dash-empty">No donations yet.<div class="hint">POST /donate to trigger a donation</div></div>';
-          return;
-        }
-        var recent = allDonations.slice(0, 5);
-        var html = '<table class="dash-table"><thead><tr><th>Time</th><th>Amount</th><th>From</th><th>Chain</th><th>Tx Hash</th></tr></thead><tbody>';
-        for (var i = 0; i < recent.length; i++) {
-          var d = recent[i];
-          var dExplorer = dashExplorerForChain(d.chain) + (d.txHash ? '/tx/' + d.txHash + dashExplorerSuffix(d.chain) : '');
-          var txLink = d.txHash ? dashShortHash(d.txHash) : '-';
-          var fromShort = d.from ? d.from.slice(0, 6) + '...' + d.from.slice(-4) : '-';
-          var chainLabel = dashChainLabel(d.chain);
-          html += '<tr><td class="dash-time">' + dashTimeAgo(d.timestamp) + '</td><td class="amount">' + dashEscape(d.amount) + ' ' + d.currency + '</td><td class="tx-hash">' + fromShort + '</td><td class="dash-time">' + chainLabel + '</td><td class="tx-hash">' + txLink + '</td></tr>';
-        }
-        html += '</tbody></table>';
-        container.innerHTML = html;
-      }
-
-      function renderHistory(loading) {
-        if (allDonations.length === 0 && !loading) {
-          histContainer.innerHTML = '<div class="dash-empty">No history yet.</div>';
-          return;
-        }
-        if (allDonations.length === 0 && loading) return;
-
-        var days = {};
-        for (var i = 0; i < allDonations.length; i++) {
-          var d = allDonations[i];
-          var dateKey = new Date(d.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-          if (!days[dateKey]) days[dateKey] = { donations: [], total: 0 };
-          days[dateKey].donations.push(d);
-          days[dateKey].total += parseFloat(d.amount.replace('$', ''));
-        }
-        var hHtml = '';
-        var dayKeys = Object.keys(days);
-        for (var di = 0; di < dayKeys.length; di++) {
-          var dayKey = dayKeys[di];
-          var dayData = days[dayKey];
-          var dayId = 'hist-day-' + di;
-          hHtml += '<div class="dash-history-day">';
-          hHtml += '<div class="dash-history-day-header" onclick="document.getElementById(\'' + dayId + '\').classList.toggle(\'open\')">';
-          hHtml += '<span class="dash-history-day-date">' + dashEscape(dayKey) + '</span>';
-          hHtml += '<span class="dash-history-day-summary">' + dayData.donations.length + ' donation' + (dayData.donations.length !== 1 ? 's' : '') + ' · <span class="amt">$' + dayData.total.toFixed(3) + '</span> USDC</span>';
-          hHtml += '</div>';
-          hHtml += '<div class="dash-history-rows" id="' + dayId + '">';
-          for (var j = 0; j < dayData.donations.length; j++) {
-            var dd = dayData.donations[j];
-            var time = new Date(dd.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            var fromShort = dd.from ? dd.from.slice(0, 6) + '...' + dd.from.slice(-4) : '-';
-            var ddExplorer = dashExplorerForChain(dd.chain) + (dd.txHash ? '/tx/' + dd.txHash + dashExplorerSuffix(dd.chain) : '');
-            var txLink = dd.txHash ? dashShortHash(dd.txHash) : '-';
-            hHtml += '<div class="dash-history-row"><span class="h-time">' + time + '</span><span class="h-from">' + fromShort + '</span><span class="h-amount">' + dashEscape(dd.amount) + '</span><span class="h-tx">' + txLink + '</span></div>';
-          }
-          hHtml += '</div></div>';
-        }
-        if (loading) {
-          hHtml += '<div class="dash-empty dash-loading" style="margin-top:8px"><div class="dash-spinner"></div> Loading more history...</div>';
-        }
-        histContainer.innerHTML = hHtml;
-      }
-
-      function fetchDonations(limit) {
-        return fetch('/donations?limit=' + (limit || 200))
-          .then(function(r) { return r.json(); })
-          .catch(function() { return { donations: [], network: '', explorerUrl: '' }; });
-      }
-
-      function loadWallets(addr, charity) {
-        if (addr) {
-          document.getElementById('dash-sender-addr').textContent = addr.address;
-          var dev = addr.balances['solana-devnet'];
-          var main = addr.balances['solana-mainnet'];
-          if (dev) {
-            document.getElementById('dash-sender-devnet-usdc').textContent = parseFloat(dev.usdc).toFixed(2);
-            document.getElementById('dash-sender-devnet-sol').textContent = parseFloat(dev.sol).toFixed(4);
-          }
-          if (main) {
-            document.getElementById('dash-sender-mainnet-usdc').textContent = parseFloat(main.usdc).toFixed(2);
-            document.getElementById('dash-sender-mainnet-sol').textContent = parseFloat(main.sol).toFixed(4);
-          }
-          document.getElementById('dash-sender-explorer-devnet').href = 'https://solscan.io/account/' + addr.address + '?cluster=devnet';
-          document.getElementById('dash-sender-explorer-mainnet').href = 'https://solscan.io/account/' + addr.address;
-        } else {
-          document.getElementById('dash-sender-addr').textContent = 'Not configured';
-        }
-        if (charity) {
-          document.getElementById('dash-receiver-addr').textContent = charity.walletAddress;
-          document.getElementById('dash-charity-name').textContent = charity.name;
-          var cdev = charity.balances && charity.balances['solana-devnet'];
-          var cmain = charity.balances && charity.balances['solana-mainnet'];
-          if (cdev) {
-            document.getElementById('dash-receiver-devnet-usdc').textContent = parseFloat(cdev.usdc).toFixed(2);
-            document.getElementById('dash-receiver-devnet-sol').textContent = parseFloat(cdev.sol).toFixed(4);
-          }
-          if (cmain) {
-            document.getElementById('dash-receiver-mainnet-usdc').textContent = parseFloat(cmain.usdc).toFixed(2);
-            document.getElementById('dash-receiver-mainnet-sol').textContent = parseFloat(cmain.sol).toFixed(4);
-          }
-          document.getElementById('dash-receiver-explorer-devnet').href = 'https://solscan.io/account/' + charity.walletAddress + '?cluster=devnet';
-          document.getElementById('dash-receiver-explorer-mainnet').href = 'https://solscan.io/account/' + charity.walletAddress;
-        } else {
-          document.getElementById('dash-receiver-addr').textContent = 'Not configured';
-        }
-      }
-
-      // Load donations + wallets in parallel
-      Promise.all([
-        fetchDonations(200),
-        fetch('/address').then(function(r) { return r.json(); }).catch(function() { return null; }),
-        fetch('/charity').then(function(r) { return r.json(); }).catch(function() { return null; }),
-      ]).then(function(results) {
-        var data = results[0];
-        dashExplorerUrl = data.explorerUrl || '';
-        document.getElementById('dash-network').textContent =
-          data.network === 'solana-mainnet' ? 'Solana' : 'Solana Devnet';
-
-        addDonations(data.donations || []);
-        renderRecent();
-        renderHistory(false);
-        loadWallets(results[1], results[2]);
-      }).catch(function() {
-        container.innerHTML = '<div class="dash-empty">Failed to load donations.</div>';
-      });
-    }
-
-    loadDashboard();
-
-    // ===== Game =====
-    const X402_SERVER = '';
-    const DONATE_PATH = '/donate';
-    const DONATION_PER_OBSTACLE = 0.001;
-    const EXPLORER_TX = function(chain, sig) {
-      var base = 'https://solscan.io/tx/' + sig;
-      return chain === 'solana-devnet' ? base + '?cluster=devnet' : base;
-    };
-    let currentChain = 'solana-devnet';
-    let charityWallet = '';
-
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width;
-    const H = canvas.height;
-
-    const GROUND_Y = H - 40;
-    const PLAYER_W = 28;
-    const PLAYER_H = 44;
-    const GRAVITY = 1.2;
-    const JUMP_VEL = -16;
-    const BASE_SPEED = 5;
-    const SPEED_INC = 0.001;
-    const MIN_GAP = 160;
-    const MAX_GAP = 300;
-
-    let state = 'idle';
-    let score = 0;
-    let bestScore = parseInt(localStorage.getItem('x402runner_best') || '0', 10);
-    let totalDonated = 0;
-    let runDonated = 0;
-    let runConfirmed = 0;
-    let speed = BASE_SPEED;
-    let frameId = null;
-    let groundOffset = 0;
-
-    let player = { x: 60, y: GROUND_Y - PLAYER_H, vy: 0, onGround: true };
-    let obstacles = [];
-    let nextObstacleIn = 120;
-    let logEntries = [];
-
-    const scoreEl = document.getElementById('score');
-    const bestEl = document.getElementById('best');
-    const donatedEl = document.getElementById('donated');
-    const startOverlay = document.getElementById('start-overlay');
-    const gameoverOverlay = document.getElementById('gameover-overlay');
-    const gameoverTitle = document.getElementById('gameover-title');
-    const gameoverSub = document.getElementById('gameover-sub');
-    const gameoverTotal = document.getElementById('gameover-total');
-    const logList = document.getElementById('log-list');
-    const logEmpty = document.getElementById('log-empty');
-
-    bestEl.textContent = bestScore;
-
-    function jump() {
-      if (state === 'idle') { startGame(); return; }
-      if (state === 'dead') { startGame(); return; }
-      if (player.onGround) {
-        player.vy = JUMP_VEL;
-        player.onGround = false;
-      }
-    }
-
-    document.addEventListener('keydown', e => {
-      if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
-    });
-    document.getElementById('canvas-wrap').addEventListener('click', jump);
-    document.getElementById('start-btn').addEventListener('click', e => { e.stopPropagation(); startGame(); });
-    document.getElementById('restart-btn').addEventListener('click', e => { e.stopPropagation(); startGame(); });
-
-    function startGame() {
-      score = 0; speed = BASE_SPEED; groundOffset = 0;
-      runDonated = 0; runConfirmed = 0;
-      player = { x: 60, y: GROUND_Y - PLAYER_H, vy: 0, onGround: true };
-      obstacles = []; nextObstacleIn = 90;
-      state = 'running';
-      startOverlay.classList.add('hidden');
-      gameoverOverlay.classList.add('hidden');
-      scoreEl.textContent = '0';
-      donatedEl.textContent = '$0.000';
-      if (frameId) cancelAnimationFrame(frameId);
-      loop();
-    }
-
-    function loop() {
-      update(); draw();
-      if (state === 'running') frameId = requestAnimationFrame(loop);
-    }
-
-    function update() {
-      speed += SPEED_INC;
-      groundOffset = (groundOffset + speed) % 40;
-
-      player.vy += GRAVITY;
-      player.y += player.vy;
-      if (player.y >= GROUND_Y - PLAYER_H) {
-        player.y = GROUND_Y - PLAYER_H;
-        player.vy = 0;
-        player.onGround = true;
-      }
-
-      nextObstacleIn -= speed;
-      if (nextObstacleIn <= 0) {
-        const difficulty = Math.min(score / 30, 1);
-        const roll = Math.random();
-        let h, w;
-        if (roll < 0.3) {
-          h = 30 + difficulty * 25 + Math.random() * 10;
-          w = 14 + Math.random() * 8;
-        } else if (roll < 0.6) {
-          h = 18 + Math.random() * 12;
-          w = 20 + difficulty * 30 + Math.random() * 10;
-        } else {
-          h = 18 + difficulty * 15 + Math.random() * 10;
-          w = 14 + difficulty * 12 + Math.random() * 8;
-        }
-        obstacles.push({ x: W + 10, w, h, scored: false });
-        const gap = MIN_GAP + Math.random() * (MAX_GAP - MIN_GAP) - difficulty * 80;
-        nextObstacleIn = Math.max(gap, 100);
-      }
-
-      for (let i = obstacles.length - 1; i >= 0; i--) {
-        const ob = obstacles[i];
-        ob.x -= speed;
-        if (!ob.scored && ob.x + ob.w < player.x) {
-          ob.scored = true;
-          score++;
-          scoreEl.textContent = score;
-          triggerDonation(score);
-        }
-        if (player.x < ob.x + ob.w && player.x + PLAYER_W > ob.x && player.y + PLAYER_H > GROUND_Y - ob.h) {
-          die(); return;
-        }
-        if (ob.x + ob.w < -10) obstacles.splice(i, 1);
-      }
-    }
-
-    function updateGameoverMsg() {
-      var msg = 'You cleared ' + score + ' obstacle' + (score !== 1 ? 's' : '');
-      if (runDonated > 0) {
-        msg += ' and donated $' + runDonated.toFixed(3) + ' USDC';
-      }
-      gameoverSub.textContent = msg;
-      if (totalDonated > 0) {
-        gameoverTotal.textContent = 'Total donated: $' + totalDonated.toFixed(3) + ' USDC';
-      }
-    }
-
-    function die() {
-      state = 'dead';
-      if (score > bestScore) {
-        bestScore = score;
-        localStorage.setItem('x402runner_best', String(bestScore));
-        bestEl.textContent = bestScore;
-        gameoverTitle.textContent = 'New High Score!';
-      } else {
-        gameoverTitle.textContent = 'Game Over';
-      }
-      updateGameoverMsg();
-
-      gameoverOverlay.classList.remove('hidden');
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-
-      ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(W, GROUND_Y); ctx.stroke();
-
-      ctx.strokeStyle = '#222';
-      for (let x = -groundOffset; x < W; x += 40) {
-        ctx.beginPath(); ctx.moveTo(x, GROUND_Y + 8); ctx.lineTo(x + 16, GROUND_Y + 8); ctx.stroke();
-      }
-      for (let x = 20 - groundOffset; x < W; x += 40) {
-        ctx.beginPath(); ctx.moveTo(x, GROUND_Y + 20); ctx.lineTo(x + 10, GROUND_Y + 20); ctx.stroke();
-      }
-
-      const px = player.x, py = player.y;
-      ctx.fillStyle = '#20F58E';
-      ctx.fillRect(px + 4, py + 8, 20, 24);
-      ctx.fillRect(px + 6, py, 16, 14);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(px + 16, py + 4, 4, 4);
-      ctx.fillStyle = '#20F58E';
-      if (player.onGround) {
-        const step = Math.floor(Date.now() / 100) % 2;
-        if (step === 0) { ctx.fillRect(px + 6, py + 32, 6, 12); ctx.fillRect(px + 16, py + 36, 6, 8); }
-        else { ctx.fillRect(px + 6, py + 36, 6, 8); ctx.fillRect(px + 16, py + 32, 6, 12); }
-      } else {
-        ctx.fillRect(px + 6, py + 32, 6, 8); ctx.fillRect(px + 16, py + 32, 6, 8);
-      }
-
-      ctx.fillStyle = '#888';
-      for (const ob of obstacles) {
-        const ox = ob.x, oy = GROUND_Y - ob.h;
-        ctx.fillRect(ox + ob.w * 0.3, oy, ob.w * 0.4, ob.h);
-        if (ob.h > 30) {
-          ctx.fillRect(ox, oy + ob.h * 0.3, ob.w * 0.35, ob.w * 0.25);
-          ctx.fillRect(ox, oy + ob.h * 0.3 - ob.w * 0.3, ob.w * 0.25, ob.w * 0.3);
-          ctx.fillRect(ox + ob.w * 0.65, oy + ob.h * 0.5, ob.w * 0.35, ob.w * 0.25);
-          ctx.fillRect(ox + ob.w * 0.75, oy + ob.h * 0.5 - ob.w * 0.25, ob.w * 0.25, ob.w * 0.25);
-        }
-      }
-
-      ctx.fillStyle = '#333'; ctx.font = '11px Inconsolata, monospace';
-      ctx.fillText('Speed: ' + speed.toFixed(1), W - 90, 20);
-    }
-
-    // Note: This demo calls POST /donate without an API key.
-    // It works because the live demo (x402charity.com) does not set DONATE_API_KEY.
-    // When you deploy your own server with DONATE_API_KEY set, this game demo
-    // won't trigger real donations — which is the intended production behavior.
-    function triggerDonation(obstacleNum) {
-      const logIdx = addLog('Obstacle #' + obstacleNum + ' cleared', 'donating...');
-      runDonated += DONATION_PER_OBSTACLE;
-      donatedEl.textContent = '$' + runDonated.toFixed(3);
-
-      fetch(X402_SERVER + DONATE_PATH, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: '$' + DONATION_PER_OBSTACLE }),
-      })
-        .then(r => r.json().then(data => ({ ok: r.ok, status: r.status, data })))
-        .then(({ ok, status, data }) => {
-          if (ok) {
-            runConfirmed += DONATION_PER_OBSTACLE;
-            totalDonated += DONATION_PER_OBSTACLE;
-            if (state === 'dead') updateGameoverMsg();
-            var chain = data.receipt?.chain;
-            if (chain) currentChain = chain;
-            if (data.receipt?.to) charityWallet = data.receipt.to;
-            const tx = data.receipt?.txHash;
-            updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — $0.001', 'confirmed', 'ok', tx);
-          } else {
-            var errDetail = data.details || data.error || 'error';
-            var errReason = getErrorExplanation(status, errDetail);
-            updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — failed', data.error || 'error', 'error', null, errReason);
-          }
-        })
-        .catch(() => {
-          updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — failed', 'network error', 'error', null,
-            'Could not reach the donation server. This may be a temporary network issue — try again in a moment.');
-        });
-    }
-
-    function getErrorExplanation(status, details) {
-      var d = (details || '').toLowerCase();
-      if (d.indexOf('insufficient') !== -1 || d.indexOf('balance') !== -1 || d.indexOf('fund') !== -1) {
-        return 'The demo donation wallet has run out of testnet USDC. This is expected in a demo environment with limited funds. To fix: visit faucet.circle.com to get free testnet USDC and send it to the donation wallet.';
-      }
-      if (status === 401) {
-        return 'The server has DONATE_API_KEY set, so the demo game cannot trigger donations. This is expected — in production, only your backend (with the API key) can trigger donations.';
-      }
-      if (status === 503) {
-        return 'The donation wallet is not configured on the server. The server admin needs to set the DONATION_PRIVATE_KEY environment variable.';
-      }
-      if (d.indexOf('blockhash') !== -1 || d.indexOf('nonce') !== -1) {
-        return 'A previous donation is still being processed (blockhash conflict). This happens when donations are triggered faster than Solana can confirm. Wait a moment and it should resolve.';
-      }
-      if (d.indexOf('rate') !== -1 || d.indexOf('limit') !== -1 || d.indexOf('429') !== -1) {
-        return 'The demo server has hit a rate limit. This is a temporary restriction in the demo environment. Wait a few seconds and try again.';
-      }
-      return 'The donation failed — this can happen in the demo environment due to limited testnet funds or rate limits. In production with a funded wallet, donations are reliable.';
-    }
-
-    function addLog(text, detail) {
-      if (logEmpty) logEmpty.style.display = 'none';
-      const idx = logEntries.length;
-      logEntries.unshift({ text, detail, status: 'pending', txHash: null, errorReason: null });
-      renderLog();
-      return idx;
-    }
-
-    function updateLog(idx, text, detail, status, txHash, errorReason) {
-      const entry = logEntries[logEntries.length - 1 - idx];
-      if (entry) {
-        entry.text = text; entry.detail = detail; entry.status = status;
-        if (txHash) entry.txHash = txHash;
-        if (errorReason) entry.errorReason = errorReason;
-        renderLog();
-      }
-    }
-
-    function renderLog() {
-      logList.innerHTML = logEntries.slice(0, 30).map(function(e) {
-        var detailHtml = escapeHtml(e.detail);
-        var txLinkHtml = '';
-        if (e.status === 'ok' && e.txHash) {
-          var href = EXPLORER_TX(currentChain, escapeHtml(e.txHash));
-          txLinkHtml = '<a class="tx-link" href="' + href + '" target="_blank" rel="noopener" title="View on explorer">' + escapeHtml(e.txHash.slice(0, 10) + '...') + '</a>';
-        }
-        var tooltipHtml = '';
-        if (e.status === 'error' && e.errorReason) {
-          tooltipHtml = '<div class="error-tooltip">' + escapeHtml(e.errorReason) + '</div>';
-        }
-        return '<div class="log-entry ' + e.status + '" tabindex="' + (e.status === 'error' ? '0' : '-1') + '">' +
-          '<span class="text">' + escapeHtml(e.text) + '</span>' +
-          '<span class="detail">' + detailHtml + '</span>' +
-          txLinkHtml +
-          tooltipHtml +
-        '</div>';
-      }).join('');
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    draw();
-
-    // ===== Sequence Diagram =====
-    (function() {
-      const steps = [
-        {
-          from: 'x402', to: 'x402', dir: 'self',
-          label: 'Deploy x402 charity server',
-          sublabel: 'Docker / Vercel / any host',
-          title: '1. Deploy your x402 charity server',
-          desc: 'Deploy the x402 charity server with two env vars: DONATION_PRIVATE_KEY (your funded wallet) and CHARITY_WALLET (the charity\'s address). That\'s it — Docker, Vercel, Railway, or any Node.js host.',
-          activeActors: ['x402'],
-        },
-        {
-          from: 'user', to: 'product', dir: 'ltr',
-          label: 'User action',
-          sublabel: 'Trade, page load, API call...',
-          title: '2. A user takes an action in your product',
-          desc: 'A user does something on your platform — places a trade, loads a page, clears a game level, makes an API call. Your product server decides this action should trigger a micro-donation.',
-          activeActors: ['user', 'product'],
-        },
-        {
-          from: 'product', to: 'x402', dir: 'ltr',
-          label: 'POST /donate',
-          sublabel: 'Simple HTTP call',
-          title: '3. Your product server triggers a donation',
-          desc: 'Your product server sends a simple POST request to your x402 charity server. No SDK needed, no crypto logic, no charity ID — just fetch(\'/donate\', { method: \'POST\' }). The x402 server handles everything from here.',
-          activeActors: ['product', 'x402'],
-        },
-        {
-          from: 'x402', to: 'facilitator', dir: 'ltr',
-          label: 'Sign + send payment',
-          sublabel: 'x402 protocol (automatic)',
-          title: '4. x402 server signs and sends the payment',
-          desc: 'The x402 charity server uses its private key to sign a partial SPL USDC transfer transaction and sends it to the x402.org facilitator. The facilitator co-signs as fee payer — so the donor wallet only needs USDC, never SOL.',
-          activeActors: ['x402', 'facilitator'],
-        },
-        {
-          from: 'facilitator', to: 'charity', dir: 'ltr',
-          label: 'USDC transfer on Solana',
-          sublabel: '$0.001 settled on-chain',
-          title: '5. USDC lands in the charity wallet',
-          desc: 'The facilitator (x402.org, run by Coinbase) co-signs and submits the SPL USDC transfer on Solana. The charity receives $0.001 directly in their associated token account. Fully transparent and verifiable by anyone.',
-          activeActors: ['facilitator', 'charity'],
-        },
-        {
-          from: 'x402', to: 'product', dir: 'rtl',
-          label: '200 OK + txHash',
-          sublabel: 'On-chain receipt',
-          title: '6. Receipt returned with on-chain proof',
-          desc: 'Your x402 server returns a JSON receipt with the on-chain transaction hash. All donations are shown on the live dashboard. The user never needed a wallet or even knew a donation happened.',
-          activeActors: ['x402', 'product'],
-        },
-      ];
-
-      const actors = ['user', 'product', 'x402', 'facilitator', 'charity'];
-      const arrowsEl = document.getElementById('seq-arrows');
-      const descTitle = document.getElementById('seq-desc-title');
-      const descText = document.getElementById('seq-desc-text');
-      const descPanel = document.getElementById('seq-desc');
-      const prevBtn = document.getElementById('seq-prev');
-      const nextBtn = document.getElementById('seq-next');
-      const progressEl = document.getElementById('seq-progress');
-      const lifelines = document.getElementById('seq-lifelines');
-
-      let currentStep = -1; // -1 = intro
-
-      // Build progress dots
-      for (let i = 0; i < steps.length; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'seq-dot';
-        dot.addEventListener('click', () => goToStep(i));
-        progressEl.appendChild(dot);
-      }
-
-      function getActorCenter(actorName) {
-        const idx = actors.indexOf(actorName);
-        // Each actor is equally spaced across the width
-        return ((idx + 0.5) / actors.length) * 100;
-      }
-
-      function buildArrowEl(step, yPercent) {
-        const arrow = document.createElement('div');
-        arrow.className = 'seq-arrow';
-        arrow.style.top = yPercent + '%';
-
-        if (step.dir === 'self') {
-          // Self-arrow: a small loop
-          const cx = getActorCenter(step.from);
-          arrow.style.left = cx + '%';
-          arrow.style.width = '0px';
-          arrow.innerHTML =
-            '<div class="seq-arrow-label ltr" style="white-space:nowrap;transform:translateX(-50%)">' + step.label + '</div>' +
-            '<div class="seq-arrow-sublabel ltr" style="white-space:nowrap;transform:translateX(-50%);top:18px">' + step.sublabel + '</div>';
-          return arrow;
-        }
-
-        const fromX = getActorCenter(step.from);
-        const toX = getActorCenter(step.to);
-        const leftX = Math.min(fromX, toX);
-        const rightX = Math.max(fromX, toX);
-
-        arrow.style.left = leftX + '%';
-        arrow.style.width = (rightX - leftX) + '%';
-
-        const lineClass = step.style === 'dashed' ? 'dashed' : 'solid';
-        const headDir = step.dir === 'ltr' ? 'right' : 'left';
-        const labelDir = step.dir;
-
-        var headHtml = '<div class="seq-arrow-head ' + headDir + '"></div>';
-        var lineHtml = '<div class="seq-arrow-line ' + lineClass + '"></div>';
-
-        arrow.innerHTML =
-          (headDir === 'left' ? headHtml + lineHtml : lineHtml + headHtml) +
-          '<div class="seq-arrow-label ' + labelDir + '">' + step.label + '</div>' +
-          '<div class="seq-arrow-sublabel ' + labelDir + '">' + step.sublabel + '</div>';
-
-        return arrow;
-      }
-
-      function goToStep(n) {
-        currentStep = Math.max(-1, Math.min(n, steps.length - 1));
-        render();
-      }
-
-      function render() {
-        // Update buttons
-        prevBtn.disabled = currentStep <= -1;
-        if (currentStep >= steps.length - 1) {
-          nextBtn.textContent = 'Replay';
-          nextBtn.classList.remove('primary');
-        } else {
-          nextBtn.textContent = 'Next \u2192';
-          nextBtn.classList.add('primary');
-        }
-
-        // Update progress dots
-        const dots = progressEl.children;
-        for (let i = 0; i < dots.length; i++) {
-          dots[i].className = 'seq-dot' + (i === currentStep ? ' active' : (i < currentStep ? ' done' : ''));
-        }
-
-        // Update description
-        if (currentStep < 0) {
-          descTitle.textContent = 'Click "Next" to see how companies integrate x402 Charity';
-          descText.textContent = 'You deploy an x402 charity server, fund it with USDC, and point it at your chosen charity. Your product server triggers donations with a simple POST request.';
-          descPanel.classList.remove('active');
-        } else {
-          const s = steps[currentStep];
-          descTitle.textContent = s.title;
-          descText.textContent = s.desc;
-          descPanel.classList.add('active');
-        }
-
-        // Update actor highlights
-        const activeActors = currentStep >= 0 ? steps[currentStep].activeActors : [];
-        actors.forEach(a => {
-          const el = document.getElementById('actor-' + a);
-          if (activeActors.includes(a)) el.classList.add('active');
-          else el.classList.remove('active');
-        });
-
-        // Build arrows — show all arrows up to currentStep
-        arrowsEl.innerHTML = '';
-        const totalSlots = steps.length;
-        for (let i = 0; i <= Math.max(currentStep, -1); i++) {
-          if (i < 0) continue;
-          const yPct = ((i + 0.5) / totalSlots) * 100;
-          const el = buildArrowEl(steps[i], yPct);
-          el.classList.add('visible');
-          if (i === currentStep) el.style.opacity = '0';
-          arrowsEl.appendChild(el);
-          // Animate the latest arrow in
-          if (i === currentStep) {
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => { el.style.transition = 'opacity 0.4s'; el.style.opacity = '1'; });
-            });
-          }
-        }
-      }
-
-      prevBtn.addEventListener('click', () => goToStep(currentStep - 1));
-      nextBtn.addEventListener('click', () => {
-        if (currentStep >= steps.length - 1) {
-          goToStep(-1); // replay
-        } else {
-          goToStep(currentStep + 1);
-        }
-      });
-
-      render();
-    })();
-  </script>
-  <script defer src="/_vercel/insights/script.js"></script>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="section" id="how-it-works">
+  <div class="wrap">
+    <div class="eyebrow">How it works</div>
+    <h2>Set up in 5 minutes.</h2>
+    <p class="sub">Deploy your own x402 charity server. Your users never need a wallet — your company funds the donations.</p>
+
+    <div class="flow">
+      <div class="flow-stage">
+        <div class="flow-track"></div>
+        <div class="flow-pulse" id="flowPulse" style="left:10%"></div>
+        <div class="flow-nodes" id="flowNodes">
+          <div class="flow-node on" data-i="0">
+            <div class="flow-tile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>
+            </div>
+            <div class="flow-lbl">User</div>
+            <div class="flow-sub">no wallet needed</div>
+          </div>
+          <div class="flow-node" data-i="1">
+            <div class="flow-tile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 20h8M12 17v3"/></svg>
+            </div>
+            <div class="flow-lbl">Your product</div>
+            <div class="flow-sub">POST /donate</div>
+          </div>
+          <div class="flow-node" data-i="2">
+            <div class="flow-tile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M3 9h18M7 13h2m4 0h4"/><circle cx="9" cy="13" r=".2"/></svg>
+            </div>
+            <div class="flow-lbl">x402 Charity server</div>
+            <div class="flow-sub">your deployment</div>
+          </div>
+          <div class="flow-node" data-i="3">
+            <div class="flow-tile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>
+            </div>
+            <div class="flow-lbl">x402.org</div>
+            <div class="flow-sub">payment protocol</div>
+          </div>
+          <div class="flow-node" data-i="4">
+            <div class="flow-tile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            </div>
+            <div class="flow-lbl">Charity</div>
+            <div class="flow-sub">USDC received</div>
+          </div>
+        </div>
+      </div>
+      <div class="flow-caption">
+        <div class="flow-caption-text">
+          <div class="flow-step-no" id="flowStepNo">Step 1 of 5</div>
+          <h4 id="flowTitle">A user takes an action in your product</h4>
+          <p id="flowText">No wallet, no balance, no crypto literacy required. A user simply taps "Buy", "Swap", "Send message" — anything you want to attach a donation to.</p>
+        </div>
+        <div class="flow-nav">
+          <div class="flow-progress" id="flowProg">
+            <span class="on"></span><span></span><span></span><span></span><span></span>
+          </div>
+          <button id="flowBack" disabled aria-label="Back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+          <button id="flowNext" aria-label="Next">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DEMO ── -->
+<section class="section" id="demo" style="background:var(--surface)">
+  <div class="wrap">
+    <div class="eyebrow">Live demo</div>
+    <h2>Run to donate.</h2>
+    <p class="sub">Jump over obstacles to donate $0.001 USDC for each one cleared. Donations are settled on Solana via the live x402 server.</p>
+
+    <div class="demo-grid">
+      <div class="demo-stage">
+        <div class="demo-head">
+          <h3>Charity Runner</h3>
+          <span class="micro">Every obstacle cleared&nbsp;·&nbsp;<b style="color:var(--accent);font-weight:500">$0.001 USDC</b></span>
+        </div>
+        <div class="game-wrap">
+          <canvas class="game-canvas" id="game" width="800" height="340"></canvas>
+          <div class="game-overlay" id="gameOver">
+            <div style="width:56px;height:56px;border-radius:18px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;color:var(--accent)">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 9v12h7v-7h4v7h7V9z"/></svg>
+            </div>
+            <h4 id="gameOverTitle">Charity Runner</h4>
+            <p id="gameOverText">Every obstacle cleared = $0.001 USDC donated on-chain.</p>
+            <button class="btn btn-primary" id="gameStart">Play</button>
+            <div class="hint">Space / Tap to jump</div>
+          </div>
+        </div>
+        <div class="game-stats">
+          <div class="game-stat"><div class="lab">Score</div><div class="val" id="gScore">0</div></div>
+          <div class="game-stat"><div class="lab">Best</div><div class="val" id="gBest">0</div></div>
+          <div class="game-stat"><div class="lab">Donated</div><div class="val brand" id="gDonated">$0.000</div></div>
+        </div>
+      </div>
+
+      <div class="log">
+        <div class="log-head">
+          <h3>Donation log</h3>
+          <div class="dot"><span class="live-dot"></span> streaming</div>
+        </div>
+        <div class="log-body" id="logBody">
+          <div class="log-empty">Start running to trigger donations</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── INTEGRATE / SETUP ── -->
+<section class="section" id="integrate">
+  <div class="wrap">
+    <div class="eyebrow">Setup</div>
+    <h2>Get started in 3 steps.</h2>
+    <p class="sub">Create a wallet, deploy the server, and trigger donations from your product. Any language. Any framework.</p>
+
+    <div class="setup-grid">
+      <div class="step-rail">
+        <button class="step-card on" data-step="0">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <h4>Create wallet</h4>
+            <p>A new Solana wallet that funds your donations. Export the secret key (or use a keypair file).</p>
+          </div>
+        </button>
+        <button class="step-card" data-step="1">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <h4>Deploy server</h4>
+            <p>Build the open-source image with Docker. Run with your env vars on any host.</p>
+          </div>
+        </button>
+        <button class="step-card" data-step="2">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <h4>Trigger donations</h4>
+            <p>Call <code>POST /donate</code> from your backend whenever a user takes an action.</p>
+          </div>
+        </button>
+
+        <div style="padding:18px 18px 0;border-top:1px solid var(--border);margin-top:8px">
+          <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:10px">You'll need</p>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text2)">
+            <li style="display:flex;gap:8px;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Any Solana wallet (Phantom, Backpack, Solflare, …)</li>
+            <li style="display:flex;gap:8px;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> USDC on Solana to fund donations</li>
+            <li style="display:flex;gap:8px;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> SOL not required — the x402 facilitator pays gas</li>
+            <li style="display:flex;gap:8px;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Charity wallet address &amp; display name</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-card">
+        <div class="code-head">
+          <div class="traffic"><span></span><span></span><span></span></div>
+          <div class="code-tabs">
+            <span class="code-tab on" id="codeTabTitle">env vars</span>
+          </div>
+          <button class="code-copy" id="codeCopy">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            <span id="codeCopyText">Copy</span>
+          </button>
+        </div>
+        <div class="code-body">
+          <pre id="codeBody"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── USE CASES ── -->
+<section class="section" id="use-cases" style="background:var(--surface)">
+  <div class="wrap">
+    <div class="eyebrow">Use cases</div>
+    <h2>Works for every product.</h2>
+    <p class="sub">Any user action can become a micro-donation. Here are a few examples — and why it's good for your business.</p>
+
+    <div class="cases" id="cases"></div>
+  </div>
+</section>
+
+<!-- ── DASHBOARD ── -->
+<section class="section" id="dashboard">
+  <div class="wrap">
+    <div class="eyebrow">Live dashboard</div>
+    <h2>Donation dashboard.</h2>
+    <p class="sub">All donations are on-chain and publicly verifiable on Solana. Embeds directly in your landing page.</p>
+
+    <div class="dash">
+      <div class="dash-stat">
+        <div class="lab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M8 10l4-3 4 3M8 14l4 3 4-3"/></svg>
+          Total donated
+        </div>
+        <div class="val" id="dashTotal">$0.00<small>USDC</small></div>
+        <div class="delta">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 17l10-10M17 7H7v10"/></svg>
+          <span id="dashDelta">+ $0.00 in last hour</span>
+        </div>
+      </div>
+      <div class="dash-stat">
+        <div class="lab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>
+          Donations
+        </div>
+        <div class="val" id="dashCount">0</div>
+        <div class="delta"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 17l10-10M17 7H7v10"/></svg> Recent on-chain donations</div>
+      </div>
+      <div class="dash-stat">
+        <div class="lab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 3v18M18 3v18M3 8h18M3 16h18"/></svg>
+          Network
+        </div>
+        <div class="val" style="font-size:28px" id="dashNetwork">Solana <small id="dashNetworkSub">devnet</small></div>
+        <div class="delta"><span class="live-dot" style="margin-right:4px"></span> RPC healthy · 2 clusters</div>
+      </div>
+    </div>
+
+    <div class="wallet-grid">
+      <div class="wallet" id="walletDonation">
+        <div class="wallet-head">
+          <div class="wallet-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M16 15h2"/></svg>
+          </div>
+          <div class="wallet-tt">
+            <h3>Donation wallet</h3>
+            <p>Funds donations</p>
+          </div>
+        </div>
+        <div class="wallet-addr">
+          <span id="donationAddr" data-full="">—</span>
+          <button data-copy="donation">Copy</button>
+        </div>
+        <div class="net-grid">
+          <div class="net">
+            <div class="net-lbl">
+              <span class="nd" style="background:var(--orange)"></span>Solana Devnet<span class="net-tag test">Test</span>
+            </div>
+            <div class="net-bals">
+              <div class="net-bal"><span class="k"><img src="/assets/tokens/usdc.svg" alt=""/>USDC</span><span class="v" id="donationDevnetUsdc">—</span></div>
+              <div class="net-bal"><span class="k"><img src="/assets/tokens/sol.svg" alt=""/>SOL</span><span class="v" id="donationDevnetSol">—</span></div>
+            </div>
+          </div>
+          <div class="net">
+            <div class="net-lbl">
+              <span class="nd" style="background:var(--accent)"></span>Solana<span class="net-tag live">Live</span>
+            </div>
+            <div class="net-bals">
+              <div class="net-bal"><span class="k"><img src="/assets/tokens/usdc.svg" alt=""/>USDC</span><span class="v" id="donationMainnetUsdc">—</span></div>
+              <div class="net-bal"><span class="k"><img src="/assets/tokens/sol.svg" alt=""/>SOL</span><span class="v" id="donationMainnetSol">—</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="wallet-foot">
+          <a id="donationExpDevnet" href="#" target="_blank">Devnet Solscan ↗</a>
+          <a id="donationExpMainnet" href="#" target="_blank">Solscan ↗</a>
+        </div>
+      </div>
+
+      <div class="wallet" id="walletCharity">
+        <div class="wallet-head">
+          <div class="wallet-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+          <div class="wallet-tt">
+            <h3>Charity wallet</h3>
+            <p id="charityName">—</p>
+          </div>
+        </div>
+        <div class="wallet-addr">
+          <span id="charityAddr" data-full="">—</span>
+          <button data-copy="charity">Copy</button>
+        </div>
+        <div class="net-grid">
+          <div class="net">
+            <div class="net-lbl">
+              <span class="nd" style="background:var(--orange)"></span>Solana Devnet<span class="net-tag test">Test</span>
+            </div>
+            <div class="net-bals">
+              <div class="net-bal"><span class="k"><img src="/assets/tokens/usdc.svg" alt=""/>USDC</span><span class="v" id="charityDevnetUsdc">—</span></div>
+              <div class="net-bal"><span class="k"><img src="/assets/tokens/sol.svg" alt=""/>SOL</span><span class="v" id="charityDevnetSol">—</span></div>
+            </div>
+          </div>
+          <div class="net">
+            <div class="net-lbl">
+              <span class="nd" style="background:var(--accent)"></span>Solana<span class="net-tag live">Live</span>
+            </div>
+            <div class="net-bals">
+              <div class="net-bal"><span class="k"><img src="/assets/tokens/usdc.svg" alt=""/>USDC</span><span class="v" id="charityMainnetUsdc">—</span></div>
+              <div class="net-bal"><span class="k"><img src="/assets/tokens/sol.svg" alt=""/>SOL</span><span class="v" id="charityMainnetSol">—</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="wallet-foot">
+          <a id="charityExpDevnet" href="#" target="_blank">Devnet Solscan ↗</a>
+          <a id="charityExpMainnet" href="#" target="_blank">Solscan ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="history">
+      <div class="history-head">
+        <h3>Recent donations</h3>
+        <div class="actions">
+          <span style="font-size:12px;color:var(--text2)">Live · <b style="color:var(--accent);font-weight:500">on-chain verified</b></span>
+          <button class="btn btn-ghost" id="refreshBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+      <table class="history-table">
+        <thead>
+          <tr><th>Tx hash</th><th>Network</th><th>Source</th><th>Status</th><th>When</th><th>Amount</th></tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr><td colspan="6" class="history-empty">Loading on-chain donations…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── CTA ── -->
+    <div class="cta">
+      <div class="cta-inner">
+        <div>
+          <h2>Ship giving in an afternoon.</h2>
+          <p>One Docker image, one POST. Your users keep using your product — and a fraction of a cent quietly goes to a cause every time they do.</p>
+          <div class="cta-actions">
+            <a href="https://github.com/allscale-io/x402charity" class="btn btn-on-dark btn-lg" target="_blank">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 005.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 014 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+              Clone the repo
+            </a>
+            <a href="https://www.npmjs.com/package/x402charity" class="btn btn-ghost-dark btn-lg" target="_blank">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M0 0v24h24V0H0zm19.2 19.2H12V7.2H4.8V4.8h14.4v14.4z"/></svg>
+              npm i x402charity
+            </a>
+          </div>
+        </div>
+        <div class="cta-fact">
+          <div class="n">5 min</div>
+          <div class="l">Average setup time from <code style="color:rgba(255,255,255,0.85)">git clone</code> to first on-chain donation</div>
+          <div class="cta-fact-row"><span>Image size</span><span>~ 84 MB</span></div>
+          <div class="cta-fact-row"><span>Languages supported</span><span>any (REST)</span></div>
+          <div class="cta-fact-row"><span>Cluster</span><span id="ctaCluster">Solana · Devnet</span></div>
+          <div class="cta-fact-row"><span>License</span><span>MIT</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+      <div class="by">
+        Built by
+        <img src="/assets/allscale-logo.svg" alt="AllScale" />
+        <a href="https://allscale.io" target="_blank">AllScale</a>
+        · MIT License
+      </div>
+      <div class="links">
+        <a href="https://github.com/allscale-io/x402charity" target="_blank">GitHub</a>
+        <a href="https://www.npmjs.com/package/x402charity" target="_blank">npm</a>
+        <a href="https://allscale.io" target="_blank">AllScale</a>
+      </div>
+    </footer>
+  </div>
+</section>
+
+<script src="/x402-charity.js"></script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
