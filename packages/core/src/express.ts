@@ -7,7 +7,12 @@ export interface X402CharityMiddlewareOptions extends ClientOptions {
   shouldDonate?: (req: Request) => boolean;
 }
 
-export function x402charity(options: X402CharityMiddlewareOptions) {
+/**
+ * Returns an Express middleware that triggers an x402 donation for each
+ * matching request. Client initialization is async (Solana keypair import),
+ * so this is an async factory.
+ */
+export async function x402charity(options: X402CharityMiddlewareOptions) {
   const {
     amount = '$0.001',
     silent = true,
@@ -15,7 +20,7 @@ export function x402charity(options: X402CharityMiddlewareOptions) {
     ...clientOptions
   } = options;
 
-  const client = new X402CharityClient(clientOptions);
+  const client = await X402CharityClient.create(clientOptions);
 
   return (req: Request, _res: Response, next: NextFunction) => {
     if (shouldDonate && !shouldDonate(req)) {

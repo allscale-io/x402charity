@@ -1,13 +1,14 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
+import { isSolanaNetwork, type SolanaNetwork } from '../config.js';
 
 const CONFIG_DIR = join(homedir(), '.x402charity');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
 
 interface CliConfig {
   privateKey?: string;
-  network?: 'base' | 'base-sepolia';
+  network?: SolanaNetwork;
 }
 
 export function loadCliConfig(): CliConfig {
@@ -33,10 +34,10 @@ export function getPrivateKey(): string {
   return process.exit(1) as never;
 }
 
-export function getNetwork(): 'base' | 'base-sepolia' {
+export function getNetwork(): SolanaNetwork {
   const envNetwork = process.env.X402_NETWORK;
-  if (envNetwork === 'base' || envNetwork === 'base-sepolia') return envNetwork;
+  if (envNetwork && isSolanaNetwork(envNetwork)) return envNetwork;
 
   const config = loadCliConfig();
-  return config.network || 'base-sepolia';
+  return config.network || 'solana-devnet';
 }

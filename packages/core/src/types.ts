@@ -1,9 +1,12 @@
+import type { SolanaNetwork } from './config.js';
+
 export interface Charity {
   id: string;
   name: string;
   description: string;
+  /** Base58-encoded Solana wallet address (32 bytes / 32-44 chars). */
   walletAddress: string;
-  chain: 'base' | 'base-sepolia';
+  chain: SolanaNetwork;
   verified: boolean;
   website?: string;
   category?: string;
@@ -12,6 +15,7 @@ export interface Charity {
 }
 
 export interface DonationReceipt {
+  /** Base58-encoded Solana transaction signature. */
   txHash: string;
   from: string;
   to: string;

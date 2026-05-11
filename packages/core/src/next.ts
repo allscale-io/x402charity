@@ -7,7 +7,12 @@ export interface X402CharityMiddlewareOptions extends ClientOptions {
   matcher?: string | string[];
 }
 
-export function x402charity(options: X402CharityMiddlewareOptions) {
+/**
+ * Returns a Next.js middleware that triggers an x402 donation for each
+ * matching request. Client initialization is async (Solana keypair import),
+ * so this is an async factory.
+ */
+export async function x402charity(options: X402CharityMiddlewareOptions) {
   const {
     amount = '$0.001',
     silent = true,
@@ -19,7 +24,7 @@ export function x402charity(options: X402CharityMiddlewareOptions) {
     ? (Array.isArray(matcher) ? matcher : [matcher])
     : null;
 
-  const client = new X402CharityClient(clientOptions);
+  const client = await X402CharityClient.create(clientOptions);
 
   return (request: NextRequest) => {
     if (patterns) {
