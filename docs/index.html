@@ -1101,18 +1101,17 @@
 
       <div class="code-panel active" id="panel-wallet">
 <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<pre><code><span class="code-comment"># Create a new wallet to fund donations.</span>
-<span class="code-comment"># Use any wallet provider (MetaMask, Coinbase Wallet, etc.)</span>
-<span class="code-comment"># and export the private key.</span>
+<pre><code><span class="code-comment"># Create a new Solana wallet to fund donations.</span>
+<span class="code-comment"># Use any wallet provider (Phantom, Solflare, Solana CLI, etc.)</span>
+<span class="code-comment"># and export the secret key (base58 or JSON array).</span>
 
 <span class="code-comment"># You'll need 3 env vars:</span>
-<span class="code-keyword">DONATION_PRIVATE_KEY</span>=<span class="code-string">"0xabc..."</span>  <span class="code-comment"># your new wallet's private key</span>
-<span class="code-keyword">CHARITY_WALLET</span>=<span class="code-string">"0xdef..."</span>       <span class="code-comment"># the charity's wallet address</span>
-<span class="code-keyword">CHARITY_NAME</span>=<span class="code-string">"Give Directly"</span>    <span class="code-comment"># display name for the charity</span>
+<span class="code-keyword">DONATION_PRIVATE_KEY</span>=<span class="code-string">"[12,34,...]"</span>      <span class="code-comment"># base58 64-byte secret OR JSON array</span>
+<span class="code-keyword">CHARITY_WALLET</span>=<span class="code-string">"So11111111..."</span>     <span class="code-comment"># charity wallet (base58 Solana pubkey)</span>
+<span class="code-keyword">CHARITY_NAME</span>=<span class="code-string">"Give Directly"</span>       <span class="code-comment"># display name for the charity</span>
 
-<span class="code-comment"># Then fund the donation wallet with:</span>
-<span class="code-comment">#   • USDC on Base (for donations)</span>
-<span class="code-comment">#   • A small amount of ETH on Base (for gas)</span></code></pre>
+<span class="code-comment"># Then fund the donation wallet with USDC on Solana.</span>
+<span class="code-comment"># SOL is not required — the x402 facilitator pays gas.</span></code></pre>
       </div>
 
       <div class="code-panel" id="panel-deploy">
@@ -1124,10 +1123,10 @@ $ docker build -t x402charity .
 
 <span class="code-comment"># Run with your env vars</span>
 $ docker run -p 3402:3402 \
-  -e <span class="code-keyword">DONATION_PRIVATE_KEY</span>=<span class="code-string">"0xabc..."</span> \
-  -e <span class="code-keyword">CHARITY_WALLET</span>=<span class="code-string">"0xdef..."</span> \
+  -e <span class="code-keyword">DONATION_PRIVATE_KEY</span>=<span class="code-string">"[12,34,...]"</span> \
+  -e <span class="code-keyword">CHARITY_WALLET</span>=<span class="code-string">"So11111111..."</span> \
   -e <span class="code-keyword">CHARITY_NAME</span>=<span class="code-string">"Give Directly"</span> \
-  -e <span class="code-keyword">DONATION_NETWORK</span>=<span class="code-string">"base"</span> \
+  -e <span class="code-keyword">DONATION_NETWORK</span>=<span class="code-string">"solana-mainnet"</span> \
   x402charity
 
 <span class="code-comment"># Your server is live at http://localhost:3402</span>
@@ -1212,7 +1211,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     <div class="container">
       <div class="section-label">Live Dashboard</div>
       <h2 class="section-title">Donation <span>dashboard</span></h2>
-      <p class="section-sub">All donations are on-chain and publicly verifiable on Base.</p>
+      <p class="section-sub">All donations are on-chain and publicly verifiable on Solana.</p>
 
       <div class="dash-stats">
         <div class="dash-stat">
@@ -1234,56 +1233,56 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
           <div class="dash-wallet-role">Donation Wallet</div>
           <div class="dash-wallet-sub">Funds donations</div>
           <div class="dash-addr" id="dash-sender-addr">Loading...</div>
-          <div class="dash-chain-label">Base Sepolia (testnet)</div>
+          <div class="dash-chain-label">Solana Devnet (testnet)</div>
           <div class="dash-bal-row">
             <span class="label">USDC</span>
-            <span class="val green" id="dash-sender-sepolia-usdc">-</span>
+            <span class="val green" id="dash-sender-devnet-usdc">-</span>
           </div>
           <div class="dash-bal-row">
-            <span class="label">ETH</span>
-            <span class="val" id="dash-sender-sepolia-eth">-</span>
+            <span class="label">SOL</span>
+            <span class="val" id="dash-sender-devnet-sol">-</span>
           </div>
-          <div class="dash-chain-label" style="margin-top:8px;">Base (mainnet)</div>
+          <div class="dash-chain-label" style="margin-top:8px;">Solana (mainnet)</div>
           <div class="dash-bal-row">
             <span class="label">USDC</span>
-            <span class="val green" id="dash-sender-base-usdc">-</span>
+            <span class="val green" id="dash-sender-mainnet-usdc">-</span>
           </div>
           <div class="dash-bal-row">
-            <span class="label">ETH</span>
-            <span class="val" id="dash-sender-base-eth">-</span>
+            <span class="label">SOL</span>
+            <span class="val" id="dash-sender-mainnet-sol">-</span>
           </div>
           <div style="margin-top:8px;">
-            <a class="dash-explorer" id="dash-sender-explorer-sepolia" href="#" target="_blank">Sepolia BaseScan</a>
+            <a class="dash-explorer" id="dash-sender-explorer-devnet" href="#" target="_blank">Solscan (devnet)</a>
             <span style="color:var(--border);margin:0 6px;">|</span>
-            <a class="dash-explorer" id="dash-sender-explorer-base" href="#" target="_blank">Base BaseScan</a>
+            <a class="dash-explorer" id="dash-sender-explorer-mainnet" href="#" target="_blank">Solscan</a>
           </div>
         </div>
         <div class="dash-wallet receiver">
           <div class="dash-wallet-role">Charity Wallet</div>
           <div class="dash-wallet-sub" id="dash-charity-name">Loading...</div>
           <div class="dash-addr" id="dash-receiver-addr">Loading...</div>
-          <div class="dash-chain-label">Base Sepolia (testnet)</div>
+          <div class="dash-chain-label">Solana Devnet (testnet)</div>
           <div class="dash-bal-row">
             <span class="label">USDC</span>
-            <span class="val green" id="dash-receiver-sepolia-usdc">-</span>
+            <span class="val green" id="dash-receiver-devnet-usdc">-</span>
           </div>
           <div class="dash-bal-row">
-            <span class="label">ETH</span>
-            <span class="val" id="dash-receiver-sepolia-eth">-</span>
+            <span class="label">SOL</span>
+            <span class="val" id="dash-receiver-devnet-sol">-</span>
           </div>
-          <div class="dash-chain-label" style="margin-top:8px;">Base (mainnet)</div>
+          <div class="dash-chain-label" style="margin-top:8px;">Solana (mainnet)</div>
           <div class="dash-bal-row">
             <span class="label">USDC</span>
-            <span class="val green" id="dash-receiver-base-usdc">-</span>
+            <span class="val green" id="dash-receiver-mainnet-usdc">-</span>
           </div>
           <div class="dash-bal-row">
-            <span class="label">ETH</span>
-            <span class="val" id="dash-receiver-base-eth">-</span>
+            <span class="label">SOL</span>
+            <span class="val" id="dash-receiver-mainnet-sol">-</span>
           </div>
           <div style="margin-top:8px;">
-            <a class="dash-explorer" id="dash-receiver-explorer-sepolia" href="#" target="_blank">Sepolia BaseScan</a>
+            <a class="dash-explorer" id="dash-receiver-explorer-devnet" href="#" target="_blank">Solscan (devnet)</a>
             <span style="color:var(--border);margin:0 6px;">|</span>
-            <a class="dash-explorer" id="dash-receiver-explorer-base" href="#" target="_blank">Base BaseScan</a>
+            <a class="dash-explorer" id="dash-receiver-explorer-mainnet" href="#" target="_blank">Solscan</a>
           </div>
         </div>
       </div>
@@ -1377,8 +1376,18 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     }
 
     function dashExplorerForChain(chain) {
-      if (chain === 'base') return 'https://basescan.org';
-      return 'https://sepolia.basescan.org';
+      // Solscan handles both clusters; devnet requires ?cluster=devnet
+      return 'https://solscan.io';
+    }
+
+    function dashExplorerSuffix(chain) {
+      return chain === 'solana-devnet' ? '?cluster=devnet' : '';
+    }
+
+    function dashChainLabel(chain) {
+      if (chain === 'solana-mainnet') return 'Solana';
+      if (chain === 'solana-devnet') return 'Devnet';
+      return chain || '-';
     }
 
     function dashEscape(str) {
@@ -1426,10 +1435,10 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         var html = '<table class="dash-table"><thead><tr><th>Time</th><th>Amount</th><th>From</th><th>Chain</th><th>Tx Hash</th></tr></thead><tbody>';
         for (var i = 0; i < recent.length; i++) {
           var d = recent[i];
-          var dExplorer = dashExplorerForChain(d.chain);
+          var dExplorer = dashExplorerForChain(d.chain) + (d.txHash ? '/tx/' + d.txHash + dashExplorerSuffix(d.chain) : '');
           var txLink = d.txHash ? dashShortHash(d.txHash) : '-';
           var fromShort = d.from ? d.from.slice(0, 6) + '...' + d.from.slice(-4) : '-';
-          var chainLabel = d.chain === 'base' ? 'Base' : 'Sepolia';
+          var chainLabel = dashChainLabel(d.chain);
           html += '<tr><td class="dash-time">' + dashTimeAgo(d.timestamp) + '</td><td class="amount">' + dashEscape(d.amount) + ' ' + d.currency + '</td><td class="tx-hash">' + fromShort + '</td><td class="dash-time">' + chainLabel + '</td><td class="tx-hash">' + txLink + '</td></tr>';
         }
         html += '</tbody></table>';
@@ -1467,7 +1476,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
             var dd = dayData.donations[j];
             var time = new Date(dd.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             var fromShort = dd.from ? dd.from.slice(0, 6) + '...' + dd.from.slice(-4) : '-';
-            var ddExplorer = dashExplorerForChain(dd.chain);
+            var ddExplorer = dashExplorerForChain(dd.chain) + (dd.txHash ? '/tx/' + dd.txHash + dashExplorerSuffix(dd.chain) : '');
             var txLink = dd.txHash ? dashShortHash(dd.txHash) : '-';
             hHtml += '<div class="dash-history-row"><span class="h-time">' + time + '</span><span class="h-from">' + fromShort + '</span><span class="h-amount">' + dashEscape(dd.amount) + '</span><span class="h-tx">' + txLink + '</span></div>';
           }
@@ -1479,8 +1488,8 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         histContainer.innerHTML = hHtml;
       }
 
-      function fetchDay(n) {
-        return fetch('/donations?daysAgo=' + n)
+      function fetchDonations(limit) {
+        return fetch('/donations?limit=' + (limit || 200))
           .then(function(r) { return r.json(); })
           .catch(function() { return { donations: [], network: '', explorerUrl: '' }; });
       }
@@ -1488,88 +1497,56 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       function loadWallets(addr, charity) {
         if (addr) {
           document.getElementById('dash-sender-addr').textContent = addr.address;
-          var sep = addr.balances['base-sepolia'];
-          var bas = addr.balances['base'];
-          if (sep) {
-            document.getElementById('dash-sender-sepolia-usdc').textContent = parseFloat(sep.usdc).toFixed(2);
-            document.getElementById('dash-sender-sepolia-eth').textContent = parseFloat(sep.eth).toFixed(4);
+          var dev = addr.balances['solana-devnet'];
+          var main = addr.balances['solana-mainnet'];
+          if (dev) {
+            document.getElementById('dash-sender-devnet-usdc').textContent = parseFloat(dev.usdc).toFixed(2);
+            document.getElementById('dash-sender-devnet-sol').textContent = parseFloat(dev.sol).toFixed(4);
           }
-          if (bas) {
-            document.getElementById('dash-sender-base-usdc').textContent = parseFloat(bas.usdc).toFixed(2);
-            document.getElementById('dash-sender-base-eth').textContent = parseFloat(bas.eth).toFixed(4);
+          if (main) {
+            document.getElementById('dash-sender-mainnet-usdc').textContent = parseFloat(main.usdc).toFixed(2);
+            document.getElementById('dash-sender-mainnet-sol').textContent = parseFloat(main.sol).toFixed(4);
           }
-          document.getElementById('dash-sender-explorer-sepolia').href = 'https://sepolia.basescan.org/address/' + addr.address;
-          document.getElementById('dash-sender-explorer-base').href = 'https://basescan.org/address/' + addr.address;
+          document.getElementById('dash-sender-explorer-devnet').href = 'https://solscan.io/account/' + addr.address + '?cluster=devnet';
+          document.getElementById('dash-sender-explorer-mainnet').href = 'https://solscan.io/account/' + addr.address;
         } else {
           document.getElementById('dash-sender-addr').textContent = 'Not configured';
         }
         if (charity) {
           document.getElementById('dash-receiver-addr').textContent = charity.walletAddress;
           document.getElementById('dash-charity-name').textContent = charity.name;
-          var csep = charity.balances && charity.balances['base-sepolia'];
-          var cbas = charity.balances && charity.balances['base'];
-          if (csep) {
-            document.getElementById('dash-receiver-sepolia-usdc').textContent = parseFloat(csep.usdc).toFixed(2);
-            document.getElementById('dash-receiver-sepolia-eth').textContent = parseFloat(csep.eth).toFixed(4);
+          var cdev = charity.balances && charity.balances['solana-devnet'];
+          var cmain = charity.balances && charity.balances['solana-mainnet'];
+          if (cdev) {
+            document.getElementById('dash-receiver-devnet-usdc').textContent = parseFloat(cdev.usdc).toFixed(2);
+            document.getElementById('dash-receiver-devnet-sol').textContent = parseFloat(cdev.sol).toFixed(4);
           }
-          if (cbas) {
-            document.getElementById('dash-receiver-base-usdc').textContent = parseFloat(cbas.usdc).toFixed(2);
-            document.getElementById('dash-receiver-base-eth').textContent = parseFloat(cbas.eth).toFixed(4);
+          if (cmain) {
+            document.getElementById('dash-receiver-mainnet-usdc').textContent = parseFloat(cmain.usdc).toFixed(2);
+            document.getElementById('dash-receiver-mainnet-sol').textContent = parseFloat(cmain.sol).toFixed(4);
           }
-          document.getElementById('dash-receiver-explorer-sepolia').href = 'https://sepolia.basescan.org/address/' + charity.walletAddress;
-          document.getElementById('dash-receiver-explorer-base').href = 'https://basescan.org/address/' + charity.walletAddress;
+          document.getElementById('dash-receiver-explorer-devnet').href = 'https://solscan.io/account/' + charity.walletAddress + '?cluster=devnet';
+          document.getElementById('dash-receiver-explorer-mainnet').href = 'https://solscan.io/account/' + charity.walletAddress;
         } else {
           document.getElementById('dash-receiver-addr').textContent = 'Not configured';
         }
       }
 
-      // Phase 1: Load today + wallets in parallel
+      // Load donations + wallets in parallel
       Promise.all([
-        fetchDay(0),
+        fetchDonations(200),
         fetch('/address').then(function(r) { return r.json(); }).catch(function() { return null; }),
         fetch('/charity').then(function(r) { return r.json(); }).catch(function() { return null; }),
       ]).then(function(results) {
-        var todayData = results[0];
-        dashExplorerUrl = todayData.explorerUrl || '';
-        document.getElementById('dash-network').textContent = todayData.network === 'base' ? 'Base' : 'Base Sepolia';
+        var data = results[0];
+        dashExplorerUrl = data.explorerUrl || '';
+        document.getElementById('dash-network').textContent =
+          data.network === 'solana-mainnet' ? 'Solana' : 'Solana Devnet';
 
-        addDonations(todayData.donations || []);
+        addDonations(data.donations || []);
         renderRecent();
-        renderHistory(true);
+        renderHistory(false);
         loadWallets(results[1], results[2]);
-
-        // Phase 2: Load previous days in batches of DAY_BATCH
-        var dayIndex = 1;
-        var emptyBatches = 0;
-
-        function loadNextBatch() {
-          if (dayIndex >= MAX_DAYS || emptyBatches >= 3) {
-            renderHistory(false);
-            return;
-          }
-          var batch = [];
-          for (var i = 0; i < DAY_BATCH && dayIndex < MAX_DAYS; i++, dayIndex++) {
-            batch.push(fetchDay(dayIndex));
-          }
-          Promise.all(batch).then(function(results) {
-            var anyData = false;
-            for (var i = 0; i < results.length; i++) {
-              if (results[i].donations && results[i].donations.length > 0) {
-                addDonations(results[i].donations);
-                anyData = true;
-              }
-            }
-            if (anyData) {
-              emptyBatches = 0;
-              renderRecent();
-              renderHistory(true);
-            } else {
-              emptyBatches++;
-            }
-            loadNextBatch();
-          });
-        }
-        loadNextBatch();
       }).catch(function() {
         container.innerHTML = '<div class="dash-empty">Failed to load donations.</div>';
       });
@@ -1581,8 +1558,11 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
     const X402_SERVER = '';
     const DONATE_PATH = '/donate';
     const DONATION_PER_OBSTACLE = 0.001;
-    const EXPLORER_URLS = { 'base': 'https://basescan.org', 'base-sepolia': 'https://sepolia.basescan.org' };
-    let explorerUrl = EXPLORER_URLS['base-sepolia'];
+    const EXPLORER_TX = function(chain, sig) {
+      var base = 'https://solscan.io/tx/' + sig;
+      return chain === 'solana-devnet' ? base + '?cluster=devnet' : base;
+    };
+    let currentChain = 'solana-devnet';
     let charityWallet = '';
 
     const canvas = document.getElementById('game');
@@ -1803,7 +1783,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
             totalDonated += DONATION_PER_OBSTACLE;
             if (state === 'dead') updateGameoverMsg();
             var chain = data.receipt?.chain;
-            if (chain && EXPLORER_URLS[chain]) explorerUrl = EXPLORER_URLS[chain];
+            if (chain) currentChain = chain;
             if (data.receipt?.to) charityWallet = data.receipt.to;
             const tx = data.receipt?.txHash;
             updateLog(logIdx, 'Obstacle #' + obstacleNum + ' — $0.001', 'confirmed', 'ok', tx);
@@ -1830,8 +1810,8 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
       if (status === 503) {
         return 'The donation wallet is not configured on the server. The server admin needs to set the DONATION_PRIVATE_KEY environment variable.';
       }
-      if (d.indexOf('nonce') !== -1) {
-        return 'A previous donation is still being processed (nonce conflict). This happens when donations are triggered faster than the blockchain can settle. Wait a moment and it should resolve.';
+      if (d.indexOf('blockhash') !== -1 || d.indexOf('nonce') !== -1) {
+        return 'A previous donation is still being processed (blockhash conflict). This happens when donations are triggered faster than Solana can confirm. Wait a moment and it should resolve.';
       }
       if (d.indexOf('rate') !== -1 || d.indexOf('limit') !== -1 || d.indexOf('429') !== -1) {
         return 'The demo server has hit a rate limit. This is a temporary restriction in the demo environment. Wait a few seconds and try again.';
@@ -1862,7 +1842,7 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
         var detailHtml = escapeHtml(e.detail);
         var txLinkHtml = '';
         if (e.status === 'ok' && e.txHash) {
-          var href = explorerUrl + '/tx/' + escapeHtml(e.txHash);
+          var href = EXPLORER_TX(currentChain, escapeHtml(e.txHash));
           txLinkHtml = '<a class="tx-link" href="' + href + '" target="_blank" rel="noopener" title="View on explorer">' + escapeHtml(e.txHash.slice(0, 10) + '...') + '</a>';
         }
         var tooltipHtml = '';
@@ -1918,15 +1898,15 @@ console.<span class="code-func">log</span>(receipt.txHash); <span class="code-co
           label: 'Sign + send payment',
           sublabel: 'x402 protocol (automatic)',
           title: '4. x402 server signs and sends the payment',
-          desc: 'The x402 charity server uses its private key to sign a USDC transferWithAuthorization (EIP-3009) and sends it to the x402.org facilitator via the x402 payment protocol. All automatic — no code needed.',
+          desc: 'The x402 charity server uses its private key to sign a partial SPL USDC transfer transaction and sends it to the x402.org facilitator. The facilitator co-signs as fee payer — so the donor wallet only needs USDC, never SOL.',
           activeActors: ['x402', 'facilitator'],
         },
         {
           from: 'facilitator', to: 'charity', dir: 'ltr',
-          label: 'USDC transfer on Base',
+          label: 'USDC transfer on Solana',
           sublabel: '$0.001 settled on-chain',
           title: '5. USDC lands in the charity wallet',
-          desc: 'The facilitator (x402.org, run by Coinbase) executes the on-chain USDC transfer on Base. The charity receives $0.001 directly in their wallet. Fully transparent and verifiable by anyone.',
+          desc: 'The facilitator (x402.org, run by Coinbase) co-signs and submits the SPL USDC transfer on Solana. The charity receives $0.001 directly in their associated token account. Fully transparent and verifiable by anyone.',
           activeActors: ['facilitator', 'charity'],
         },
         {
