@@ -127,7 +127,8 @@ console.log(receipt.txHash); // on-chain Solana signature
 | `CHARITY_WALLET` | Yes | Solana wallet address (base58 pubkey) of the charity. | — |
 | `CHARITY_NAME` | No | Display name for the charity | `My Charity` |
 | `CHARITY_DESCRIPTION` | No | Description of the charity | — |
-| `DONATION_NETWORK` | No | `solana-mainnet` or `solana-devnet` | `solana-devnet` |
+| `DONATION_NETWORK` | No | `solana-mainnet` or `solana-devnet`. **Mainnet requires `FACILITATOR_URL` to be set** — the default x402.org facilitator currently advertises Solana devnet only. | `solana-devnet` |
+| `FACILITATOR_URL` | No | Override the x402 facilitator URL. Required for `solana-mainnet`. PayAI (`https://facilitator.payai.network`) is the current mainnet-capable option; self-hosted facilitators also work. | `https://x402.org/facilitator` |
 | `BASE_URL` | No | Public URL of your server (auto-detected on Vercel) | `http://localhost:3402` |
 | `PORT` | No | Server port | `3402` |
 | `DONATE_API_KEY` | No | Secret key to protect `POST /donate`. If set, callers must send `Authorization: Bearer <key>`. If unset, the endpoint is open. **Set this in production.** | — (open) |
@@ -264,7 +265,7 @@ Or deploy manually:
 Before donations can work, your donation wallet needs USDC on the correct network:
 
 - **If using `solana-devnet` (testnet, the default):** Get devnet USDC from the [Circle faucet](https://faucet.circle.com/) (choose Solana → Devnet). No SOL needed for the donor wallet.
-- **If using `solana-mainnet`:** Fund the donor wallet with real USDC on Solana. No SOL needed in this wallet — the facilitator pays gas.
+- **If using `solana-mainnet`:** Fund the donor wallet with real USDC on Solana, **and** point `FACILITATOR_URL` at a mainnet-capable facilitator (e.g. `https://facilitator.payai.network`). No SOL needed in this wallet — the facilitator pays gas. The default `https://x402.org/facilitator` does **not** currently support Solana mainnet.
 
 > **ATA bootstrapping:** SPL USDC is held in an Associated Token Account (ATA) derived from `(wallet, mint)`. The x402 facilitator is expected to include an ATA-create instruction on the first donation to a charity whose ATA does not yet exist, but **this has not been verified end-to-end from this codebase yet** — see [Known Issues](#known-issues--future-work). If your first mainnet donation fails because the charity ATA doesn't exist, pre-create it manually with `spl-token create-account <USDC_MINT> --owner <CHARITY_WALLET>` (rent is ~0.002 SOL, one-time).
 
@@ -309,11 +310,19 @@ x402charity/
 
 The Solana port is recent. The following items are known gaps or follow-ups — contributions welcome.
 
+### Verified during the Solana port
+
+- **Server boots cleanly on `solana-devnet`** with the default x402.org facilitator. `/health`, `/charity`, `/address`, `/donations` all respond; static assets serve correctly; `POST /donate` against an unfunded wallet fails fast with `{"error":"Donation failed","details":"x402 donation failed (402): ..."}` rather than hanging.
+- **`https://x402.org/facilitator/supported` advertises Solana devnet** (CAIP-2 `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`) and returns a `feePayer` of `CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5` — confirming facilitator-as-fee-payer mode is wired correctly.
+
 ### Needs verification (before mainnet use)
 
-- **End-to-end mainnet donation has not been exercised yet from this codebase.** Run the full flow on `solana-devnet` first (`pnpm dev`, then `curl -X POST localhost:3402/donate ...`) and confirm the receipt contains a real Solana signature and shows up on Solscan before pointing at `solana-mainnet`.
-- **First-donation ATA creation.** `@x402/svm` is expected to include an `createAssociatedTokenAccount` instruction in the partial transaction when the charity ATA does not exist, with the facilitator paying the ~0.002 SOL rent. This has not been confirmed against a charity wallet that has never held USDC. Workaround: pre-create the charity ATA with `spl-token create-account` if the first donation fails.
-- **Facilitator URL.** The server currently relies on the protocol default (`https://x402.org/facilitator`, operated by Coinbase, which advertises SVM support). If that endpoint is rate-limited or doesn't co-sign SVM transactions reliably, swap to an alternative (PayAI's facilitator or self-hosted via `toFacilitatorSvmSigner` from `@x402/svm`). The current code does not expose a `FACILITATOR_URL` env var — adding one is a small change in `packages/server/src/server.ts`.
+- **End-to-end donation against a funded wallet has not been exercised yet.** The server starts and reaches the x402 handshake, but no real on-chain donation has been settled from this codebase. Next step: fund the donor wallet with devnet USDC from `faucet.circle.com` (Solana → Devnet), POST `/donate`, and confirm the receipt contains a real Solana signature visible on Solscan.
+- **First-donation ATA creation.** `@x402/svm` is expected to include a `createAssociatedTokenAccount` instruction in the partial transaction when the charity ATA does not exist, with the facilitator paying the ~0.002 SOL rent. This has not been confirmed against a charity wallet that has never held USDC. Workaround: pre-create the charity ATA with `spl-token create-account` if the first donation fails.
+
+### Known limitations
+
+- **Mainnet requires a non-default facilitator.** The public `https://x402.org/facilitator` currently advertises Solana **devnet only**. Booting with `DONATION_NETWORK=solana-mainnet` and no `FACILITATOR_URL` will crash at startup with `Facilitator does not support scheme "exact" on network "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"`. To use mainnet today, set `FACILITATOR_URL=https://facilitator.payai.network` (or another mainnet-capable facilitator) — the server now supports this override.
 
 ### Known limitations
 
