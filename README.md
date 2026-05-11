@@ -268,21 +268,41 @@ Before donations can work, your donation wallet needs USDC on the correct networ
 
 > **ATA bootstrapping:** SPL USDC is held in an Associated Token Account (ATA) derived from `(wallet, mint)`. The x402 facilitator is expected to include an ATA-create instruction on the first donation to a charity whose ATA does not yet exist, but **this has not been verified end-to-end from this codebase yet** — see [Known Issues](#known-issues--future-work). If your first mainnet donation fails because the charity ATA doesn't exist, pre-create it manually with `spl-token create-account <USDC_MINT> --owner <CHARITY_WALLET>` (rent is ~0.002 SOL, one-time).
 
+## What's Hosted from This Repo
+
+This repo is the source of truth for three published artefacts:
+
+| Artefact | Where | What's published from this repo |
+|---|---|---|
+| **Website** — [x402charity.com](https://x402charity.com) | Vercel (project linked to `allscale-io/x402charity`, auto-deploys from `main`) | The static landing page + dashboard (`docs/`) and the API endpoints (`api/index.ts` → wraps `@x402charity/server`). The Vercel build copies `docs/{index.html, colors_and_type.css, x402-charity.js, assets/, fonts/}` into `public/`, and serverless rewrites send `/donate`, `/donations`, `/address`, `/charity`, `/health` to `api/index.ts`. |
+| **npm package** — [`x402charity`](https://www.npmjs.com/package/x402charity) | npm registry | Built from `packages/core/`. Includes the `X402CharityClient`, the Express + Next.js middleware, the registry helpers, and the `npx x402charity` CLI. |
+| **GitHub repo** — [allscale-io/x402charity](https://github.com/allscale-io/x402charity) | GitHub | This repo. |
+
+A second internal package (`@x402charity/server`, in `packages/server/`) is the Express app the Vercel function and the Dockerfile both run. It is **not published to npm** — it's a workspace-only package used by the Vercel deploy and anyone running `pnpm dev` / `docker run x402charity`.
+
 ## Repository Structure
 
 ```
 x402charity/
 ├── packages/
-│   ├── core/            # npm package: client, middleware, CLI (x402charity)
-│   └── server/          # Deployable donation server
+│   ├── core/                          # npm package "x402charity" — client, middleware, CLI
+│   └── server/                        # Express donation server (not on npm; used by Vercel + Docker)
 ├── registry/
-│   └── charities.json   # Charity directory
-├── docs/
-│   └── index.html       # Landing page (x402charity.com)
+│   └── charities.json                 # Charity directory
+├── docs/                              # Source of the live website. All files here get copied to public/ at build time.
+│   ├── index.html                     # Landing page + dashboard markup
+│   ├── colors_and_type.css            # AllScale design-system tokens
+│   ├── x402-charity.js                # Frontend logic (live feed, dashboard, game, copy buttons)
+│   ├── assets/                        # Logo, chain & token icons
+│   │   ├── allscale-logo.svg
+│   │   ├── chain/solana.svg
+│   │   └── tokens/{usdc,sol}.svg
+│   └── fonts/Archivo-VariableFont.ttf # Brand font
 ├── api/
-│   └── index.ts         # Vercel serverless entry point
+│   └── index.ts                       # Vercel serverless entry point (wraps the Express app)
+├── public/                            # GENERATED at build time by `vercel.json`. Do not edit. Gitignored except .gitkeep.
 ├── Dockerfile
-└── vercel.json
+└── vercel.json                        # Vercel build/rewrite config
 ```
 
 ## Known Issues & Future Work
