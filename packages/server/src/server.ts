@@ -9,6 +9,7 @@ import {
 } from '@solana/kit';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { paymentMiddlewareFromConfig } from '@x402/express';
+import { HTTPFacilitatorClient } from '@x402/core/server';
 import {
   SVM_ADDRESS_REGEX,
   SOLANA_DEVNET_CAIP2,
@@ -222,10 +223,21 @@ export async function createCharityServer(options: ServerOptions = {}): Promise<
     },
   };
 
+  // Facilitator override — useful when the default x402.org facilitator doesn't
+  // yet support your target network (e.g. solana-mainnet). PayAI and Coinbase
+  // CDP also operate x402-compatible facilitators.
+  const facilitatorUrl = process.env.FACILITATOR_URL?.trim();
+  const facilitatorClient = facilitatorUrl
+    ? new HTTPFacilitatorClient({ url: facilitatorUrl })
+    : undefined;
+  if (facilitatorUrl) {
+    console.log(`=== Facilitator ===\n  ${facilitatorUrl}\n`);
+  }
+
   app.use(
     paymentMiddlewareFromConfig(
       routes as Parameters<typeof paymentMiddlewareFromConfig>[0],
-      undefined,
+      facilitatorClient,
       [{ network: caip2 as `${string}:${string}`, server: new ExactSvmScheme() }],
     ),
   );
