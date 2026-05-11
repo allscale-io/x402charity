@@ -19,11 +19,13 @@
     "start": "node bin/server.js"
   },
   "dependencies": {
-    "@x402/evm": "^2.5.0",
-    "@x402/express": "^2.6.0",
-    "x402charity": "workspace:*",
+    "@solana-program/token": "^0.9.0",
+    "@solana/kit": "^5.5.1",
+    "@x402/express": "^2.11.0",
+    "@x402/svm": "^2.11.0",
+    "bs58": "^6.0.0",
     "express": "^5.0.0",
-    "viem": "^2.21.0"
+    "x402charity": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "^4.17.0",
@@ -38,7 +40,8 @@
     "server",
     "express",
     "usdc",
-    "base",
+    "solana",
+    "spl-token",
     "web3"
   ],
   "homepage": "https://x402charity.com",
