@@ -4,8 +4,8 @@
       "id": "testing-charity",
       "name": "Testing Charity",
       "description": "Test charity for development and demos",
-      "walletAddress": "0x8DC1521132381aAB648e067c2Db3677D5BF70c6d",
-      "chain": "base-sepolia",
+      "walletAddress": "GokT7XLkr4ezHGB6KrLwTGyhCSVF8YJaqbVf2ZNeAJxr",
+      "chain": "solana-devnet",
       "verified": false,
       "category": "testing",
       "x402Endpoint": "https://x402charity.com/donate"

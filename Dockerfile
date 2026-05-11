@@ -20,9 +20,9 @@ RUN pnpm --filter x402charity build && pnpm --filter @x402charity/server build
 
 EXPOSE 3402
 
-# Required: DONATION_PRIVATE_KEY
-# Required: CHARITY_WALLET (or use registry/charities.json)
+# Required: DONATION_PRIVATE_KEY (Solana secret key — base58 64-byte or JSON array)
+# Required: CHARITY_WALLET (Solana base58 pubkey, or use registry/charities.json)
 # Optional: CHARITY_NAME, CHARITY_ID, CHARITY_DESCRIPTION
-# Optional: DONATION_NETWORK (base or base-sepolia, default: base-sepolia)
+# Optional: DONATION_NETWORK (solana-mainnet or solana-devnet, default: solana-devnet)
 # Optional: PORT (default: 3402)
 CMD ["node", "packages/server/bin/server.js"]

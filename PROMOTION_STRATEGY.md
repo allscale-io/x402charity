@@ -1,5 +1,8 @@
 # x402charity Promotion Strategy
 
+> **Note:** Written when the project targeted Base/EVM. The project has since been ported to Solana. Promotion channels referencing the Base ecosystem (awesome-base, Base grants, /base Farcaster channel) are no longer the primary fit — Solana-equivalent venues (e.g. Solana Ecosystem, Solana Foundation grants, /solana channels) should be substituted before re-using this checklist.
+
+
 ## TODO Checklist
 
 ### 1. Ecosystem Listings (Do First -- quick PRs, high impact)

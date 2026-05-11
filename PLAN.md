@@ -1,5 +1,14 @@
 # x402charity Project Plan
 
+> **Status:** This project is now **Solana-only**. The original plan (below) referenced Base/EVM. The implementation has been ported to:
+> - `@x402/svm` (Coinbase x402 SVM scheme) instead of `@x402/evm`
+> - `@solana/kit` + `@solana-program/token` instead of `viem`
+> - SPL USDC on Solana (mainnet + devnet) instead of ERC-20 USDC on Base
+> - Ed25519 signatures on partial Solana transactions instead of EIP-712 typed data
+> - Coinbase x402 facilitator co-signs as fee payer — donor wallet needs only USDC (no SOL)
+>
+> Stale references in the sections below are left intact as project history.
+
 ## Project Structure
 
 ```

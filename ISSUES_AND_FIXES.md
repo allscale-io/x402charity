@@ -1,5 +1,8 @@
 # x402charity — Deployment Issues & Recommended Fixes
 
+> **Note:** This document predates the Solana migration. Some sections may reference Base/EVM specifics; the actual implementation now uses Solana (`@x402/svm`, SPL USDC, `solana-devnet` / `solana-mainnet`).
+
+
 This document covers bugs and design issues found when deploying [x402charity](https://github.com/allscale-io/x402charity) to Vercel.
 
 ---
@@ -125,9 +128,9 @@ The README's "Deploy on Vercel" section says:
 
 It does not mention:
 - The `BASE_URL` variable needed for donations to work
-- That the donation wallet must be funded with both USDC and ETH (for gas) on the correct network
-- That `base-sepolia` is the default network (testnet), which requires testnet USDC
-- How to get testnet USDC (e.g. Circle faucet at https://faucet.circle.com/)
+- That the donation wallet must be funded with USDC on Solana (no SOL needed — the facilitator pays gas)
+- That `solana-devnet` is the default network (testnet), which requires devnet USDC
+- How to get devnet USDC (e.g. Circle faucet at https://faucet.circle.com/ — choose Solana → Devnet)
 
 **Fix:** Expand the Vercel section with the complete list of required steps, including `BASE_URL` (or auto-detect it per fix #1) and wallet funding instructions.
 
