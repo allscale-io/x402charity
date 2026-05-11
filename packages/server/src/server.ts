@@ -2,33 +2,48 @@ import { resolve } from 'node:path';
 import { timingSafeEqual } from 'node:crypto';
 import express, { type Express } from 'express';
 import {
-  createPublicClient,
-  http,
-  erc20Abi,
-  formatUnits,
-  formatEther,
-  parseAbiItem,
-} from 'viem';
-import { base, baseSepolia } from 'viem/chains';
-import { privateKeyToAccount } from 'viem/accounts';
+  address,
+  createSolanaRpc,
+  type Address,
+  type Signature,
+} from '@solana/kit';
+import { findAssociatedTokenPda } from '@solana-program/token';
 import { paymentMiddlewareFromConfig } from '@x402/express';
-import { ExactEvmScheme } from '@x402/evm/exact/server';
-import { X402CharityClient, listCharities, setCharities } from 'x402charity';
-import type { Charity } from 'x402charity';
+import {
+  SVM_ADDRESS_REGEX,
+  SOLANA_DEVNET_CAIP2,
+  SOLANA_MAINNET_CAIP2,
+  TOKEN_PROGRAM_ADDRESS,
+  USDC_DEVNET_ADDRESS,
+  USDC_MAINNET_ADDRESS,
+  DEVNET_RPC_URL,
+  MAINNET_RPC_URL,
+} from '@x402/svm';
+import { ExactSvmScheme } from '@x402/svm/exact/server';
+import {
+  X402CharityClient,
+  listCharities,
+  setCharities,
+  isSolanaNetwork,
+  EXPLORER_URLS,
+  explorerClusterQuery,
+  type SolanaNetwork,
+  type Charity,
+} from 'x402charity';
 
-const USDC_ADDRESSES: Record<string, `0x${string}`> = {
-  base: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-  'base-sepolia': '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
+const USDC_MINTS: Record<SolanaNetwork, string> = {
+  'solana-mainnet': USDC_MAINNET_ADDRESS,
+  'solana-devnet': USDC_DEVNET_ADDRESS,
 };
 
-const CAIP2: Record<string, string> = {
-  base: 'eip155:8453',
-  'base-sepolia': 'eip155:84532',
+const CAIP2: Record<SolanaNetwork, string> = {
+  'solana-mainnet': SOLANA_MAINNET_CAIP2,
+  'solana-devnet': SOLANA_DEVNET_CAIP2,
 };
 
-const EXPLORER_URLS: Record<string, string> = {
-  base: 'https://basescan.org',
-  'base-sepolia': 'https://sepolia.basescan.org',
+const RPC_URLS: Record<SolanaNetwork, string> = {
+  'solana-mainnet': MAINNET_RPC_URL,
+  'solana-devnet': DEVNET_RPC_URL,
 };
 
 interface DonationLog {
@@ -48,13 +63,13 @@ interface DonationLog {
 export interface ServerOptions {
   /** Port to listen on. Default: 3402 */
   port?: number;
-  /** Private key for the server's donation wallet (hex string). */
+  /** Donor wallet secret key — base58 64-byte or JSON-array format. */
   privateKey?: string;
-  /** Network to use. Default: base-sepolia */
-  network?: 'base' | 'base-sepolia';
+  /** Network. Default: solana-devnet */
+  network?: SolanaNetwork;
   /** Path to the docs directory for serving static pages. */
   docsDir?: string;
-  /** Charity wallet address. */
+  /** Charity wallet (base58 Solana address). */
   charityWallet?: string;
   /** Charity name. */
   charityName?: string;
@@ -63,22 +78,22 @@ export interface ServerOptions {
 /**
  * Resolve the single charity from env vars or registry.
  */
-function resolveCharity(options: ServerOptions, network: string): Charity {
+function resolveCharity(options: ServerOptions, network: SolanaNetwork): Charity {
   const charityWallet = options.charityWallet || process.env.CHARITY_WALLET;
   const charityName = options.charityName || process.env.CHARITY_NAME || 'My Charity';
   const baseUrl = process.env.BASE_URL
     || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3402');
 
   if (charityWallet) {
-    if (!/^0x[a-fA-F0-9]{40}$/.test(charityWallet)) {
-      throw new Error(`Invalid CHARITY_WALLET address: "${charityWallet}". Must be a 0x-prefixed 40-character hex string.`);
+    if (!SVM_ADDRESS_REGEX.test(charityWallet)) {
+      throw new Error(`Invalid CHARITY_WALLET address: "${charityWallet}". Must be a base58-encoded Solana public key.`);
     }
     const charity: Charity = {
       id: charityName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       name: charityName,
       description: process.env.CHARITY_DESCRIPTION || `Donations to ${charityName}`,
       walletAddress: charityWallet,
-      chain: network as 'base' | 'base-sepolia',
+      chain: network,
       verified: false,
       x402Endpoint: `${baseUrl}/donate`,
     };
@@ -95,38 +110,55 @@ function resolveCharity(options: ServerOptions, network: string): Charity {
 }
 
 /**
+ * Derive the USDC associated token account for a wallet on the given network.
+ */
+async function getUsdcAta(
+  wallet: string,
+  network: SolanaNetwork,
+): Promise<Address> {
+  const [ata] = await findAssociatedTokenPda({
+    owner: address(wallet),
+    tokenProgram: address(TOKEN_PROGRAM_ADDRESS),
+    mint: address(USDC_MINTS[network]),
+  });
+  return ata;
+}
+
+/**
  * Create the Express app that donates on behalf of users using the server's own wallet.
  */
-export function createCharityServer(options: ServerOptions = {}): {
+export async function createCharityServer(options: ServerOptions = {}): Promise<{
   app: Express;
-} {
-  const {
-    privateKey = process.env.DONATION_PRIVATE_KEY || '',
-    network = (process.env.DONATION_NETWORK as 'base' | 'base-sepolia') || 'base-sepolia',
-  } = options;
+}> {
+  const privateKey = options.privateKey || process.env.DONATION_PRIVATE_KEY || '';
+  const rawNetwork = options.network || process.env.DONATION_NETWORK || 'solana-devnet';
+  if (!isSolanaNetwork(rawNetwork)) {
+    throw new Error(`Invalid DONATION_NETWORK "${rawNetwork}". Must be "solana-mainnet" or "solana-devnet".`);
+  }
+  const network: SolanaNetwork = rawNetwork;
 
   const charity = resolveCharity(options, network);
 
   const explorerUrl = EXPLORER_URLS[network];
+  const explorerSuffix = explorerClusterQuery(network);
 
   // Set up wallet for server-side x402 client (trigger-donate endpoint)
-  let account: ReturnType<typeof privateKeyToAccount> | null = null;
+  let donorAddress: string | null = null;
   let donationClient: X402CharityClient | null = null;
   if (privateKey) {
     try {
-      const pk = (privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`) as `0x${string}`;
-      account = privateKeyToAccount(pk);
-      donationClient = new X402CharityClient({
+      donationClient = await X402CharityClient.create({
         privateKey,
         network,
         donateEndpoint: charity.x402Endpoint,
         charity,
       });
+      donorAddress = donationClient.account.address;
       console.log('\n=== Donation Wallet ===');
-      console.log(`  Address: ${account.address}`);
+      console.log(`  Address: ${donorAddress}`);
       console.log(`  Network: ${network}`);
-      console.log(`  Fund this address with USDC and ETH (for gas) on ${network === 'base' ? 'Base' : 'Base Sepolia'}`);
-      console.log(`  Explorer: ${explorerUrl}/address/${account.address}\n`);
+      console.log(`  Fund this address with USDC on ${network}. SOL is not required — the facilitator pays gas.`);
+      console.log(`  Explorer: ${explorerUrl}/account/${donorAddress}${explorerSuffix}\n`);
     } catch (err) {
       console.error('Failed to initialize donation wallet:', err instanceof Error ? err.message : err);
     }
@@ -193,7 +225,7 @@ export function createCharityServer(options: ServerOptions = {}): {
     paymentMiddlewareFromConfig(
       routes as Parameters<typeof paymentMiddlewareFromConfig>[0],
       undefined,
-      [{ network: caip2 as `${string}:${string}`, server: new ExactEvmScheme() }],
+      [{ network: caip2 as `${string}:${string}`, server: new ExactSvmScheme() }],
     ),
   );
 
@@ -202,77 +234,63 @@ export function createCharityServer(options: ServerOptions = {}): {
     res.json({
       status: 'ok',
       charity: { name: charity.name, wallet: charity.walletAddress },
-      walletConfigured: !!account,
-      donationWallet: account?.address ?? null,
+      walletConfigured: !!donorAddress,
+      donationWallet: donorAddress,
     });
   });
 
   // Public address and balances of the donation wallet
   app.get('/address', async (_req, res) => {
-    if (!account) {
+    if (!donorAddress) {
       res.status(503).json({ error: 'Donation wallet not configured.' });
       return;
     }
 
-    const address = account.address;
-    const chains = {
-      base: { chain: base, rpc: 'https://mainnet.base.org' },
-      'base-sepolia': { chain: baseSepolia, rpc: 'https://sepolia.base.org' },
-    };
-
-    const balances: Record<string, { eth: string; usdc: string }> = {};
+    const networks: SolanaNetwork[] = ['solana-mainnet', 'solana-devnet'];
+    const balances: Record<string, { sol: string; usdc: string }> = {};
 
     await Promise.all(
-      Object.entries(chains).map(async ([name, { chain, rpc }]) => {
-        const client = createPublicClient({ chain, transport: http(rpc, { timeout: 15_000 }) });
-        const [ethBal, usdcBal] = await Promise.all([
-          client.getBalance({ address }),
-          client.readContract({
-            address: USDC_ADDRESSES[name],
-            abi: erc20Abi,
-            functionName: 'balanceOf',
-            args: [address],
-          }),
-        ]);
-        balances[name] = {
-          eth: formatEther(ethBal),
-          usdc: formatUnits(usdcBal, 6),
-        };
+      networks.map(async (net) => {
+        try {
+          const rpc = createSolanaRpc(RPC_URLS[net]);
+          const ata = await getUsdcAta(donorAddress!, net);
+          const [solRes, usdcRes] = await Promise.all([
+            rpc.getBalance(address(donorAddress!)).send().catch(() => null),
+            rpc.getTokenAccountBalance(ata).send().catch(() => null),
+          ]);
+          balances[net] = {
+            sol: solRes ? (Number(solRes.value) / 1e9).toFixed(9) : '0',
+            usdc: usdcRes?.value?.uiAmountString ?? '0',
+          };
+        } catch {
+          balances[net] = { sol: '0', usdc: '0' };
+        }
       }),
     );
 
-    res.json({ address, balances });
+    res.json({ address: donorAddress, balances });
   });
 
   // Charity info with balances
   app.get('/charity', async (_req, res) => {
-    const charityAddr = charity.walletAddress as `0x${string}`;
-    const chains = {
-      base: { chain: base, rpc: 'https://mainnet.base.org' },
-      'base-sepolia': { chain: baseSepolia, rpc: 'https://sepolia.base.org' },
-    };
-
-    const balances: Record<string, { eth: string; usdc: string }> = {};
+    const networks: SolanaNetwork[] = ['solana-mainnet', 'solana-devnet'];
+    const balances: Record<string, { sol: string; usdc: string }> = {};
 
     await Promise.all(
-      Object.entries(chains).map(async ([name, { chain: c, rpc }]) => {
+      networks.map(async (net) => {
         try {
-          const client = createPublicClient({ chain: c, transport: http(rpc) });
-          const [ethBal, usdcBal] = await Promise.all([
-            client.getBalance({ address: charityAddr }),
-            client.readContract({
-              address: USDC_ADDRESSES[name],
-              abi: erc20Abi,
-              functionName: 'balanceOf',
-              args: [charityAddr],
-            }),
+          const rpc = createSolanaRpc(RPC_URLS[net]);
+          const ata = await getUsdcAta(charity.walletAddress, net);
+          const [solRes, usdcRes] = await Promise.all([
+            rpc.getBalance(address(charity.walletAddress)).send().catch(() => null),
+            rpc.getTokenAccountBalance(ata).send().catch(() => null),
           ]);
-          balances[name] = {
-            eth: formatEther(ethBal),
-            usdc: formatUnits(usdcBal, 6),
+          balances[net] = {
+            sol: solRes ? (Number(solRes.value) / 1e9).toFixed(9) : '0',
+            usdc: usdcRes?.value?.uiAmountString ?? '0',
           };
         } catch {
-          balances[name] = { eth: '0', usdc: '0' };
+          balances[net] = { sol: '0', usdc: '0' };
         }
       }),
     );
@@ -286,87 +304,93 @@ export function createCharityServer(options: ServerOptions = {}): {
     });
   });
 
-  // Donation history API — fetches on-chain USDC transfers from both networks
-  // Accepts ?daysAgo=N to scan a single day's worth of blocks (default: 0 = today)
+  // Donation history — scans recent USDC transfers into the charity's ATA on
+  // each network. Uses getSignaturesForAddress + getTransaction per signature.
+  // Accepts ?limit=N (default 50, max 200) to bound the scan per network.
   app.get('/donations', async (req, res) => {
-    const charityAddr = charity.walletAddress as `0x${string}`;
-    const daysAgo = Math.min(365, Math.max(0, parseInt(req.query.daysAgo as string) || 0));
-
-    const transferEvent = parseAbiItem(
-      'event Transfer(address indexed from, address indexed to, uint256 value)',
-    );
-
-    const chains = [
-      { name: 'base' as const, chain: base, rpc: 'https://mainnet.base.org', explorer: 'https://basescan.org' },
-      { name: 'base-sepolia' as const, chain: baseSepolia, rpc: 'https://sepolia.base.org', explorer: 'https://sepolia.basescan.org' },
-    ];
-
-    const CHUNK_SIZE = 9999n;
-    const BLOCKS_PER_DAY = 43200n; // ~24h at ~2s/block on Base
-    const BATCH_CONCURRENCY = 10;
-
+    const limit = Math.min(200, Math.max(1, parseInt(req.query.limit as string) || 50));
+    const networks: SolanaNetwork[] = ['solana-mainnet', 'solana-devnet'];
     const onChainDonations: DonationLog[] = [];
 
-    await Promise.all(chains.map(async ({ name, chain, rpc }) => {
+    await Promise.all(networks.map(async (net) => {
       try {
-        const client = createPublicClient({ chain, transport: http(rpc, { timeout: 15_000 }) });
-        const currentBlock = await client.getBlockNumber();
+        const rpc = createSolanaRpc(RPC_URLS[net]);
+        const charityWallet = charity.walletAddress;
+        const ata = await getUsdcAta(charityWallet, net);
+        const usdcMint = USDC_MINTS[net];
 
-        const endBlock = currentBlock - BigInt(daysAgo) * BLOCKS_PER_DAY;
-        let startBlock = endBlock - BLOCKS_PER_DAY;
-        if (startBlock < 0n) startBlock = 0n;
+        const sigs = await rpc.getSignaturesForAddress(ata, { limit }).send();
+        if (!sigs.length) return;
 
-        // Build chunk ranges
-        const chunks: { from: bigint; to: bigint }[] = [];
-        for (let from = startBlock; from <= endBlock; from += CHUNK_SIZE + 1n) {
-          const to = from + CHUNK_SIZE > endBlock ? endBlock : from + CHUNK_SIZE;
-          chunks.push({ from, to });
-        }
-
-        // Fetch logs in batched parallel to respect RPC rate limits
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const allLogs: any[] = [];
-        for (let i = 0; i < chunks.length; i += BATCH_CONCURRENCY) {
-          const batch = chunks.slice(i, i + BATCH_CONCURRENCY);
-          const results = await Promise.all(
-            batch.map(({ from, to }) =>
-              client.getLogs({
-                address: USDC_ADDRESSES[name],
-                event: transferEvent,
-                args: { to: charityAddr },
-                fromBlock: from,
-                toBlock: to,
-              }).catch(() => []),
+        // Fetch transactions in small batches (RPC rate limit friendly)
+        const BATCH = 5;
+        for (let i = 0; i < sigs.length; i += BATCH) {
+          const slice = sigs.slice(i, i + BATCH);
+          const txs = await Promise.all(
+            slice.map((s) =>
+              rpc
+                .getTransaction(s.signature, {
+                  encoding: 'jsonParsed',
+                  commitment: 'confirmed',
+                  maxSupportedTransactionVersion: 0,
+                })
+                .send()
+                .catch(() => null),
             ),
           );
-          for (const logs of results) {
-            allLogs.push(...logs);
+
+          for (let j = 0; j < txs.length; j++) {
+            const tx = txs[j];
+            const sigInfo = slice[j];
+            if (!tx || !tx.meta || tx.meta.err) continue;
+            const post = tx.meta.postTokenBalances ?? [];
+            const pre = tx.meta.preTokenBalances ?? [];
+
+            // Find the charity USDC balance entry (by owner + mint) in post
+            const postEntry = post.find(
+              (b) => b.mint === usdcMint && b.owner === charityWallet,
+            );
+            if (!postEntry) continue;
+            const preEntry = pre.find(
+              (b) => b.accountIndex === postEntry.accountIndex,
+            );
+
+            const postAmt = Number(postEntry.uiTokenAmount?.uiAmountString ?? '0');
+            const preAmt = Number(preEntry?.uiTokenAmount?.uiAmountString ?? '0');
+            const delta = postAmt - preAmt;
+            if (delta <= 0) continue;
+
+            // Sender: find a different-owner balance entry that decreased
+            let fromAddr = '';
+            for (const p of pre) {
+              if (p.mint !== usdcMint || p.owner === charityWallet) continue;
+              const matched = post.find((b) => b.accountIndex === p.accountIndex);
+              const preX = Number(p.uiTokenAmount?.uiAmountString ?? '0');
+              const postX = Number(matched?.uiTokenAmount?.uiAmountString ?? '0');
+              if (preX - postX > 0) {
+                fromAddr = p.owner ?? '';
+                break;
+              }
+            }
+
+            onChainDonations.push({
+              txHash: String(sigInfo.signature),
+              from: fromAddr,
+              to: charityWallet,
+              charityId: charity.id,
+              charityName: charity.name,
+              amount: `$${delta.toFixed(6).replace(/0+$/, '').replace(/\.$/, '')}`,
+              currency: 'USDC',
+              chain: net,
+              timestamp: sigInfo.blockTime
+                ? Number(sigInfo.blockTime) * 1000
+                : Date.now(),
+              status: 'ok',
+            });
           }
         }
-
-        // Estimate timestamps from block numbers (avoids getBlock RPC calls)
-        const currentTimestamp = Date.now();
-        const BLOCK_TIME_MS = 2000; // ~2s per block on Base
-
-        for (const log of allLogs) {
-          const amount = formatUnits(log.args.value ?? 0n, 6);
-          const blockDiff = Number(currentBlock - log.blockNumber!);
-          const estimatedTimestamp = currentTimestamp - blockDiff * BLOCK_TIME_MS;
-          onChainDonations.push({
-            txHash: log.transactionHash ?? '',
-            from: (log.args.from as string) ?? '',
-            to: (log.args.to as string) ?? '',
-            charityId: charity.id,
-            charityName: charity.name,
-            amount: `$${amount}`,
-            currency: 'USDC',
-            chain: name,
-            timestamp: estimatedTimestamp,
-            status: 'ok',
-          });
-        }
       } catch (err) {
-        console.error(`Failed to fetch on-chain donations (${name}):`, err instanceof Error ? err.message : err);
+        console.error(`Failed to fetch donations (${net}):`, err instanceof Error ? err.message : err);
       }
     }));
 
@@ -374,7 +398,7 @@ export function createCharityServer(options: ServerOptions = {}): {
     const total = all.reduce((sum, d) => sum + parseFloat(d.amount.replace('$', '')), 0);
 
     res.json({
-      total: `$${total.toFixed(4)}`,
+      total: `$${total.toFixed(6)}`,
       count: all.length,
       network,
       explorerUrl,
@@ -397,7 +421,7 @@ export function createCharityServer(options: ServerOptions = {}): {
     });
   });
 
-  // Donation queue — serializes x402 payments to avoid nonce conflicts
+  // Donation queue — serializes x402 payments to avoid blockhash/nonce conflicts
   let donationQueue: Promise<void> = Promise.resolve();
   const MAX_RETRIES = 3;
   const RETRY_DELAY_MS = 1000;
@@ -483,9 +507,9 @@ export function createCharityServer(options: ServerOptions = {}): {
 /**
  * Start the charity server on the given port.
  */
-export function startCharityServer(options: ServerOptions = {}): void {
+export async function startCharityServer(options: ServerOptions = {}): Promise<void> {
   const port = options.port || 3402;
-  const { app } = createCharityServer(options);
+  const { app } = await createCharityServer(options);
 
   app.listen(port, () => {
     console.log(`x402 Charity Server running on http://localhost:${port}\n`);
@@ -498,3 +522,6 @@ export function startCharityServer(options: ServerOptions = {}): void {
     console.log(`  POST /donate              — trigger a donation\n`);
   });
 }
+
+// Re-export the Signature type so consumers can type-check signature strings.
+export type SolanaSignature = Signature;
