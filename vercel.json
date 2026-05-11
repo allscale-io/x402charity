@@ -1,6 +1,6 @@
 {
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm --filter x402charity build && pnpm --filter @x402charity/server build && cp docs/index.html public/index.html",
+  "buildCommand": "pnpm --filter x402charity build && pnpm --filter @x402charity/server build && mkdir -p public/assets public/fonts && cp docs/index.html public/index.html && cp docs/colors_and_type.css public/colors_and_type.css && cp docs/x402-charity.js public/x402-charity.js && cp -R docs/assets/. public/assets/ && cp -R docs/fonts/. public/fonts/",
   "functions": {
     "api/index.ts": {
       "maxDuration": 30

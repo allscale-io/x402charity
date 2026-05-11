@@ -4,4 +4,6 @@ dist/
 *.tgz
 .x402charity/
 .vercel
-public/index.html
+# Vercel build output — everything under public/ is generated from docs/ at build time
+public/*
+!public/.gitkeep

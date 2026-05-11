@@ -203,10 +203,11 @@ export async function createCharityServer(options: ServerOptions = {}): Promise<
 
   // --- Static pages ---
   // On Vercel, static files are served by the platform before Express sees the request.
-  // This route is only used for local/Docker development.
+  // For local/Docker, serve the docs/ directory directly (CSS, JS, assets, fonts).
   const docsDir = options.docsDir || resolve(process.cwd(), 'docs');
 
   app.get('/', (_req, res) => res.sendFile(resolve(docsDir, 'index.html')));
+  app.use(express.static(docsDir, { index: false }));
 
   // --- x402 payment middleware ---
   const caip2 = CAIP2[network];
