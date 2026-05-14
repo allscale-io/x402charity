@@ -9,6 +9,16 @@
       "verified": false,
       "category": "testing",
       "x402Endpoint": "https://x402charity.com/donate"
+    },
+    {
+      "id": "give-directly",
+      "name": "GiveDirectly",
+      "description": "Direct cash transfers to people living in poverty across 14+ countries, delivered via mobile money",
+      "walletAddress": "0x33B22411606f385443835f5558E567887d90C511",
+      "chain": "base",
+      "verified": false,
+      "category": "poverty",
+      "x402Endpoint": "https://app.endaoment.org/orgs/27-1661997"
     }
   ]
 }
