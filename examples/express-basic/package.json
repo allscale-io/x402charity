@@ -1,0 +1,13 @@
+{
+  "name": "x402charity-express-basic-example",
+  "version": "1.0.0",
+  "description": "Basic Express app example with x402charity middleware",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "@x402charity/middleware-express": "workspace:^"
+  }
+}
