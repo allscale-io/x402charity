@@ -9,6 +9,18 @@
       "verified": false,
       "category": "testing",
       "x402Endpoint": "https://x402charity.com/donate"
+    },
+    {
+      "id": "give-directly",
+      "name": "GiveDirectly",
+      "description": "Direct cash transfers to people living in poverty. GiveDirectly sends money directly to the world's poorest households, letting them decide how best to use it.",
+      "walletAddress": "0x750EF1D7a0b4Ab1c97B7A623D7917CcEb5ea779C",
+      "chain": "base",
+      "verified": false,
+      "category": "poverty",
+      "website": "https://www.givedirectly.org",
+      "source": "https://www.thegivingblock.com/donate/givedirectly",
+      "x402Endpoint": ""
     }
   ]
 }
