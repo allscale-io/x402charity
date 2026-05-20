@@ -9,6 +9,16 @@
       "verified": false,
       "category": "testing",
       "x402Endpoint": "https://x402charity.com/donate"
+    },
+    {
+      "id": "unicef",
+      "name": "UNICEF",
+      "description": "UNICEF works in over 190 countries and territories to save children's lives, defend their rights, and help them fulfill their potential, from early childhood through adolescence.",
+      "walletAddress": "0x78B486062E0D8Ae4b3413eD4a7380f0a9B281a35",
+      "chain": "base",
+      "verified": false,
+      "category": "children",
+      "x402Endpoint": "https://www.unicef.org/crypto"
     }
   ]
 }
