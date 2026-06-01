@@ -233,6 +233,9 @@ npx x402charity donate testing-charity '$0.001' --network solana-devnet
 npx x402charity config show
 ```
 
+#### Demo
+![x402charity CLI Demo](./cli-demo.gif)
+
 ## Example Use Cases
 
 - **DEX / Trading** — $0.001 per swap. 50K daily trades = $50/day to charity
@@ -241,6 +244,10 @@ npx x402charity config show
 - **E-commerce** — $0.01 per order or checkout
 - **Betting / Predictions** — $0.001 per bet placed
 - **Payments / Banking** — $0.001 per transfer processed
+
+## Examples
+
+- [Express Basic](./examples/express-basic) - Minimal Express application showing how to use the x402charity middleware
 
 ## Deploy on Vercel
 
