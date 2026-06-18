@@ -9,6 +9,16 @@
       "verified": false,
       "category": "testing",
       "x402Endpoint": "https://x402charity.com/donate"
+    },
+    {
+      "id": "give-directly",
+      "name": "GiveDirectly",
+      "description": "Direct cash transfers to people living in poverty around the world",
+      "walletAddress": "0x9e6D69e45b5B98c8D17b8E64963f0fF2b7E89d28",
+      "chain": "base",
+      "verified": false,
+      "category": "poverty",
+      "x402Endpoint": ""
     }
   ]
 }
