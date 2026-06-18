@@ -9,6 +9,17 @@
       "verified": false,
       "category": "testing",
       "x402Endpoint": "https://x402charity.com/donate"
+    },
+    {
+      "id": "trees-for-the-future",
+      "name": "Trees for the Future",
+      "description": "Trees for the Future (TREES) confronts hunger, poverty, and environmental degradation by serving farming families through agroforestry training and the Forest Garden Approach",
+      "walletAddress": "0x890e21a372171639B310F8989A417b9A29045949",
+      "chain": "base",
+      "verified": true,
+      "category": "environment",
+      "website": "https://trees.org",
+      "source": "https://basescan.org/address/0x890e21a372171639b310f8989a417b9a29045949"
     }
   ]
 }

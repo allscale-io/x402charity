@@ -233,6 +233,8 @@ npx x402charity donate testing-charity '$0.001' --network solana-devnet
 npx x402charity config show
 ```
 
+![CLI Demo](./docs/cli-demo.gif)
+
 ## Example Use Cases
 
 - **DEX / Trading** — $0.001 per swap. 50K daily trades = $50/day to charity
