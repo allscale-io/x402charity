@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="320" viewBox="0 0 800 320">
+  <rect width="800" height="320" fill="#1a1a2e" rx="8"/>
+  <circle cx="20" cy="15" r="6" fill="#ff5f56"/>
+  <circle cx="40" cy="15" r="6" fill="#ffbd2e"/>
+  <circle cx="60" cy="15" r="6" fill="#27ca40"/>
+
+  <text x="20" y="50" font-family="Consolas, monospace" font-size="14" fill="#4caf50">$</text>
+  <text x="35" y="50" font-family="Consolas, monospace" font-size="14" fill="#eee"> npx x402charity donate testing-charity '$0.001' --network base-sepolia</text>
+
+  <text x="20" y="90" font-family="Consolas, monospace" font-size="14" fill="#888">Donating $0.001 USDC to "Testing Charity" on base-sepolia...</text>
+
+  <text x="20" y="130" font-family="Consolas, monospace" font-size="14" fill="#4caf50">Donation successful!</text>
+
+  <text x="20" y="170" font-family="Consolas, monospace" font-size="13" fill="#888">  Charity:  </text>
+  <text x="120" y="170" font-family="Consolas, monospace" font-size="13" fill="#eee">Testing Charity</text>
+
+  <text x="20" y="195" font-family="Consolas, monospace" font-size="13" fill="#888">  Amount:   </text>
+  <text x="120" y="195" font-family="Consolas, monospace" font-size="13" fill="#eee">$0.001 USDC</text>
+
+  <text x="20" y="220" font-family="Consolas, monospace" font-size="13" fill="#888">  Tx Hash:  </text>
+  <text x="120" y="220" font-family="Consolas, monospace" font-size="13" fill="#64b5f6">0x7a3b2c...abcdef12345678</text>
+
+  <text x="20" y="245" font-family="Consolas, monospace" font-size="13" fill="#888">  Chain:    </text>
+  <text x="120" y="245" font-family="Consolas, monospace" font-size="13" fill="#eee">base-sepolia</text>
+
+  <text x="20" y="270" font-family="Consolas, monospace" font-size="13" fill="#888">  From:     </text>
+  <text x="120" y="270" font-family="Consolas, monospace" font-size="13" fill="#64b5f6">0x1234...5678</text>
+
+  <text x="20" y="295" font-family="Consolas, monospace" font-size="13" fill="#888">  To:       </text>
+  <text x="120" y="295" font-family="Consolas, monospace" font-size="13" fill="#64b5f6">0x8DC1...70c6d</text>
+</svg>
