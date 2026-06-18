@@ -1,0 +1,15 @@
+{
+  "name": "x402charity-express-example",
+  "version": "1.0.0",
+  "description": "Example of x402charity integration with Express.js",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "x402charity": "file:../../packages/core"
+  }
+}

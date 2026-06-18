@@ -9,6 +9,16 @@
       "verified": false,
       "category": "testing",
       "x402Endpoint": "https://x402charity.com/donate"
+    },
+    {
+      "id": "givedirectly",
+      "name": "GiveDirectly",
+      "description": "GiveDirectly allows donors to send money directly to the world's poorest households with no strings attached.",
+      "walletAddress": "0x21d0d88caf045a9a285fe7341abac0b6ba1647bb",
+      "chain": "base",
+      "verified": true,
+      "category": "poverty-alleviation",
+      "x402Endpoint": "https://x402charity.com/donate"
     }
   ]
 }
