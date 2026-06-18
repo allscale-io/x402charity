@@ -1,0 +1,14 @@
+{
+  "name": "x402charity-express-basic",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Basic Express app with x402charity auto-donation middleware",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "x402charity": "^0.2.1"
+  }
+}
